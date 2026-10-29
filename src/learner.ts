@@ -1,6 +1,6 @@
 // Learner model: Leitner-style spaced repetition per item, rolling accuracy per skill
 // (drives difficulty tiers), and UFLI lesson advancement based on mastery.
-import { FIRST_LESSON, lessonInfo, nextLesson, itemsUpTo, parseId, WORD_LESSON, type ItemKind } from './data/curriculum';
+import { FIRST_LESSON, LAST_LESSON, lessonInfo, nextLesson, itemsUpTo, parseId, WORD_LESSON, type ItemKind } from './data/curriculum';
 
 const MIN = 60e3, DAY = 864e5;
 // Box n is due INTERVALS[n] after it was last promoted. The short early steps give
@@ -9,7 +9,7 @@ export const INTERVALS = [0, 2 * MIN, 20 * MIN, DAY, 3 * DAY, 7 * DAY, 21 * DAY,
 export const MASTERED_BOX = 2;
 const RECENT = 12;
 
-export type Skill = 'grapheme' | 'word' | 'sentence' | 'heart' | 'phonemic' | 'rhyme' | 'spelling';
+export type Skill = 'grapheme' | 'word' | 'sentence' | 'heart' | 'phonemic' | 'rhyme' | 'spelling' | 'fun';
 export type Tier = 0 | 1 | 2;
 /** correct = first try; help = needed a model or hint; seen = exposure only. */
 export type Result = 'correct' | 'wrong' | 'help' | 'seen';
@@ -27,6 +27,8 @@ export interface LearnerState {
   stickers: string[];
   lastGames: string[];
   sessions: number;
+  /** Session number in which the last bonus game was played. */
+  lastBonusSession?: number;
   pendingLevelUp: number | null;
   settings: Settings;
 }
@@ -171,10 +173,18 @@ export class Learner {
    */
   pick(kinds: ItemKind[], n: number, { filter = () => true, newRatio }: { filter?: (x: string) => boolean; newRatio?: number } = {}): string[] {
     const t = this.now();
-    const pool = itemsUpTo(this.s.lesson).filter(it => {
-      const { kind, x } = parseId(it.id);
-      return kinds.includes(kind) && filter(x);
-    });
+    const wanted = (id: string) => { const { kind, x } = parseId(id); return kinds.includes(kind) && filter(x); };
+    const pool = itemsUpTo(this.s.lesson).filter(it => wanted(it.id));
+    // Early on a child may know just one or two letters ("a" four rounds in a row is dull).
+    // Preview the next letters in the sequence — ranked after the current lesson's — for variety.
+    // Letters only: an upcoming word could contain sounds that haven't been taught.
+    const variety = Math.min(n, 3);
+    if (kinds.length === 1 && kinds[0] === 'g' && pool.length < variety) {
+      for (const it of itemsUpTo(LAST_LESSON)) {
+        if (pool.length >= variety) break;
+        if (it.lesson > this.s.lesson && wanted(it.id)) pool.push({ ...it, lesson: this.s.lesson - 1 });
+      }
+    }
     if (pool.length === 0) return [];
     newRatio ??= [0.25, 0.35, 0.45][this.overallTier()];
     const maxNew = Math.max(1, Math.round(n * newRatio));

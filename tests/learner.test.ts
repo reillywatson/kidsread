@@ -74,6 +74,14 @@ test('pick favors new items from the current lesson, then due reviews', () => {
   expect(new Set(picks).size).toBe(4);
 });
 
+test('a beginner gets the current letter plus previews of the next ones, not one letter over and over', () => {
+  const { l } = make();
+  expect(l.lesson).toBe(1);
+  const picks = l.pick(['g'], 4);
+  expect(picks).toContain('a');
+  expect(new Set(picks).size).toBeGreaterThanOrEqual(3);
+});
+
 test('pick repeats items when the pool is tiny, without back-to-back repeats', () => {
   const { l } = make();
   l.setLesson(2);

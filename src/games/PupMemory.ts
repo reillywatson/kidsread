@@ -113,7 +113,12 @@ export class PupMemory extends BaseGame {
 
     await this.prompt(async () => { await this.say(LINES.findPairs); });
 
-    let matched = 0, misses = 0;
+    // Only real memory slips count against the child: missing a pair whose partner card had
+    // already been shown. Early guesses (flipping cards nobody has seen yet) are part of the game.
+    let matched = 0, slips = 0;
+    const seen = new Set<Phaser.GameObjects.Container>();
+    const partnerSeen = (card: Phaser.GameObjects.Container) =>
+      cards.some(o => o !== card && o.getData('pair') === card.getData('pair') && seen.has(o));
     while (matched < pairs.length && !this.timeUp()) {
       const picked: Phaser.GameObjects.Container[] = [];
       while (picked.length < 2) {
@@ -133,12 +138,14 @@ export class PupMemory extends BaseGame {
         await flip(c, true);
       }
       const [a, b] = picked;
+      const couldKnow = partnerSeen(a);
+      seen.add(a); seen.add(b);
       if (a.getData('pair') === b.getData('pair')) {
         matched++;
         a.setData('done', true); b.setData('done', true);
-        this.score(misses === 0);
-        this.learner.pushRecent(this.meta.skill, misses === 0);
-        misses = 0;
+        this.score(slips === 0);
+        this.learner.pushRecent(this.meta.skill, slips === 0);
+        slips = 0;
         const face = a.getData('face') as Face;
         this.learner.record(face.item, 'seen');
         this.sfx.ding();
@@ -149,7 +156,7 @@ export class PupMemory extends BaseGame {
         this.progress();
         await Promise.all([a, b].map(c => this.tween({ targets: c, alpha: 0.35, duration: 250 })));
       } else {
-        misses++;
+        if (couldKnow) slips++;
         this.sfx.boing();
         await this.wait(900);
         await Promise.all([flip(a, false), flip(b, false)]);

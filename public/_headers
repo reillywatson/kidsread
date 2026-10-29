@@ -1,5 +1,6 @@
-# Vite's hashed bundles never change; voice clips change only when `npm run voice` is re-run.
+# Vite's hashed bundles never change. Voice clips keep their file names when re-recorded, so
+# browsers re-check them each time (a cheap "not modified" when nothing changed).
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 /voice/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=0, must-revalidate

@@ -1,13 +1,15 @@
-// Voice, letter sounds, sound effects. Phrases play from pre-recorded clips (npm run voice)
-// through WebAudio; anything without a clip falls back to the device's speech synthesis.
-// A grown-up's own recording of a letter sound always wins.
+// Voice, letter sounds, sound effects. All speech is pre-recorded (npm run voice) and plays
+// through WebAudio. There is deliberately no speech-synthesis fallback: a phrase without a
+// recording stays silent (and fails the voice-coverage test), rather than switching to a
+// robotic device voice. A grown-up's own recording of a letter sound always wins.
 import manifest from './voice/manifest.json';
-import { GRAPHEMES } from './data/curriculum';
 import { slug } from './lines';
 import { settings, onSettingsChange } from './settings';
 
-const CLIPS = manifest.clips as Record<string, number>;
-const SOUNDS = manifest.sounds as Record<string, string>;
+const CLIPS = manifest.clips as Record<string, unknown>;
+// Letter sounds: { file } entries (older manifests stored just the file name).
+const SOUNDS = manifest.sounds as unknown as Record<string, string | { file: string }>;
+const soundFile = (g: string) => { const s = SOUNDS[g]; return typeof s === 'string' ? s : s?.file; };
 const BASE = `${import.meta.env.BASE_URL}voice/`;
 
 // ---------- WebAudio graph ----------
@@ -36,16 +38,11 @@ function applySettings() {
   busSfx.gain.setTargetAtTime(settings.sfx ? 1 : 0, t, 0.02);
   busMusic.gain.setTargetAtTime(settings.music ? MUSIC_LEVEL * (speaking ? 0.35 : 1) : 0, t, 0.15);
 }
-onSettingsChange(() => { voice = null; applySettings(); });
+onSettingsChange(applySettings);
 
 // Must run inside a user gesture on iOS.
-let unlocked = false;
 export function unlock() {
   try { ac(); } catch { /* no WebAudio */ }
-  if ('speechSynthesis' in window && !unlocked) {
-    speechSynthesis.speak(new SpeechSynthesisUtterance(' '));
-    unlocked = true;
-  }
 }
 
 // ---------- Clips ----------
@@ -71,7 +68,6 @@ let current: AudioBufferSourceNode | null = null;
 let currentEl: HTMLAudioElement | null = null;
 
 export function stop() {
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
   if (current) { try { current.stop(); } catch { /* already stopped */ } current = null; }
   if (currentEl) { currentEl.pause(); currentEl = null; }
 }
@@ -104,50 +100,23 @@ async function playBuffer(key: string, rate = 1): Promise<boolean> {
 }
 
 // ---------- Speech ----------
-/** Character voices: the narrator's recording sped up or slowed down. */
+/**
+ * Character voices: the narrator's recording sped up or slowed down. The character lines are
+ * already recorded in character (see the voice script's delivery tags), so this is a light touch.
+ */
 export type Style = 'narrator' | 'pika' | 'zombie' | 'monster' | 'frog' | 'pup';
-const STYLE_RATE: Record<Style, number> = { narrator: 1, pika: 1.45, zombie: 0.72, monster: 0.82, frog: 1.25, pup: 1.15 };
+const STYLE_RATE: Record<Style, number> = { narrator: 1, pika: 1.2, zombie: 0.85, monster: 0.9, frog: 1.1, pup: 1.05 };
 
-let voice: SpeechSynthesisVoice | null = null;
-const PREFERRED = ['Samantha', 'Google US English', 'Microsoft Aria', 'Microsoft Jenny', 'Karen', 'Moira', 'Tessa', 'Allison', 'Ava'];
-function pickVoice() {
-  if (voice) return voice;
-  const vs = voices();
-  voice = vs.find(v => v.name === settings.voice)
-    || PREFERRED.map(n => vs.find(v => v.name.includes(n))).find(Boolean)
-    || vs.find(v => /en-US/i.test(v.lang)) || vs[0] || null;
-  return voice;
-}
-export const voices = () => (window.speechSynthesis?.getVoices() || []).filter(v => /^en/i.test(v.lang));
-if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => { voice = null; };
-
-function synthesize(text: string, rate: number, pitch: number): Promise<void> {
-  if (!('speechSynthesis' in window) || !text) return Promise.resolve();
-  stop();
-  duck(true);
-  return new Promise<void>(resolve => {
-    const u = new SpeechSynthesisUtterance(text);
-    const v = pickVoice();
-    if (v) u.voice = v;
-    u.lang = v?.lang || 'en-US';
-    u.rate = settings.rate * rate;
-    u.pitch = pitch;
-    let done = false;
-    const finish = () => { if (!done) { done = true; clearTimeout(timer); duck(false); resolve(); } };
-    const timer = setTimeout(finish, 1500 + text.length * 110 / u.rate);
-    u.onend = finish;
-    u.onerror = finish;
-    speechSynthesis.speak(u);
-  });
+function missing(what: string) {
+  if (import.meta.env.DEV) console.warn(`No recording for ${what} — run \`npm run voice\``);
 }
 
 /** Speak a phrase; resolves when done. */
 export async function say(text: string, { style = 'narrator' as Style } = {}): Promise<void> {
   if (!text) return;
-  const r = STYLE_RATE[style];
   const k = slug(text);
-  if (CLIPS[k] && await playBuffer(k, r)) return;
-  await synthesize(text, 1, style === 'narrator' ? 1.1 : Math.min(2, Math.max(0.1, r * 1.1)));
+  if (CLIPS[k] && await playBuffer(k, STYLE_RATE[style])) return;
+  missing(`"${text}"`);
 }
 
 // ---------- Letter sounds ----------
@@ -210,12 +179,13 @@ function playUrl(url: string): Promise<void> {
   });
 }
 
-/** A letter sound: grown-up's recording, else the generated clip, else speech. */
+/** A letter sound: grown-up's recording, else the generated clip. */
 export async function sound(g: string): Promise<void> {
   const rec = recordings.get('g:' + g);
   if (rec) return playUrl(rec);
-  if (SOUNDS[g] && await playBuffer(SOUNDS[g])) return;
-  await synthesize(GRAPHEMES[g]?.tts || g, 0.8, 1.1);
+  const file = soundFile(g);
+  if (file && await playBuffer(file)) return;
+  missing(`the letter sound "${g}"`);
 }
 
 // ---------- Sound effects ----------

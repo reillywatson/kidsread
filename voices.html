@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Voice Preview</title>
+  <style>
+    :root { --bg: #f6f7fb; --card: #fff; --ink: #1f2430; --muted: #6b7280; --line: #e6e8ee; --accent: #2f6fe0; --bad: #b3261e; }
+    body { margin: 0; padding: 20px 16px 60px; background: var(--bg); color: var(--ink); font: 15px/1.4 system-ui, -apple-system, sans-serif; }
+    header { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 8px 0 12px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    h1 { font-size: 22px; margin: 0 12px 0 0; }
+    h2 { font-size: 17px; margin: 26px 0 8px; display: flex; gap: 10px; align-items: center; }
+    h3 { font-size: 13px; margin: 14px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    input[type=search] { font: inherit; padding: 8px 12px; border-radius: 10px; border: 1px solid #c9cfdb; min-width: 240px; }
+    button { font: inherit; padding: 4px 10px; border-radius: 9px; border: 1px solid #c9cfdb; background: #fff; cursor: pointer; }
+    button:hover { background: #eef2fb; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; }
+    .rows { display: grid; gap: 4px; }
+    .item { display: flex; gap: 8px; align-items: center; background: var(--card); border-radius: 10px; padding: 6px 8px; border: 2px solid transparent; }
+    .item.playing { border-color: var(--accent); }
+    .item.missing { opacity: .7; }
+    .item .play { width: 32px; height: 32px; border-radius: 50%; padding: 0; flex: none; }
+    .item.missing .play { border-color: var(--bad); color: var(--bad); }
+    .item .t { flex: 1; min-width: 0; }
+    .item .sent { display: block; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .item .g { font-size: 22px; font-weight: 700; min-width: 40px; }
+    .muted { color: var(--muted); }
+    .choose { display: grid; gap: 8px; }
+    .choice-row { display: flex; gap: 8px; align-items: center; background: var(--card); border-radius: 12px; padding: 8px 10px; flex-wrap: wrap; }
+    .choice-row .g { font-size: 24px; font-weight: 700; min-width: 54px; }
+    .opt { display: flex; gap: 6px; align-items: center; border: 2px solid var(--line); border-radius: 10px; padding: 4px 8px; }
+    .opt.picked { border-color: #43c35e; background: #effaf1; }
+    .opt.playing { border-color: var(--accent); }
+    .opt small { color: var(--muted); max-width: 210px; }
+    .opt .use { font-size: 13px; }
+    .opt.picked .use { background: #43c35e; color: #fff; border-color: #43c35e; }
+    .note { background: #fff7d6; border-radius: 10px; padding: 8px 12px; margin: 6px 0 10px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- Dev-only page: every recorded clip in public/voice. Open /voices.html while `npm run dev` runs. -->
+  <header>
+    <h1>Voice preview</h1>
+    <input type="search" id="q" placeholder="Filter…" autofocus>
+    <button id="stop">■ Stop</button>
+    <span class="muted" id="summary"></span>
+  </header>
+  <main id="main"></main>
+  <script type="module">
+    import manifest from '/src/voice/manifest.json';
+    import { LINES, slug } from '/src/lines.ts';
+    import { GRAPHEMES } from '/src/data/curriculum.ts';
+    import { uniqueTexts, spoken, pickedSounds, describe } from '/scripts/voice-plan.mjs';
+    const picks = await fetch('/__sound-picks').then(r => r.json()).catch(() => ({}));
+    const SOUNDS = pickedSounds(picks);
+
+    const clips = manifest.clips, sounds = manifest.sounds;
+    const fileOf = s => (typeof s === 'string' ? s : s?.file);
+    const main = document.getElementById('main');
+    const audio = new Audio();
+    let queue = [], playingEl = null;
+
+    function play(el, file) {
+      playingEl?.classList.remove('playing');
+      if (!file) return next();
+      playingEl = el;
+      el.classList.add('playing');
+      audio.src = `/voice/${file}.m4a`;
+      audio.play().catch(next);
+    }
+    function next() {
+      playingEl?.classList.remove('playing');
+      playingEl = null;
+      const n = queue.shift();
+      if (n) play(n.el, n.file);
+    }
+    audio.onended = next;
+    document.getElementById('stop').onclick = () => { queue = []; audio.pause(); next(); };
+
+    function item({ label, sub, file, big }) {
+      const el = document.createElement('div');
+      el.className = 'item' + (file ? '' : ' missing');
+      el.innerHTML = `<button class="play" title="${file ? 'Play' : 'No recording'}">${file ? '▶' : '!'}</button>
+        ${big ? `<span class="g">${big}</span>` : ''}<span class="t">${label}${sub ? `<span class="sent">${sub}</span>` : ''}</span>`;
+      el.dataset.search = `${big ?? ''} ${label} ${sub ?? ''}`.toLowerCase();
+      el.querySelector('.play').onclick = () => { queue = []; audio.pause(); play(el, file); };
+      el.file = file;
+      return el;
+    }
+    function section(title, groups, layout = 'rows') {
+      const h = document.createElement('h2');
+      h.innerHTML = `${title} <button>▶ Play all</button>`;
+      const box = document.createElement('section');
+      box.append(h);
+      for (const [sub, items] of groups) {
+        if (sub) { const h3 = document.createElement('h3'); h3.textContent = sub; box.append(h3); }
+        const wrap = document.createElement('div');
+        wrap.className = layout;
+        items.forEach(i => wrap.append(i));
+        box.append(wrap);
+      }
+      h.querySelector('button').onclick = () => {
+        audio.pause();
+        queue = [...box.querySelectorAll('.item:not(.hidden)')].filter(e => e.file).map(el => ({ el, file: el.file }));
+        next();
+      };
+      main.append(box);
+    }
+
+    // Choosing letter sounds: every option from `npm run voice -- --audition`.
+    const audition = await fetch('/voice-audition/index.json').then(r => (r.ok ? r.json() : null)).catch(() => null);
+    if (audition) {
+      const box = document.createElement('section');
+      box.innerHTML = `<h2>Choose letter sounds</h2>
+        <p class="note">Play the options for each sound and click <b>Use this</b> on the best one. Choices save to
+        <code>scripts/sound-picks.json</code>; then rebuild with <code>npm run voice -- --offline</code> (no API calls).</p>`;
+      const list = document.createElement('div');
+      list.className = 'choose';
+      for (const entry of audition) {
+        const row = document.createElement('div');
+        row.className = 'choice-row';
+        row.dataset.search = `${GRAPHEMES[entry.id]?.label ?? entry.id} ${GRAPHEMES[entry.id]?.key ?? ''}`.toLowerCase();
+        row.innerHTML = `<span class="g">${GRAPHEMES[entry.id]?.label ?? entry.id}</span>`;
+        let chosen = picks[entry.id] ?? 0;
+        const opts = entry.options.map(o => {
+          const el = document.createElement('div');
+          el.className = 'opt' + (o.n === chosen ? ' picked' : '');
+          el.innerHTML = `<button class="play" ${o.file ? '' : 'disabled'}>${o.file ? '▶' : '✗'}</button><small>${o.desc}</small><button class="use">${o.n === chosen ? 'In use' : 'Use this'}</button>`;
+          el.querySelector('.play').onclick = () => {
+            queue = []; audio.pause(); playingEl?.classList.remove('playing');
+            playingEl = el; el.classList.add('playing');
+            audio.src = `/voice-audition/${o.file}.m4a`; audio.play().catch(next);
+          };
+          el.querySelector('.use').onclick = async () => {
+            const r = await fetch('/__sound-picks', { method: 'POST', body: JSON.stringify({ id: entry.id, n: o.n }) });
+            if (!r.ok) return alert('Could not save — is `npm run dev` running?');
+            chosen = o.n;
+            opts.forEach((x, i) => { x.classList.toggle('picked', i === chosen); x.querySelector('.use').textContent = i === chosen ? 'In use' : 'Use this'; });
+          };
+          return el;
+        });
+        opts.forEach(o => row.append(o));
+        list.append(row);
+      }
+      box.append(list);
+      main.append(box);
+    }
+
+    // Letter sounds, in teaching order.
+    const letters = Object.values(GRAPHEMES).sort((a, b) => a.lesson - b.lesson).map(g => {
+      const spec = SOUNDS[g.id];
+      const how = !spec ? '' : spec.same ? `same as ${GRAPHEMES[spec.same].label}` : describe(spec);
+      return item({ big: g.label, label: `like ${g.key}`, sub: `lesson ${g.lesson} · ${how}`, file: fileOf(sounds[g.id]) });
+    });
+    section('Letter sounds', [[null, letters]], 'grid');
+
+    // Phrases, grouped by where they're used (the keys in src/lines.ts).
+    const groups = [];
+    const walk = (v, path) => {
+      if (typeof v === 'string') return [v];
+      if (Array.isArray(v)) return v.flatMap(x => walk(x, path));
+      return Object.entries(v).flatMap(([k, x]) => walk(x, [...path, k]));
+    };
+    const phraseSlugs = new Set();
+    for (const [key, v] of Object.entries(LINES)) {
+      const texts = [...new Set(walk(v, [key]))];
+      texts.forEach(t => phraseSlugs.add(slug(t)));
+      groups.push([key.replace(/([A-Z])/g, ' $1').toLowerCase(), texts.map(t => item({ label: t, sub: spoken(t), file: clips[slug(t)] ? slug(t) : null }))]);
+    }
+    section('Phrases', groups);
+
+    // Every other word: decodable words, heart words, picture names, keywords, sticker names.
+    const words = uniqueTexts().filter(t => !phraseSlugs.has(slug(t))).sort((a, b) => a.localeCompare(b));
+    section('Words', [[null, words.map(t => item({ label: t, sub: spoken(t) !== t ? `sent as “${spoken(t)}”` : '', file: clips[slug(t)] ? slug(t) : null }))]], 'grid');
+
+    const all = [...document.querySelectorAll('.item, .choice-row')];
+    const missing = all.filter(e => e.classList.contains('item') && !e.file).length;
+    document.getElementById('summary').textContent = `${all.length} clips · ${manifest.engine}` + (missing ? ` · ${missing} missing` : '');
+
+    document.getElementById('q').oninput = e => {
+      const q = e.target.value.trim().toLowerCase();
+      for (const el of all) el.classList.toggle('hidden', !!q && !el.dataset.search.includes(q));
+      for (const s of main.querySelectorAll('section')) s.classList.toggle('hidden', !s.querySelector('.item:not(.hidden), .choice-row:not(.hidden)'));
+    };
+  </script>
+</body>
+</html>

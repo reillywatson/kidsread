@@ -8,7 +8,7 @@ import { GRAPHEMES } from '../data/curriculum';
 import * as state from '../state';
 import type { Session } from '../session';
 import { pickOne, type Result, type Skill, type Tier } from '../learner';
-import { H, W, roundButton, tweenP, wiggle, type Tappable } from '../widgets';
+import { H, W, burst, roundButton, sprite, text, tweenP, wiggle, type Tappable } from '../widgets';
 
 export type Theme = 'pvz' | 'pokemon' | 'paw' | 'friends';
 
@@ -23,6 +23,11 @@ export interface GameMeta {
   /** Texture key for the game's icon. */
   icon: string;
   eligible: (lesson: number) => boolean;
+  /**
+   * Bonus games are just for fun: they pop up now and then during a session (see session.ts),
+   * can't be chosen directly, always give 3 stars, and don't touch learning progress.
+   */
+  bonus?: boolean;
 }
 
 export class Aborted extends Error { constructor() { super('aborted'); this.name = 'Aborted'; } }
@@ -68,6 +73,7 @@ export abstract class BaseGame extends Phaser.Scene {
     // Not this.time.now: the scene clock is stale until its first update.
     this.t0 = performance.now();
     (async () => {
+      if (this.meta.bonus) await this.bonusBanner();
       await this.say(this.meta.intro);
       await this.run();
       this.finish();
@@ -75,6 +81,44 @@ export abstract class BaseGame extends Phaser.Scene {
   }
 
   get signal() { return this.ctl.signal; }
+
+  private async bonusBanner() {
+    const c = this.add.container(W / 2, H / 2).setDepth(950);
+    const g = this.add.graphics();
+    g.fillStyle(0x000000, 0.2).fillRoundedRect(-300, -82, 600, 180, 40);
+    g.fillStyle(0xffd21f).fillRoundedRect(-300, -90, 600, 180, 40);
+    g.lineStyle(10, 0xffffff).strokeRoundedRect(-300, -90, 600, 180, 40);
+    c.add([g, sprite(this, -210, 0, 'star', 110), sprite(this, 210, 0, 'star', 110), text(this, 0, 0, 'BONUS!', 96, '#e53935').setStroke('#ffffff', 12)]);
+    c.setScale(0);
+    this.sfx.fanfare();
+    await this.tween({ targets: c, scale: 1, angle: { from: -12, to: 0 }, duration: 450, ease: 'Back.Out' });
+    burst(this, W / 2, H / 2, ['⭐', '🎉', '✨'], 24);
+    await this.say(LINES.bonus);
+    await this.tween({ targets: c, scale: 0, alpha: 0, duration: 300, ease: 'Back.In' });
+    c.destroy();
+  }
+
+  /** For bonus games: a shrinking timer bar across the top; resolves when time runs out. */
+  playFor(seconds: number) {
+    const bw = 520, x0 = W / 2 - bw / 2;
+    this.add.rectangle(W / 2, 40, bw + 8, 26, 0xffffff, 0.85).setStrokeStyle(4, 0x2b2b2b, 0.4).setDepth(900);
+    const bar = this.add.rectangle(x0, 40, bw, 18, 0x43c35e).setOrigin(0, 0.5).setDepth(901);
+    return this.tween({ targets: bar, scaleX: 0, duration: seconds * 1000, ease: 'Linear',
+      onUpdate: () => bar.setFillStyle(bar.scaleX < 0.25 ? 0xffb300 : 0x43c35e) });
+  }
+
+  /** A score counter (icon + number) in the top bar; returns a function that adds a point. */
+  scoreCounter(texture: string) {
+    const c = this.add.container(W / 2 + 330, 40).setDepth(900);
+    const label = text(this, 30, 0, '0', 40);
+    c.add([this.add.rectangle(15, 0, 120, 56, 0xffffff, 0.85).setStrokeStyle(4, 0xffc94d), sprite(this, -22, 0, texture, 40), label]);
+    let n = 0;
+    return () => {
+      label.setText(String(++n));
+      this.tweens.add({ targets: c, scale: { from: 1.25, to: 1 }, duration: 250, ease: 'Back.Out' });
+      return n;
+    };
+  }
 
   /** Number of rounds for this game at the current tier; also draws the progress dots. */
   rounds(base: number) {
@@ -167,6 +211,7 @@ export abstract class BaseGame extends Phaser.Scene {
   }
 
   private finish() {
+    if (this.meta.bonus) { this.session.gameDone(this, 3); return; }
     const acc = this.total ? this.right / this.total : 1;
     const stars = acc >= 0.9 ? 3 : acc >= 0.6 ? 2 : 1;
     this.learner.adjustTier(this.meta.skill);

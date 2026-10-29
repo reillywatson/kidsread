@@ -47,7 +47,7 @@ test('sound counting uses graphemes, not letters', () => {
 });
 
 test('every phrase, word and letter sound has a recording', () => {
-  const clips = manifest.clips as Record<string, number>;
+  const clips = manifest.clips as Record<string, string>;
   const missing = [
     ...allLines(),
     ...LESSONS.flatMap(l => l.w), ...Object.keys(HEART), ...Object.keys(PIC), ...Object.keys(BANK),

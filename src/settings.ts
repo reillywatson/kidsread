@@ -3,13 +3,10 @@
 export interface DeviceSettings {
   music: boolean;
   sfx: boolean;
-  /** Fallback speech-synthesis voice, used only for phrases without a recording. */
-  voice: string;
-  rate: number;
 }
 
 const KEY = 'kidsread.settings';
-const defaults: DeviceSettings = { music: true, sfx: true, voice: '', rate: 0.9 };
+const defaults: DeviceSettings = { music: true, sfx: true };
 
 function load(): DeviceSettings {
   try { return { ...defaults, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { return { ...defaults }; }

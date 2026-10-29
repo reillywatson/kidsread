@@ -30,7 +30,6 @@ export function openParentArea(onClose: () => void) {
     const skills = (['grapheme', 'word', 'spelling', 'sentence', 'heart', 'phonemic', 'rhyme'] as const)
       .map(k => `<tr><td>${k}</td><td>${['easy', 'medium', 'hard'][learner.tier(k)]}</td><td>${pct(k)}</td></tr>`).join('');
     const tricky = sum.tricky.map(t => `<li><b>${esc(t.id.slice(2))}</b> — ${t.right} right, ${t.wrong + t.help} missed</li>`).join('') || '<li>Nothing yet</li>';
-    const voices = audio.voices().map(v => `<option value="${esc(v.name)}" ${v.name === settings.voice ? 'selected' : ''}>${esc(v.name)} (${v.lang})</option>`).join('');
     const players = state.profiles().map(p => `
       <div class="player ${p.id === state.profile?.id ? 'cur' : ''}">
         ${avatarImg(p.avatar)}
@@ -87,11 +86,6 @@ export function openParentArea(onClose: () => void) {
           <label>Games per session
             <select data-games>${[2, 3, 4, 5, 6].map(n => `<option ${n === s.settings.gamesPerSession ? 'selected' : ''}>${n}</option>`).join('')}</select>
           </label>
-          <details><summary>Backup voice</summary>
-            <p class="muted">Speech is pre-recorded. This voice is only used for anything without a recording.</p>
-            <label>Voice <select data-voice><option value="">Automatic</option>${voices}</select></label>
-            <label>Speed <input type="range" min="0.6" max="1.2" step="0.05" value="${settings.rate}" data-rate></label>
-          </details>
           <button data-test>Test voice</button>
         </section>
 
@@ -161,8 +155,6 @@ export function openParentArea(onClose: () => void) {
     else if ('games' in d) { state.learner.s.settings.gamesPerSession = Number(t.value); state.learner.save(); }
     else if ('music' in d) updateSettings({ music: t.checked });
     else if ('sfx' in d) updateSettings({ sfx: t.checked });
-    else if ('voice' in d) updateSettings({ voice: t.value });
-    else if ('rate' in d) updateSettings({ rate: Number(t.value) });
   });
 
   render();

@@ -1,4 +1,4 @@
-import { svg, line, cel, ell, eyeWhite, shadow, vgrad, INK } from './util';
+import { svg, line, cel, ell, shadow, vgrad, isBlinking, shut, INK } from './util';
 
 export type PupId = 'chase' | 'marshall' | 'skye' | 'rubble';
 export const PUP_NAMES: PupId[] = ['chase', 'marshall', 'skye', 'rubble'];
@@ -31,38 +31,55 @@ const TAG_SYMBOL: Record<PupId, (x: number, y: number) => string> = {
   rubble: (x, y) => `<path d="M${x - 8} ${y + 10} L${x + 6} ${y - 6} M${x + 2} ${y - 10} a6 6 0 1 0 8 8" fill="none" stroke="#37474f" stroke-width="5" stroke-linecap="round"/>`,
 };
 
-const HEAD = 'M120 44 C176 44 204 86 200 130 C196 176 164 206 120 206 C76 206 44 176 40 130 C36 86 64 44 120 44Z';
+// A little wider than tall, like the show's pups.
+const HEAD = 'M120 46 C182 46 210 92 206 136 C202 182 166 208 120 208 C74 208 38 182 34 136 C30 92 58 46 120 46Z';
 
-const nose = (y: number) => `${cel(`M104 ${y} Q120 ${y - 6} 136 ${y} Q136 ${y + 14} 120 ${y + 18} Q104 ${y + 14} 104 ${y}Z`, '#2a2420', '#111', { off: [-2, -3], stroke: 2.5 })}
-  <ellipse cx="114" cy="${y + 3}" rx="5" ry="3" fill="#fff" opacity=".7"/>`;
+const nose = (y: number) => `${cel(`M102 ${y} Q120 ${y - 7} 138 ${y} Q138 ${y + 15} 120 ${y + 20} Q102 ${y + 15} 102 ${y}Z`, '#2a2420', '#111', { off: [-2, -3], stroke: 2.5 })}
+  <ellipse cx="113" cy="${y + 3}" rx="6" ry="3.5" fill="#fff" opacity=".75"/>`;
 const mouth = (y: number) => `
-  <path d="M120 ${y} L120 ${y + 10} M98 ${y + 12} Q110 ${y + 22} 120 ${y + 12} Q130 ${y + 22} 142 ${y + 12}" fill="none" ${line(3.5)}/>
-  <path d="M112 ${y + 18} Q120 ${y + 36} 128 ${y + 18}Z" fill="#ff6f8c" ${line(2.5)}/>`;
-const brows = `<path d="M72 98 Q88 90 104 98 M136 98 Q152 90 168 98" fill="none" ${line(4)}/>`;
+  <path d="M120 ${y} L120 ${y + 9} M100 ${y + 11} Q110 ${y + 21} 120 ${y + 11} Q130 ${y + 21} 140 ${y + 11}" fill="none" ${line(3.5)}/>
+  <path d="M112 ${y + 17} Q120 ${y + 35} 128 ${y + 17}Z" fill="#ff6f8c" ${line(2.5)}/>`;
+
+/** Big, glossy cartoon eye: tall oval, mostly iris, two highlights. */
+const pupEye = (x: number, y: number, iris: string) => isBlinking() ? shut(x, y + 4, 17) : `
+  <ellipse cx="${x}" cy="${y}" rx="19" ry="22" fill="#fff" ${line(3)}/>
+  <ellipse cx="${x}" cy="${y + 2}" rx="15" ry="18" fill="${iris}"/>
+  <ellipse cx="${x}" cy="${y + 3}" rx="9" ry="11" fill="#141010"/>
+  <circle cx="${x - 5}" cy="${y - 6}" r="6" fill="#fff"/>
+  <circle cx="${x + 6}" cy="${y + 9}" r="2.5" fill="#fff" opacity=".9"/>`;
+const eyes = (L: Look, y = 128) => pupEye(92, y, L.iris) + pupEye(148, y, L.iris);
+
+/** Fluffy cheek tufts poking out past the head outline (drawn before the head). */
+const cheeks = (fur: string, furS: string) =>
+  cel('M50 140 L26 150 L42 158 L28 170 L48 172 L40 182 L60 178Z', fur, furS, { off: [-2, -2], stroke: 3.5 })
+  + cel('M190 140 L214 150 L198 158 L212 170 L192 172 L200 182 L180 178Z', fur, furS, { off: [-2, -2], stroke: 3.5 });
 
 /** Ears, face and headgear for each pup, in a 240-wide head box. */
 function head(id: PupId) {
   const L = LOOK[id];
-  const face = (muzzleY = 162) => `${cel(ell(120, muzzleY, 47, 35), L.muzzle, L.muzzleS, { off: [-3, -6], stroke: 3 })}`;
+  const muzzle = (y = 168) => cel(ell(120, y, 44, 33), L.muzzle, L.muzzleS, { off: [-3, -6], stroke: 3 });
   switch (id) {
     case 'chase': return `
-      ${cel('M60 106 L36 14 L106 64Z', '#6b4423', '#4a2d15', { off: [-3, -3], inner: '<path d="M62 92 L48 34 L92 66Z" fill="#d9a46a"/>' })}
-      ${cel('M180 106 L204 14 L134 64Z', '#6b4423', '#4a2d15', { off: [-3, -3], inner: '<path d="M178 92 L192 34 L148 66Z" fill="#d9a46a"/>' })}
-      ${cel(HEAD, L.fur, L.furS, { off: [-8, -8], inner: '<path d="M30 122 C40 70 80 52 120 52 C160 52 200 70 210 122 C180 104 150 98 120 108 C90 98 60 104 30 122Z" fill="#8b5a2b"/>' })}
-      ${face()}${eyeWhite(90, 120, 16, L.iris, 1)}${eyeWhite(150, 120, 16, L.iris, -1)}${brows}${nose(142)}${mouth(158)}
+      ${cel('M60 108 L34 12 L108 64Z', '#6b4423', '#4a2d15', { off: [-3, -3], inner: '<path d="M62 94 L46 32 L94 66Z" fill="#d9a46a"/>' })}
+      ${cel('M180 108 L206 12 L132 64Z', '#6b4423', '#4a2d15', { off: [-3, -3], inner: '<path d="M178 94 L194 32 L146 66Z" fill="#d9a46a"/>' })}
+      ${cheeks(L.fur, L.furS)}
+      ${cel(HEAD, L.fur, L.furS, { off: [-8, -8], inner: `
+        <path d="M30 128 C38 72 80 54 120 54 C160 54 202 72 210 128 C186 110 160 104 120 112 C80 104 54 110 30 128Z" fill="#8b5a2b"/>
+        <path d="${ell(92, 104, 10, 6, -10)}" fill="#ecc896"/><path d="${ell(148, 104, 10, 6, 10)}" fill="#ecc896"/>` })}
+      ${muzzle()}${eyes(L)}${nose(150)}${mouth(166)}
       ${cel('M54 78 C56 24 184 24 186 78Z', '#3a6fe0', '#1d469f', { off: [-6, -6], hl: [92, 44, 20, 8] })}
       ${cel('M50 68 L190 68 L190 84 L50 84Z', '#14347a', '#0c2050', { off: [-2, -2], stroke: 3 })}
-      ${cel('M56 84 Q120 108 184 84 L184 78 Q120 100 56 78Z', '#0d2350', '#081633', { off: [0, -2], stroke: 3 })}
+      ${cel('M58 84 Q120 102 182 84 L182 78 Q120 96 58 78Z', '#0d2350', '#081633', { off: [0, -2], stroke: 3 })}
       ${cel('M120 28 L135 37 L133 56 L120 65 L107 56 L105 37Z', '#ffd21f', '#e0a800', { off: [-2, -2], stroke: 2.5 })}
       ${STAR(120, 47, 9, '#ffb300')}`;
     case 'marshall': {
-      const spots = '<circle cx="62" cy="108" r="5" fill="#222"/><circle cx="66" cy="136" r="7" fill="#222"/><circle cx="176" cy="150" r="6" fill="#222"/><circle cx="166" cy="104" r="5" fill="#222"/><circle cx="74" cy="170" r="4" fill="#222"/>';
+      const spots = '<circle cx="60" cy="112" r="5" fill="#222"/><circle cx="62" cy="142" r="7" fill="#222"/><circle cx="180" cy="152" r="6" fill="#222"/><circle cx="172" cy="108" r="5" fill="#222"/><circle cx="72" cy="176" r="4" fill="#222"/>';
       return `
-      ${cel('M56 92 C20 100 18 168 44 190 C62 178 70 134 72 102Z', '#fff', '#d7dbe0', { off: [-3, -4], inner: '<circle cx="40" cy="140" r="7" fill="#222"/><circle cx="50" cy="166" r="5" fill="#222"/>' })}
-      ${cel('M184 92 C220 100 222 168 196 190 C178 178 170 134 168 102Z', '#fff', '#d7dbe0', { off: [-3, -4], inner: '<circle cx="200" cy="136" r="6" fill="#222"/><circle cx="192" cy="164" r="7" fill="#222"/>' })}
+      ${cel('M56 94 C20 102 18 170 44 192 C62 180 70 136 72 104Z', '#fff', '#d7dbe0', { off: [-3, -4], inner: '<circle cx="40" cy="142" r="7" fill="#222"/><circle cx="50" cy="168" r="5" fill="#222"/>' })}
+      ${cel('M184 94 C220 102 222 170 196 192 C178 180 170 136 168 104Z', '#fff', '#d7dbe0', { off: [-3, -4], inner: '<circle cx="200" cy="138" r="6" fill="#222"/><circle cx="192" cy="166" r="7" fill="#222"/>' })}
       ${cel(HEAD, L.fur, L.furS, { off: [-8, -8], inner: spots })}
-      ${face()}<circle cx="96" cy="176" r="3" fill="#222"/><circle cx="146" cy="172" r="3" fill="#222"/>
-      ${eyeWhite(90, 120, 16, L.iris, 1)}${eyeWhite(150, 120, 16, L.iris, -1)}${brows}${nose(142)}${mouth(158)}
+      ${muzzle()}<circle cx="98" cy="182" r="3" fill="#222"/><circle cx="144" cy="178" r="3" fill="#222"/>
+      ${eyes(L)}${nose(150)}${mouth(166)}
       ${cel('M26 88 Q120 68 214 88 Q216 102 200 102 Q120 88 40 102 Q24 102 26 88Z', '#d32f2f', '#9a1b1b', { off: [-3, -3] })}
       ${cel('M58 90 C56 28 184 28 182 90Z', '#ef4b3f', '#b71c1c', { off: [-7, -6], hl: [88, 50, 18, 8], inner: '<path d="M120 30 L120 90" stroke="#8e1515" stroke-width="6"/>' })}
       ${cel('M120 42 L141 55 L137 78 L120 87 L103 78 L99 55Z', '#ffd21f', '#e0a800', { off: [-2, -2], stroke: 3 })}
@@ -71,12 +88,13 @@ function head(id: PupId) {
     case 'skye': {
       const ear = (x: number, o: number) => `M${x} 96 C${x + o * 40} 100 ${x + o * 46} 150 ${x + o * 36} 182 C${x + o * 28} 196 ${x + o * 14} 196 ${x + o * 8} 186
         C${x + o * 2} 196 ${x - o * 10} 192 ${x - o * 10} 180 C${x - o * 20} 176 ${x - o * 18} 160 ${x - o * 10} 150 C${x - o * 20} 140 ${x - o * 14} 120 ${x}  96Z`;
+      // Lashes sit on the outer top corner of each eye (not floating above it, where they read as brows).
+      const lashes = isBlinking() ? '' : `<path d="M77 113 L68 106 M81 108 L75 99 M163 113 L172 106 M159 108 L165 99" ${line(3)}/>`;
       return `
       ${cel(ear(56, -1), '#d1a06a', '#a7743f', { off: [-3, -4] })}${cel(ear(184, 1), '#d1a06a', '#a7743f', { off: [-3, -4] })}
+      ${cheeks(L.fur, L.furS)}
       ${cel(HEAD, L.fur, L.furS, { off: [-8, -8] })}
-      ${face(164)}${eyeWhite(90, 122, 17, L.iris, 1)}${eyeWhite(150, 122, 17, L.iris, -1)}
-      <path d="M72 108 l-6 -6 M78 104 l-3 -8 M162 104 l3 -8 M168 108 l6 -6" ${line(3)}/>
-      ${nose(144)}${mouth(160)}
+      ${muzzle(170)}${eyes(L, 130)}${lashes}${nose(152)}${mouth(168)}
       ${cel('M54 92 C52 28 188 28 186 92 Q120 76 54 92Z', '#ff9cbd', '#e0507a', { off: [-7, -6], hl: [92, 50, 18, 8] })}
       ${cel('M54 92 Q46 120 60 134 Q70 110 72 92Z', '#ff9cbd', '#e0507a', { off: [-2, -3], stroke: 3.5 })}
       ${cel('M186 92 Q194 120 180 134 Q170 110 168 92Z', '#ff9cbd', '#e0507a', { off: [-2, -3], stroke: 3.5 })}
@@ -85,15 +103,17 @@ function head(id: PupId) {
       <path d="M84 58 Q92 54 98 60 M136 58 Q144 54 150 60" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>`;
     }
     case 'rubble': return `
-      ${cel('M52 100 Q28 90 32 126 Q46 124 62 114Z', '#a8692f', '#7d4a1d', { off: [-2, -3] })}
-      ${cel('M188 100 Q212 90 208 126 Q194 124 178 114Z', '#a8692f', '#7d4a1d', { off: [-2, -3] })}
-      ${cel('M120 48 C184 48 212 92 208 138 C204 186 168 210 120 210 C72 210 36 186 32 138 C28 92 56 48 120 48Z', L.fur, L.furS, { off: [-9, -8] })}
-      ${cel('M68 160 Q120 144 172 160 Q178 198 120 204 Q62 198 68 160Z', L.muzzle, L.muzzleS, { off: [-3, -6], stroke: 3 })}
-      ${eyeWhite(88, 122, 15, L.iris, 1)}${eyeWhite(152, 122, 15, L.iris, -1)}
-      <path d="M70 104 Q86 98 102 108 M138 108 Q154 98 170 104" fill="none" ${line(5.5)}/>
-      ${nose(142)}
-      <path d="M92 172 Q120 198 148 172 Q120 181 92 172Z" fill="#7a2f2f" ${line(3)}/>
-      <path d="M100 176 l5 -9 l5 9Z M130 176 l5 -9 l5 9Z" fill="#fff" stroke="${INK}" stroke-width="1.5"/>
+      ${cel('M50 100 Q26 90 30 128 Q46 126 62 116Z', '#a8692f', '#7d4a1d', { off: [-2, -3] })}
+      ${cel('M190 100 Q214 90 210 128 Q194 126 178 116Z', '#a8692f', '#7d4a1d', { off: [-2, -3] })}
+      ${cel('M120 48 C186 48 214 94 210 140 C206 188 168 212 120 212 C72 212 34 188 30 140 C26 94 54 48 120 48Z', L.fur, L.furS, { off: [-9, -8] })}
+      ${eyes(L, 130)}
+      ${cel('M66 112 Q84 96 108 108 Q98 116 86 114 Q74 114 66 112Z', '#a8692f', '#7d4a1d', { off: [-1, -2], stroke: 2.5 })}
+      ${cel('M174 112 Q156 96 132 108 Q142 116 154 114 Q166 114 174 112Z', '#a8692f', '#7d4a1d', { off: [-1, -2], stroke: 2.5 })}
+      ${cel('M82 172 Q82 152 104 152 Q120 152 120 166 Q120 152 136 152 Q158 152 158 172 Q158 190 136 190 Q120 190 120 182 Q120 190 104 190 Q82 190 82 172Z', L.muzzle, L.muzzleS, { off: [-3, -5], stroke: 3 })}
+      <path d="M98 186 Q120 210 142 186 Q120 194 98 186Z" fill="#7a2f2f" ${line(3)}/>
+      <path d="M105 190 l5 -12 l5 12Z M125 190 l5 -12 l5 12Z" fill="#fff" stroke="${INK}" stroke-width="1.5"/>
+      <circle cx="102" cy="172" r="2" fill="#7d4a1d"/><circle cx="96" cy="178" r="2" fill="#7d4a1d"/><circle cx="138" cy="172" r="2" fill="#7d4a1d"/><circle cx="144" cy="178" r="2" fill="#7d4a1d"/>
+      ${nose(150)}
       ${cel('M28 86 Q120 66 212 86 Q214 100 198 100 Q120 86 42 100 Q26 100 28 86Z', '#f2a600', '#c98400', { off: [-3, -3] })}
       ${cel('M58 88 C58 24 182 24 182 88Z', '#ffd54f', '#f2a600', { off: [-7, -6], hl: [86, 50, 18, 8] })}
       ${cel('M110 28 L130 28 L130 86 L110 86Z', '#f2a600', '#c98400', { off: [-2, 0], stroke: 3 })}`;
@@ -112,7 +132,7 @@ function collar(id: PupId, y: number) {
 /** Full-body sitting pup in uniform. */
 export function pup(id: PupId) {
   const L = LOOK[id];
-  const paw = (x: number) => `${cel(ell(x, 318, 20, 11), L.fur, L.furS, { off: [-2, -3] })}
+  const paw = (x: number) => `${cel(ell(x, 318, 19, 11), L.fur, L.furS, { off: [-2, -3] })}
     <path d="M${x - 7} 312 l0 8 M${x} 311 l0 9 M${x + 7} 312 l0 8" stroke="${INK}" stroke-width="2" opacity=".5"/>`;
   return svg('0 0 240 340', `
     ${shadow(120, 330, 92, 10)}
@@ -121,12 +141,12 @@ export function pup(id: PupId) {
     ${cel(ell(62, 296, 36, 28), L.fur, L.furS, { off: [-5, -6] })}
     ${cel(ell(178, 296, 36, 28), L.fur, L.furS, { off: [-5, -6] })}
     ${cel('M74 196 C64 236 66 296 82 318 L158 318 C174 296 176 236 166 196Z', L.fur, L.furS, { off: [-8, -6] })}
-    ${cel('M70 210 C68 246 72 272 80 288 L160 288 C168 272 172 246 170 210 Q120 232 70 210Z', L.vest, L.vestS, {
+    ${cel('M94 262 Q92 290 96 314 Q106 322 116 314 Q120 290 118 262Z', L.fur, L.furS, { off: [-4, -3] })}
+    ${cel('M122 262 Q120 290 124 314 Q134 322 144 314 Q148 290 146 262Z', L.fur, L.furS, { off: [-4, -3] })}
+    ${cel('M70 210 C68 246 72 272 80 288 Q120 300 160 288 C168 272 172 246 170 210 Q120 232 70 210Z', L.vest, L.vestS, {
       off: [-8, -6], hl: [96, 240, 10, 22],
-      inner: `<path d="M80 278 L160 278" stroke="#fff" stroke-width="5" opacity=".5"/><rect x="134" y="244" width="22" height="18" rx="4" fill="${L.vestS}" stroke="${INK}" stroke-width="2"/>` })}
-    ${cel('M96 252 L96 312 Q96 320 104 320 L114 320 Q122 320 122 312 L122 252Z', L.fur, L.furS, { off: [-3, -3] })}
-    ${cel('M118 252 L118 312 Q118 320 126 320 L136 320 Q144 320 144 312 L144 252Z', L.fur, L.furS, { off: [-3, -3] })}
-    ${paw(108)}${paw(132)}
+      inner: `<path d="M80 278 Q120 290 160 278" stroke="#fff" stroke-width="5" fill="none" opacity=".5"/><rect x="134" y="244" width="22" height="18" rx="4" fill="${L.vestS}" stroke="${INK}" stroke-width="2"/>` })}
+    ${paw(106)}${paw(134)}
     ${collar(id, 192)}
     <g transform="translate(0 -6)">${head(id)}</g>`);
 }

@@ -40,7 +40,15 @@ export const LINES = {
     monster: "I'm the Letter Monster, and I'm hungry! Feed me things that start with my sound.",
     frog: 'Froggy wants to hop! Tap the picture that rhymes.',
     bubbles: 'Bubbles! Pop every bubble with the sound you hear.',
+    bowling: 'Tap a lane to roll a Wall-nut and knock down the zombies!',
+    whack: 'Pokémon are popping out of the grass! Tap them to catch them!',
+    treats: 'Move the pup to catch the yummy treats!',
+    balloons: 'Pop the balloons! Find the golden star balloons!',
   },
+
+  // Bonus games (just for fun)
+  bonus: 'Bonus game!',
+  timesUp: "Time's up! Great playing!",
 
   // In-game prompts
   zapZombie: 'Zap the zombie with', find: 'Find', zap: 'Zap', whereIs: 'Where is',

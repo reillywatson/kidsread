@@ -5,7 +5,8 @@ UFLI Foundations phonics sequence, with spaced repetition and difficulty that ad
 Kids never need to read to get around — every instruction is spoken and every button is a picture.
 
 Built with Phaser 4 + TypeScript + Vite. Characters are SVG drawings, pictures are emoji, speech is
-pre-recorded at build time, and music and sound effects are synthesized live.
+pre-recorded at build time, and music (plucked strings, marimba, soft pads, room reverb) and sound
+effects are synthesized live.
 
 ## Running
 
@@ -45,26 +46,52 @@ the home screen to switch players. Grown-ups can name, re-picture or delete play
 | 👾 Friends | **Rhyme Frog** — hop to the picture that rhymes | Phonological awareness (no reading) |
 | 👾 Friends | **Bubble Pop** — pop every bubble with the sound you hear | Auditory drill, fast |
 
+**Bonus games** are just for fun and can't be picked directly: about a third of sessions (and at
+least every third session) slip one in after the first game, announced with a big “BONUS!”.
+
+| World | Bonus game |
+|---|---|
+| 🌱 Plants vs. Zombies | **Wall-nut Bowling** — tap a lane to bowl over the zombies |
+| ⚡ Pokémon | **Poké Pop-up** — catch Pokémon popping out of the tall grass |
+| 🐾 Paw Patrol | **Treat Catch** — move the pup to catch falling treats |
+| 👾 Friends | **Balloon Party** — pop balloons; gold star balloons are worth extra |
+
 The ▶ button plays a mixed session (default 4 games, then a sticker). Tapping a character plays only
 that world. Each game has 🏠 (home) and 👂 (hear the instructions again). ⚙️ on the home screen has
 big picture toggles for music and sound effects.
 
 ## Voice
 
-All speech is pre-recorded by `npm run voice` (macOS `say` + `afconvert`) into `public/voice/`,
-so it sounds identical on every phone. The script uses the best installed English voice, preferring
-**Premium** or **Enhanced** voices — install one in *System Settings → Accessibility → Spoken Content
-→ System Voice → Manage Voices* (e.g. “Ava (Premium)” or “Zoe (Premium)”) and re-run
-`npm run voice -- --force` for a much more natural voice. `VOICE="Name" npm run voice` picks one explicitly.
+All speech is pre-recorded by `npm run voice` into `public/voice/`, so it sounds identical on
+every phone. The narrator is **Laura** on ElevenLabs' **eleven_v4** model, used whenever
+`ELEVENLABS_KEY` is set:
+
+```sh
+npm run voice -- --dry     # what would be recorded and roughly how many characters (no API calls)
+npm run voice              # record anything new or changed (cached by exact text, voice and model)
+npm run voice -- --force   # re-record everything
+npm run voice -- --say     # use macOS voices instead (no key needed)
+```
+
+Each kind of line gets its own delivery via v4 audio tags (in `scripts/voice.mjs`): praise and
+rewards `[excited]`, game intros `[cheerfully]`, instructions `[warmly]`, character lines in
+character (squeaky Pikachu, groaning zombies), and single words plain for clarity. Run it from your
+own terminal: ElevenLabs flags requests that arrive through proxies, and the free tier allows only
+two requests at a time (the script respects that and retries when rate-limited).
+
+Listen to every clip at **/voices.html** while `npm run dev` is running: letter sounds, every phrase
+(grouped by where it's used, with the exact text sent), and every word, with play-all and search.
+
+`scripts/voice-samples.mjs` builds a side-by-side comparison page of candidate voices and models in
+`voice-samples/` (git-ignored) — handy if you want to try a different narrator.
 
 Isolated letter sounds are the hard part — speech engines say “tuh” for /t/. The script builds each
 sound from real speech and checks it automatically: short vowels are cut from words (/æ/ from “at”),
 fricatives from word onsets (/f/ from “fun”, stretched), stops are clipped to the burst, and held
-sounds (/m/, /s/) are only accepted if they come out as one continuous sound. Check them in the
-grown-up area (▶ next to each sound) and **record your own** for any that sound off — your
-recording replaces the built-in one.
+sounds (/m/, /s/) are only accepted if they come out as one continuous sound (otherwise it falls back
+to the macOS voice and says so). Check them in the grown-up area (▶ next to each sound) and **record
+your own** for any that sound off — your recording replaces the built-in one.
 
-Character lines are the narrator's recordings pitched up or down (squeaky Pikachu, groaning zombies).
 Anything without a recording falls back to the device's speech synthesis. A test fails if a phrase
 or word is missing a recording, so add new phrases to `src/lines.ts` and re-run `npm run voice`.
 

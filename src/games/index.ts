@@ -11,6 +11,10 @@ import * as bubbles from './Bubbles';
 import * as evolve from './Evolve';
 import * as bones from './Bones';
 import * as garden from './Garden';
+import * as bowling from './Bowling';
+import * as whack from './Whack';
+import * as treats from './Treats';
+import * as balloons from './Balloons';
 
 export const GAMES = [
   { meta: zombies.meta, scene: zombies.Zombies },
@@ -25,4 +29,9 @@ export const GAMES = [
   { meta: monster.meta, scene: monster.Monster },
   { meta: frog.meta, scene: frog.Frog },
   { meta: bubbles.meta, scene: bubbles.Bubbles },
+  // Bonus games: just for fun, never chosen directly (see session.ts).
+  { meta: bowling.meta, scene: bowling.Bowling },
+  { meta: whack.meta, scene: whack.Whack },
+  { meta: treats.meta, scene: treats.Treats },
+  { meta: balloons.meta, scene: balloons.Balloons },
 ];

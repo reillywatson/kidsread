@@ -9,7 +9,7 @@ import type { GameMeta, Theme } from './games/BaseGame';
  * mixes worlds when no world was chosen, and never repeats a game back to back.
  */
 export function chooseGames(n: number, theme?: Theme): GameMeta[] {
-  const metas = GAMES.map(g => g.meta).filter(m => m.eligible(learner.lesson) && (!theme || m.theme === theme));
+  const metas = GAMES.map(g => g.meta).filter(m => !m.bonus && m.eligible(learner.lesson) && (!theme || m.theme === theme));
   const out: GameMeta[] = [];
   while (out.length < n && metas.length) {
     const weights = metas.map(m => {
@@ -27,12 +27,31 @@ export function chooseGames(n: number, theme?: Theme): GameMeta[] {
   return out;
 }
 
+/**
+ * Maybe slip a bonus game into the playlist: about a third of sessions, and always if the last
+ * two sessions had none. It goes after the first learning game (never first) and matches the
+ * world when one was chosen.
+ */
+function withBonus(games: GameMeta[], theme?: Theme): GameMeta[] {
+  const since = learner.s.sessions - (learner.s.lastBonusSession ?? -Infinity);
+  if (games.length < 2 || (since < 3 && Math.random() > 0.35)) return games;
+  const bonuses = GAMES.map(g => g.meta).filter(m => m.bonus && (!theme || m.theme === theme));
+  const fresh = bonuses.filter(m => !learner.s.lastGames.includes(m.id));
+  const pool = fresh.length ? fresh : bonuses;
+  if (!pool.length) return games;
+  const bonus = pool[Math.floor(Math.random() * pool.length)];
+  const at = 1 + Math.floor(Math.random() * (games.length - 1));
+  learner.s.lastBonusSession = learner.s.sessions;
+  learner.save();
+  return [...games.slice(0, at), bonus, ...games.slice(at)];
+}
+
 export class Session {
   games: GameMeta[];
   i = 0;
 
   constructor(public theme?: Theme) {
-    this.games = chooseGames(learner.s.settings.gamesPerSession, theme);
+    this.games = withBonus(chooseGames(learner.s.settings.gamesPerSession, theme), theme);
     learner.startSession();
   }
 
