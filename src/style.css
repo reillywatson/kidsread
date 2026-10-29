@@ -78,3 +78,8 @@ html, body {
 #parent .clip { display: flex; gap: 6px; align-items: center; padding: 6px 8px; background: #f6f7fb; border-radius: 10px; }
 #parent .clip b { min-width: 34px; font-size: 20px; }
 #parent .clip .muted { flex: 1; }
+#parent .players { display: grid; gap: 8px; }
+#parent .player { display: flex; gap: 10px; align-items: center; padding: 6px 10px; background: #f6f7fb; border-radius: 12px; }
+#parent .player.cur { background: #fff6d6; }
+#parent .player input { flex: 1; font: inherit; padding: 6px 10px; border-radius: 10px; border: 1px solid #c9cfdb; }
+#parent details { margin: 8px 0; }

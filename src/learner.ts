@@ -16,7 +16,7 @@ export type Result = 'correct' | 'wrong' | 'help' | 'seen';
 
 export interface ItemState { box: number; due: number; right: number; wrong: number; help: number; seen: number; last: number }
 
-export interface Settings { gamesPerSession: number; rate: number; voice: string }
+export interface Settings { gamesPerSession: number }
 
 export interface LearnerState {
   lesson: number;
@@ -33,12 +33,6 @@ export interface LearnerState {
 
 export interface Storage { get(): Partial<LearnerState> | null; set(v: LearnerState): void }
 
-const KEY = 'kidsread.v1';
-export const browserStorage: Storage = {
-  get() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; } },
-  set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { /* storage full or blocked */ } },
-};
-
 const defaults = (): LearnerState => ({
   lesson: FIRST_LESSON,
   items: {},
@@ -49,7 +43,7 @@ const defaults = (): LearnerState => ({
   lastGames: [],
   sessions: 0,
   pendingLevelUp: null,
-  settings: { gamesPerSession: 4, rate: 0.9, voice: '' },
+  settings: { gamesPerSession: 4 },
 });
 
 export class Learner {
@@ -57,7 +51,7 @@ export class Learner {
   /** id -> times used this session, to spread items out. */
   private sessionUse = new Map<string, number>();
 
-  constructor(private storage: Storage = browserStorage, private now: () => number = () => Date.now()) {
+  constructor(private storage: Storage, private now: () => number = () => Date.now()) {
     const saved = storage.get();
     this.s = { ...defaults(), ...saved, settings: { ...defaults().settings, ...saved?.settings } };
   }

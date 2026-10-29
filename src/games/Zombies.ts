@@ -4,6 +4,8 @@ import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES } from '../data/curriculum';
 import { graphemeDistractors } from '../choices';
 import { shuffle, pickOne } from '../learner';
+import { LINES } from '../lines';
+import * as audio from '../audio';
 import { burst, emoji, sprite, text, tappable } from '../widgets';
 
 export const meta: GameMeta = {
@@ -11,7 +13,7 @@ export const meta: GameMeta = {
   theme: 'pvz',
   skill: 'grapheme',
   title: 'Zombie Letters — hear a sound, tap the letter',
-  intro: 'Zombies are coming! Listen for the sound, and tap the zombie with that letter!',
+  intro: LINES.intro.zombies,
   icon: 'zombie',
   eligible: () => true,
 };
@@ -19,7 +21,6 @@ export const meta: GameMeta = {
 const LANES = [260, 440, 620];
 const HOUSE_X = 230;
 const START_X = 1380;
-const GROANS = ['Braaains?', 'Uhhh?', 'Grrr?'];
 
 export class Zombies extends BaseGame {
   private shooters: Phaser.GameObjects.Image[] = [];
@@ -69,18 +70,20 @@ export class Zombies extends BaseGame {
 
       let help = this.tier === 0;
       await this.prompt(async () => {
-        await this.say(r === 0 ? 'Zap the zombie with' : pickOne(['Find', 'Zap', 'Where is']));
+        await this.say(r === 0 ? LINES.zapZombie : pickOne([LINES.find, LINES.zap, LINES.whereIs]));
         await this.letterSound(g);
         if (help) {
           (this.bubble.list[1] as Phaser.GameObjects.Text).setText(GRAPHEMES[g].pic);
           this.bubble.setVisible(true);
-          await this.say(`like ${GRAPHEMES[g].key}`);
+          await this.keyword(g);
         }
       });
 
       const res = await this.choose(zs, opts.indexOf(g), {
         onWrong: obj => {
-          const t = text(this, obj.x, obj.y - 260, pickOne(GROANS), 34, '#4e342e').setDepth(60);
+          const groan = pickOne(LINES.groans);
+          void audio.say(groan, { style: 'zombie' });
+          const t = text(this, obj.x, obj.y - 260, groan, 34, '#4e342e').setDepth(60);
           this.tweens.add({ targets: t, y: t.y - 40, alpha: 0, duration: 1200, onComplete: () => t.destroy() });
         },
         onScaffold: () => { help = true; void this.letterSound(g).catch(() => {}); },

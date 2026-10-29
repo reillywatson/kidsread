@@ -2,7 +2,10 @@
 // ~45-second time box, abort-on-exit, scoring, scaffolded choices and recording results.
 import Phaser from 'phaser';
 import * as audio from '../audio';
-import { learner } from '../state';
+import { playMusic } from '../music';
+import { LINES } from '../lines';
+import { GRAPHEMES } from '../data/curriculum';
+import * as state from '../state';
 import type { Session } from '../session';
 import { pickOne, type Result, type Skill, type Tier } from '../learner';
 import { H, W, roundButton, tweenP, wiggle, type Tappable } from '../widgets';
@@ -25,13 +28,12 @@ export interface GameMeta {
 export class Aborted extends Error { constructor() { super('aborted'); this.name = 'Aborted'; } }
 
 const TIME_BOX = 50_000;
-const PRAISE = ['Great job!', 'Awesome!', 'You did it!', 'Wow!', 'Super!', 'Yes!', 'Amazing!', 'Nice!'];
 
 export abstract class BaseGame extends Phaser.Scene {
   session!: Session;
   tier: Tier = 0;
   lesson = 1;
-  learner = learner;
+  get learner() { return state.learner; }
   sfx = audio.sfx;
   private ctl = new AbortController();
   private right = 0;
@@ -55,8 +57,10 @@ export abstract class BaseGame extends Phaser.Scene {
     this.right = this.total = this.done = 0;
     this.dots = [];
     this.replayFn = null;
-    this.tier = learner.tier(this.meta.skill);
-    this.lesson = learner.lesson;
+    this.tier = this.learner.tier(this.meta.skill);
+    this.lesson = this.learner.lesson;
+    playMusic(this.meta.theme);
+    audio.preload([this.meta.intro, ...LINES.praise]);
     this.events.once('shutdown', () => { this.ctl.abort(); audio.stop(); });
     this.setup();
     roundButton(this, 60, 56, 40, 0xff7043, '🏠', () => this.session.quit(this)).setDepth(900);
@@ -98,7 +102,9 @@ export abstract class BaseGame extends Phaser.Scene {
       p.then(v => { signal.removeEventListener('abort', ab); resolve(v); }, reject);
     });
   }
-  say(t: string) { return this.guard(audio.say(t)); }
+  say(t: string, style?: audio.Style) { return this.guard(audio.say(t, { style })); }
+  /** "like apple" — the keyword for a letter sound. */
+  async keyword(g: string) { await this.say(LINES.like); await this.say(GRAPHEMES[g].key); }
   letterSound(g: string) { return this.guard(audio.sound(g)); }
   wait(ms: number) { return this.guard(new Promise<void>(r => this.time.delayedCall(ms, r))); }
   tween(cfg: Phaser.Types.Tweens.TweenBuilderConfig) { return this.guard(tweenP(this, cfg)); }
@@ -151,20 +157,20 @@ export abstract class BaseGame extends Phaser.Scene {
     }));
   }
 
-  record(id: string, result: Result) { learner.record(id, result, this.meta.skill); }
+  record(id: string, result: Result) { this.learner.record(id, result, this.meta.skill); }
 
   score(firstTry: boolean) { this.total++; if (firstTry) this.right++; }
 
   async praise(firstTry: boolean) {
     this.sfx.ding();
-    if (firstTry && Math.random() < 0.45) await this.say(pickOne(PRAISE));
+    if (firstTry && Math.random() < 0.45) await this.say(pickOne(LINES.praise));
   }
 
   private finish() {
     const acc = this.total ? this.right / this.total : 1;
     const stars = acc >= 0.9 ? 3 : acc >= 0.6 ? 2 : 1;
-    learner.adjustTier(this.meta.skill);
-    learner.checkLessonUp();
+    this.learner.adjustTier(this.meta.skill);
+    this.learner.checkLessonUp();
     this.session.gameDone(this, stars);
   }
 }

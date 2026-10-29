@@ -6,6 +6,7 @@ import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES, PIC, segment } from '../data/curriculum';
 import { readableWords, wordDistractors, picsStartingWith, picsNotStartingWith, canStartWord } from '../choices';
 import { shuffle, pickOne } from '../learner';
+import { LINES } from '../lines';
 import * as audio from '../audio';
 import { WordView, burst, picture, roundButton, sprite, text } from '../widgets';
 
@@ -14,7 +15,7 @@ export const meta: GameMeta = {
   theme: 'pokemon',
   skill: 'word',
   title: 'Poké Catch — read a word, pick its picture',
-  intro: 'Help Pikachu catch them all! Read the word on the sign, then tap the matching picture.',
+  intro: LINES.intro.pikablend,
   icon: 'pikachu',
   eligible: () => true,
 };
@@ -48,7 +49,7 @@ export class PikaBlend extends BaseGame {
     burst(this, ball.x, ball.y);
     this.pika.setTexture('pikachu');
     this.tweens.add({ targets: this.pika, y: this.pika.y - 60, duration: 220, yoyo: true, ease: 'Quad.Out' });
-    void audio.say(pickOne(['Pika pika!', 'Pika!', 'Pikachu!']), { pitch: 1.8, rate: 1.2 });
+    void audio.say(pickOne(LINES.pika), { style: 'pika' });
     this.time.delayedCall(900, () => ball.destroy());
   }
 
@@ -75,8 +76,8 @@ export class PikaBlend extends BaseGame {
       cards.forEach((c, i) => this.tweens.add({ targets: c, y: { from: 760, to: 540 }, duration: 400, delay: i * 80, ease: 'Back.Out' }));
 
       await this.prompt(async () => {
-        if (r === 0) await this.say('Read the word. Tap the letters to hear their sounds.');
-        else await this.say(pickOne(['What does it say?', 'Read it!', 'Which one is it?']));
+        if (r === 0) await this.say(LINES.readWordTapLetters);
+        else await this.say(pickOne(LINES.readIt));
       });
       const res = await this.choose(cards, opts.indexOf(w), {
         onWrong: () => { this.pika.setTexture('pikachuSurprised'); },
@@ -125,7 +126,7 @@ export class PikaBlend extends BaseGame {
       const cards = opts.map((x, i) => picture(this, 640 + (i - (opts.length - 1) / 2) * 260, 540, x, { size: 100 }));
 
       await this.prompt(async () => {
-        await this.say(r === 0 ? 'What starts with this sound?' : pickOne(['What starts with this sound?', 'Which one?']));
+        await this.say(r === 0 ? LINES.startsWithSound : pickOne([LINES.startsWithSound, LINES.whichOne]));
         // Brand-new letters are modeled so the child can learn them.
         if (helped) await this.letterSound(g);
         if (this.tier === 0) for (const o of opts) await this.say(o);

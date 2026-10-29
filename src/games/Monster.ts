@@ -5,6 +5,7 @@ import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES } from '../data/curriculum';
 import { canStartWord, picsStartingWith, picsNotStartingWith } from '../choices';
 import { shuffle, pickOne } from '../learner';
+import { LINES } from '../lines';
 import * as audio from '../audio';
 import { burst, emoji, picture, sprite, text } from '../widgets';
 
@@ -13,7 +14,7 @@ export const meta: GameMeta = {
   theme: 'friends',
   skill: 'grapheme',
   title: 'Letter Monster — feed it pictures starting with its sound',
-  intro: "I'm the Letter Monster, and I'm hungry! Feed me things that start with my sound.",
+  intro: LINES.intro.monster,
   icon: 'monsterHappy',
   eligible: () => true,
 };
@@ -57,17 +58,17 @@ export class Monster extends BaseGame {
 
       let help = this.tier === 0;
       await this.prompt(async () => {
-        await this.say(r === 0 ? 'Feed me things that start with' : pickOne(['I want something that starts with', 'Yum! Find', 'Feed me']));
+        await this.say(r === 0 ? LINES.feedMe : pickOne(LINES.feedMeShort), 'monster');
         await this.letterSound(g);
         if (help) {
-          await this.say(`like ${GRAPHEMES[g].key}`);
+          await this.keyword(g);
           for (const o of opts) await this.say(o);
         }
       });
       const res = await this.choose(cards, opts.indexOf(answer), {
         onWrong: () => {
           this.monster.setTexture('monsterYuck');
-          void audio.say(pickOne(['Yuck!', 'Blech!', 'No thank you!']), { pitch: 0.8 });
+          void audio.say(pickOne(LINES.yuck), { style: 'monster' });
           this.time.delayedCall(900, () => this.monster.setTexture('monster'));
         },
         onScaffold: () => { help = true; void this.letterSound(g).catch(() => {}); },

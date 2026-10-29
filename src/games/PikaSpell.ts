@@ -5,6 +5,7 @@ import { BaseGame, type GameMeta } from './BaseGame';
 import { PIC, segment, GRAPHEMES } from '../data/curriculum';
 import { graphemeDistractors, readableWords } from '../choices';
 import { shuffle } from '../learner';
+import { LINES } from '../lines';
 import * as audio from '../audio';
 import { burst, picture, sprite, tappable, text, wiggle, roundButton } from '../widgets';
 
@@ -13,7 +14,7 @@ export const meta: GameMeta = {
   theme: 'pokemon',
   skill: 'spelling',
   title: 'Poké Spell — hear a word, build it with letters',
-  intro: "Let's spell! Listen to the word, then tap the letters in order to fill the boxes.",
+  intro: LINES.intro.pikaspell,
   icon: 'pokeball',
   eligible: lesson => readableWords(lesson, { heart: false }).length >= 2,
 };
@@ -79,7 +80,7 @@ export class PikaSpell extends BaseGame {
       });
 
       await this.prompt(async () => {
-        if (r === 0) await this.say('Spell');
+        if (r === 0) await this.say(LINES.spell);
         await this.say(w);
       });
 

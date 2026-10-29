@@ -5,6 +5,7 @@ import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES, PIC, HEART, LESSONS } from '../data/curriculum';
 import { readableWords } from '../choices';
 import { shuffle, pickOne } from '../learner';
+import { LINES } from '../lines';
 import { PUP_NAMES } from '../art';
 import { WordView, burst, emoji, sprite, tappable, text } from '../widgets';
 
@@ -13,7 +14,7 @@ export const meta: GameMeta = {
   theme: 'paw',
   skill: 'heart',
   title: 'Pup Match — memory with letters, words and heart words',
-  intro: 'Find the matching pairs! Tap two badges to flip them over.',
+  intro: LINES.intro.pupmemory,
   icon: 'pawBadge',
   eligible: () => true,
 };
@@ -110,7 +111,7 @@ export class PupMemory extends BaseGame {
       await this.tween({ targets: c, scaleX: 1, duration: 120 });
     };
 
-    await this.prompt(async () => { await this.say('Find the pairs!'); });
+    await this.prompt(async () => { await this.say(LINES.findPairs); });
 
     let matched = 0, misses = 0;
     while (matched < pairs.length && !this.timeUp()) {
@@ -141,6 +142,7 @@ export class PupMemory extends BaseGame {
         const face = a.getData('face') as Face;
         this.learner.record(face.item, 'seen');
         this.sfx.ding();
+        this.sfx.bark();
         burst(this, (a.x + b.x) / 2, (a.y + b.y) / 2, ['🐾', '⭐', '🦴']);
         await Promise.all([a, b].map(c => this.tween({ targets: c, scale: 1.15, duration: 150, yoyo: true })));
         await face.say();
@@ -153,6 +155,6 @@ export class PupMemory extends BaseGame {
         await Promise.all([flip(a, false), flip(b, false)]);
       }
     }
-    if (matched === pairs.length) await this.say(pickOne(['Ruff ruff! You found them all!', 'Great job, pup!']));
+    if (matched === pairs.length) await this.say(pickOne(LINES.foundAll), 'pup');
   }
 }

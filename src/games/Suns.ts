@@ -4,6 +4,7 @@ import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { readableWords, wordDistractors, wordItem } from '../choices';
 import { shuffle } from '../learner';
+import { LINES } from '../lines';
 import { WordView, burst, sprite, tappable } from '../widgets';
 
 export const meta: GameMeta = {
@@ -11,7 +12,7 @@ export const meta: GameMeta = {
   theme: 'pvz',
   skill: 'word',
   title: 'Sunflower Suns — hear a word, tap the matching word',
-  intro: 'Sunflower needs sunshine! Catch the sun with the word you hear.',
+  intro: LINES.intro.suns,
   icon: 'sunflower',
   eligible: lesson => readableWords(lesson).length >= 4,
 };
@@ -49,7 +50,7 @@ export class Suns extends BaseGame {
       });
 
       await this.prompt(async () => {
-        await this.say(r === 0 ? 'Catch the sun that says' : 'Find');
+        await this.say(r === 0 ? LINES.catchSun : LINES.find);
         await this.say(w);
       });
       const res = await this.choose(suns, opts.indexOf(w), { onScaffold: () => { void this.say(w).catch(() => {}); } });

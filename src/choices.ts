@@ -1,7 +1,8 @@
 // Distractor selection. Difficulty tier controls how similar the wrong answers are:
 // tier 0 = clearly different, tier 2 = minimal pairs / confusable letters.
 import {
-  GRAPHEMES, PIC, BANK, RHYMES, WORD_LESSON, HEART, soundClass, confusable, picConflict, editDistance, initialSound,
+  GRAPHEMES, PIC, BANK, RHYMES, WORD_LESSON, HEART, soundClass, confusable, picConflict, editDistance, initialSound, segment,
+  type Token,
 } from './data/curriculum';
 import { shuffle, type Tier } from './learner';
 
@@ -81,3 +82,64 @@ export function rhymeRound(nChoices: number, tier: Tier) {
   const ds = tier === 2 ? prefer(sameStart, others, nChoices - 1) : pickN(others, nChoices - 1);
   return { target, answer, choices: shuffle([answer, ...ds]) };
 }
+
+// ---- Word chains (Poké Evolve) ----
+const same = (a: Token[], b: Token[]) => a.length === b.length && a.every((t, i) => t.t === b[i].t);
+
+/** Words one sound-change away (same number of sounds, one grapheme different). */
+export function neighbors(w: string, pool: string[]): string[] {
+  const a = segment(w);
+  return pool.filter(x => {
+    if (x === w) return false;
+    const b = segment(x);
+    if (b.length !== a.length || !same(a.filter(t => !t.g), b.filter(t => !t.g))) return false;
+    return a.filter((t, i) => t.t !== b[i].t).length === 1;
+  });
+}
+
+export const decodable = (lesson: number) => readableWords(lesson, { heart: false });
+export function chainStarts(lessonOrPool: number | string[]) {
+  const pool = typeof lessonOrPool === 'number' ? decodable(lessonOrPool) : lessonOrPool;
+  return pool.filter(w => neighbors(w, pool).length > 0);
+}
+
+/** A random walk through one-change neighbors, never revisiting a word. */
+export function buildChain(start: string, steps: number, pool: string[]): string[] {
+  const chain = [start];
+  while (chain.length <= steps) {
+    const next = shuffle(neighbors(chain[chain.length - 1], pool).filter(x => !chain.includes(x)));
+    if (!next.length) break;
+    chain.push(next[0]);
+  }
+  return chain;
+}
+
+
+/** The longest of several random walks, preferring `start` but trying other words if it dead-ends. */
+export function bestChain(start: string | undefined, steps: number, pool: string[]): string[] {
+  const starts = chainStarts(pool);
+  let best: string[] = [];
+  for (let k = 0; k < 30 && best.length <= steps; k++) {
+    const s = k < 10 && start ? start : starts[Math.floor(Math.random() * starts.length)];
+    const c = buildChain(s, steps, pool);
+    if (c.length > best.length) best = c;
+  }
+  return best;
+}
+
+// ---- Vowels (Garden Sort) ----
+export const VOWELS = ['a', 'e', 'i', 'o', 'u'];
+export const vowelsAt = (lesson: number) => VOWELS.filter(v => GRAPHEMES[v].lesson <= lesson);
+/** The word's only vowel sound, if it has exactly one short vowel. */
+export function shortVowel(w: string): string | null {
+  const vs = segment(w).filter(t => t.g && (VOWELS.includes(t.g) || t.g.endsWith('_e')));
+  return vs.length === 1 && VOWELS.includes(vs[0].g!) ? vs[0].g : null;
+}
+
+
+// ---- Counting sounds (Rubble's Bones) ----
+// Graphemes whose sound is really two sounds (x = /ks/) — skipped to keep counting clear.
+const TWO_SOUNDS = new Set(['x', 'qu', 'nk', 'all', 'oll', 'ull']);
+export const soundCount = (w: string) => segment(w).filter(t => t.g).length;
+export const countable = (w: string) => segment(w).every(t => !t.g || !TWO_SOUNDS.has(t.g));
+

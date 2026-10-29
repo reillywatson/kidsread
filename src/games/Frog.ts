@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { rhymeRound } from '../choices';
 import { pickOne } from '../learner';
+import { LINES } from '../lines';
 import { burst, picture, sprite } from '../widgets';
 
 export const meta: GameMeta = {
@@ -10,7 +11,7 @@ export const meta: GameMeta = {
   theme: 'friends',
   skill: 'rhyme',
   title: 'Rhyme Frog — hop to the rhyming picture',
-  intro: 'Froggy wants to hop! Tap the picture that rhymes.',
+  intro: LINES.intro.frog,
   icon: 'frog',
   eligible: () => true,
 };
@@ -41,7 +42,7 @@ export class Frog extends BaseGame {
       cards.forEach((c, i) => this.tweens.add({ targets: [c, pads[i]], y: '+=8', duration: 900 + i * 100, yoyo: true, repeat: -1, ease: 'Sine.InOut' }));
 
       await this.prompt(async () => {
-        await this.say('What rhymes with');
+        await this.say(LINES.rhymesWith);
         await this.say(round.target);
         for (const c of cards) {
           c.setScale(1.1);
@@ -55,7 +56,7 @@ export class Frog extends BaseGame {
           const pad = pads[cards.indexOf(obj as Phaser.GameObjects.Container)];
           this.tweens.add({ targets: pad, alpha: 0.4, duration: 300 });
         },
-        onScaffold: () => { void this.say(`${round.target}, ${round.answer}`).catch(() => {}); },
+        onScaffold: () => { void this.say(round.target).then(() => this.say(round.answer)).catch(() => {}); },
       });
       this.learner.pushRecent('rhyme', res.firstTry);
       this.score(res.firstTry);
@@ -70,8 +71,9 @@ export class Frog extends BaseGame {
         })(),
       ]);
       burst(this, xs[i], 380, ['💧', '✨', '🐸']);
-      void this.say(pickOne(['Ribbit!', 'Ribbit ribbit!']));
-      await this.say(`${round.target}, ${round.answer}`);
+      await this.say(pickOne(LINES.ribbit), 'frog');
+      await this.say(round.target);
+      await this.say(round.answer);
       await this.praise(res.firstTry);
       [target, ...cards, ...pads].forEach(o => { this.tweens.killTweensOf(o); o.destroy(); });
       this.frog.setPosition(HOME.x, HOME.y);

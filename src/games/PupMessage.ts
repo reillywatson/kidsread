@@ -5,6 +5,7 @@ import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { NOUNS, HEART, WORD_LESSON, picConflict } from '../data/curriculum';
 import { shuffle, pickOne } from '../learner';
+import { LINES } from '../lines';
 import * as audio from '../audio';
 import { WordView, burst, picture, sprite } from '../widgets';
 
@@ -13,7 +14,7 @@ export const meta: GameMeta = {
   theme: 'paw',
   skill: 'sentence',
   title: 'Pup Pad — read a sentence, pick the picture',
-  intro: 'Ryder sent a message! Read it, then tap the picture that matches.',
+  intro: LINES.intro.pupmessage,
   icon: 'pup-chase',
   eligible: lesson => lesson >= 9 && nounsAt(lesson).length >= 3,
 };
@@ -101,7 +102,7 @@ export class PupMessage extends BaseGame {
       };
       let helped = false;
       await this.prompt(async () => {
-        await this.say(r === 0 ? 'Read the message. Which picture matches?' : pickOne(['Read the message!', 'What does it say?']));
+        await this.say(r === 0 ? LINES.readMessage : pickOne(LINES.readMessageShort));
       });
       const res = await this.choose(cards, s.choices.indexOf(s.answer), {
         scaffoldAfter: 1,
@@ -121,7 +122,7 @@ export class PupMessage extends BaseGame {
       this.tweens.add({ targets: this.pup, y: this.pup.y - 40, duration: 200, yoyo: true, repeat: 1 });
       await this.tween({ targets: truck, x: 1500, duration: 1400, ease: 'Sine.InOut' });
       truck.destroy();
-      if (Math.random() < 0.3) await this.say('Paw Patrol is on a roll!');
+      if (Math.random() < 0.3) await this.say(LINES.pawRoll);
       await this.praise(res.firstTry);
       [...views, period, ...cards].forEach(o => o.destroy());
       this.progress();

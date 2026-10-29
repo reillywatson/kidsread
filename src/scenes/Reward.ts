@@ -5,6 +5,7 @@ import type { Session } from '../session';
 import { GRAPHEMES, lessonInfo } from '../data/curriculum';
 import { nextSticker } from '../stickers';
 import * as audio from '../audio';
+import { LINES } from '../lines';
 import { W, burst, emoji, roundButton, sprite, text, tweenP, tappable, onTap } from '../widgets';
 
 export class Reward extends Phaser.Scene {
@@ -37,7 +38,7 @@ export class Reward extends Phaser.Scene {
       await tweenP(this, { targets: s, scale: 150 / s.height, angle: { from: -90, to: 0 }, duration: 350, ease: 'Back.Out' });
       if (i < this.stars) burst(this, s.x, s.y);
     }
-    await say(['Good try!', 'Great job!', 'Super star!'][this.stars - 1]);
+    await say(LINES.stars[this.stars - 1]);
 
     // New lesson unlocked?
     const lvl = learner.takeLevelUp();
@@ -64,11 +65,11 @@ export class Reward extends Phaser.Scene {
     if (l.g.length) {
       const g = GRAPHEMES[l.g[0]];
       banner.add([text(this, -120, 0, l.g.map(x => GRAPHEMES[x].label).join(' '), 120), emoji(this, 140, 0, g.pic, 110)]);
-      await audio.say('You unlocked a new sound!');
-      for (const x of l.g) { await audio.sound(x); await audio.say(`like ${GRAPHEMES[x].key}`); }
+      await audio.say(LINES.newSound);
+      for (const x of l.g) { await audio.sound(x); await audio.say(LINES.like); await audio.say(GRAPHEMES[x].key); }
     } else {
       banner.add(emoji(this, 0, 0, '🚀', 120));
-      await audio.say('Level up! New words to read!');
+      await audio.say(LINES.levelUp);
     }
     await new Promise(r => this.time.delayedCall(800, r));
     banner.destroy();
@@ -79,7 +80,7 @@ export class Reward extends Phaser.Scene {
     gift.add(sprite(this, 0, 0, 'gift', 220));
     tappable(gift, 220, 220);
     this.tweens.add({ targets: gift, angle: { from: -6, to: 6 }, duration: 300, yoyo: true, repeat: -1 });
-    await audio.say('You finished! Tap the present!');
+    await audio.say(LINES.tapPresent);
     onTap(gift, async () => {
       gift.disableInteractive();
       this.tweens.killTweensOf(gift);
@@ -93,7 +94,9 @@ export class Reward extends Phaser.Scene {
       burst(this, W / 2, 470, ['🎉', '⭐', '✨'], 24);
       await tweenP(this, { targets: prize, scale: finalScale, duration: 500, ease: 'Back.Out' });
       if (!this.alive) return;
-      await audio.say(`You got a sticker! ${st.name}!`);
+      await audio.say(LINES.gotSticker);
+      if (!this.alive) return;
+      await audio.say(st.name);
       if (!this.alive) return;
       roundButton(this, W / 2 - 130, 640, 56, 0xff7043, '🏠', () => this.session.quit(this));
       roundButton(this, W / 2 + 130, 640, 56, 0x43c35e, '🔁', () => this.session.again(this));
