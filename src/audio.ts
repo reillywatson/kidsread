@@ -191,6 +191,13 @@ export async function sound(g: string): Promise<void> {
   missing(`the letter sound "${g}"`);
 }
 
+// ---------- Haptics ----------
+/** A light buzz on devices that support it (Android; iOS browsers ignore it). Off with sounds. */
+export function buzz(pattern: number | number[]) {
+  if (!settings.sfx) return;
+  try { navigator.vibrate?.(pattern); } catch { /* not supported */ }
+}
+
 // ---------- Sound effects ----------
 function tone(freq: number, dur: number, { type = 'sine' as OscillatorType, vol = 0.25, to = 0, delay = 0 } = {}) {
   if (!settings.sfx) return;

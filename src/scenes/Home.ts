@@ -6,7 +6,10 @@ import { LINES } from '../lines';
 import * as audio from '../audio';
 import { playMusic } from '../music';
 import { openParentArea } from '../parent';
-import { H, W, emoji, glossyCircle, roundButton, sprite, tappable, text, onTap } from '../widgets';
+import { H, W, burst, emoji, glossyCircle, roundButton, sprite, tappable, text, onTap } from '../widgets';
+
+const CAMEOS = ['pikachu', 'bulbasaur', 'charmander', 'squirtle', 'pup-chase', 'pup-marshall', 'pup-skye', 'pup-rubble',
+  'zombie', 'zombieCone', 'wallnut', 'frog', 'monsterHappy'];
 
 const WORLDS: { theme: Theme; texture: string; color: number }[] = [
   { theme: 'pvz', texture: 'peashooter', color: 0x7cc242 },
@@ -21,6 +24,7 @@ export class Home extends Phaser.Scene {
   constructor() { super('Home'); }
 
   create() {
+    this.cameras.main.fadeIn(220, 255, 255, 255);
     if (!profile) { this.scene.start('Profiles'); return; }
     this.starting = false;
     this.add.image(640, 360, 'bgHome');
@@ -56,9 +60,29 @@ export class Home extends Phaser.Scene {
       this.tweens.add({ targets: c, y: 548, duration: 900 + i * 120, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
     });
 
+    this.cameos();
     roundButton(this, W - 190, 66, 46, 0x90a4ae, '⚙️', () => this.scene.start('Settings'));
     roundButton(this, W - 76, 66, 46, 0xff8a65, '📒', () => this.scene.start('Stickers'));
     this.grownUpLock();
+  }
+
+  /** Now and then a friend hops across the bottom of the screen. Tap it for a giggle. */
+  private cameos() {
+    const send = () => {
+      const key = CAMEOS[Math.floor(Math.random() * CAMEOS.length)];
+      const ltr = Math.random() < 0.5;
+      const c = sprite(this, ltr ? -80 : W + 80, H - 48, key, 90).setInteractive({ useHandCursor: true });
+      const hop = this.tweens.add({ targets: c, y: H - 78, duration: 260, yoyo: true, repeat: -1, ease: 'Quad.Out' });
+      const walk = this.tweens.add({ targets: c, x: ltr ? W + 80 : -80, duration: 9000, onComplete: () => { hop.remove(); c.destroy(); } });
+      onTap(c, () => {
+        audio.sfx.giggle();
+        burst(this, c.x, c.y - 30, ['💖', '⭐', '✨'], 8);
+        this.tweens.add({ targets: c, angle: { from: 0, to: ltr ? 360 : -360 }, duration: 500 });
+        walk.timeScale = 2.5;
+      });
+      this.time.delayedCall(9000 + Math.random() * 7000, send);
+    };
+    this.time.delayedCall(2500, send);
   }
 
   start(theme?: Theme) {

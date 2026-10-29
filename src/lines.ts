@@ -28,6 +28,7 @@ export const LINES = {
   levelUp: 'Level up! New words to read!',
   tapPresent: 'You finished! Tap the present!',
   gotSticker: 'You got a sticker!',
+  stickerHint: 'Drag your stickers onto the picture!',
 
   // Game intros
   intro: {

@@ -25,6 +25,7 @@ export class Profiles extends Phaser.Scene {
   constructor() { super('Profiles'); }
 
   create() {
+    this.cameras.main.fadeIn(220, 255, 255, 255);
     this.add.image(640, 360, 'bgHome');
     playMusic('home');
     const list = profiles();
@@ -67,6 +68,7 @@ export class AvatarPicker extends Phaser.Scene {
   constructor() { super('AvatarPicker'); }
 
   create() {
+    this.cameras.main.fadeIn(220, 255, 255, 255);
     this.add.image(640, 360, 'bgHome');
     this.add.rectangle(W / 2, H / 2 + 20, 1180, 600, 0xffffff, 0.55).setStrokeStyle(6, 0xffffff);
     playMusic('home');

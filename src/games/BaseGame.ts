@@ -75,6 +75,7 @@ export abstract class BaseGame extends Phaser.Scene {
   protected abstract run(): Promise<void>;
 
   create() {
+    this.cameras.main.fadeIn(220, 255, 255, 255);
     this.ctl = new AbortController();
     this.right = this.total = this.done = 0;
     this.dots = [];
@@ -210,6 +211,7 @@ export abstract class BaseGame extends Phaser.Scene {
   /** Big theme-flavored celebration when the power meter fills. */
   private async powerUp() {
     this.sfx.power();
+    audio.buzz([40, 60, 40, 60, 80]);
     this.cameras.main.shake(350, 0.008);
     this.cameras.main.flash(250, 255, 255, 210);
     confetti(this, 70);
@@ -411,6 +413,7 @@ export abstract class BaseGame extends Phaser.Scene {
   async praise(firstTry: boolean) {
     if (firstTry && this.streak > 0 && this.streak % POWER === 0) { await this.powerUp(); return; }
     this.sfx.chime(firstTry ? this.streak : 0);
+    if (firstTry) audio.buzz(15);
     if (firstTry && this.streak > 0) this.sfx.charge(((this.streak - 1) % POWER) + 1);
     if (firstTry && Math.random() < 0.45) await this.say(pickOne(LINES.praise));
   }

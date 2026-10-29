@@ -31,7 +31,11 @@ export interface LearnerState {
   lastBonusSession?: number;
   pendingLevelUp: number | null;
   settings: Settings;
+  /** Stickers placed in the sticker playground: page -> stickers. */
+  board?: Record<string, PlacedSticker[]>;
 }
+
+export interface PlacedSticker { id: string; x: number; y: number }
 
 export interface Storage { get(): Partial<LearnerState> | null; set(v: LearnerState): void }
 

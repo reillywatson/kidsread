@@ -1,12 +1,16 @@
-// Between games: stars, any level-up, then on to the next game. After the last game: a sticker.
+// Between games: stars, any level-up, then on to the next game. A path across the screen shows
+// the session's games with the player's avatar hopping along toward the present at the end;
+// the next button shows what's coming up. After the last game: a sticker.
 import Phaser from 'phaser';
-import { learner } from '../state';
+import { learner, profile } from '../state';
 import type { Session } from '../session';
 import { GRAPHEMES, lessonInfo } from '../data/curriculum';
 import { nextSticker } from '../stickers';
 import * as audio from '../audio';
 import { LINES } from '../lines';
-import { W, burst, emoji, roundButton, sprite, text, tweenP, tappable, onTap } from '../widgets';
+import { W, burst, emoji, glossyCircle, roundButton, sprite, text, tweenP, tappable, onTap } from '../widgets';
+
+const PATH_Y = 372;
 
 export class Reward extends Phaser.Scene {
   private session!: Session;
@@ -23,9 +27,67 @@ export class Reward extends Phaser.Scene {
   create() {
     this.alive = true;
     this.events.once('shutdown', () => { this.alive = false; audio.stop(); });
+    this.cameras.main.fadeIn(220, 255, 255, 255);
     this.add.image(640, 360, 'bgHome');
     roundButton(this, 60, 56, 40, 0xff7043, '🏠', () => this.session.quit(this));
     void this.sequence();
+  }
+
+  /** The session's games as stepping stones, a present at the end, and the player's avatar. */
+  private path() {
+    const { games, i: done } = this.session;
+    const n = games.length + 1;
+    const gap = Math.min(130, 900 / (n - 1));
+    const xs = Array.from({ length: n }, (_, k) => W / 2 + (k - (n - 1) / 2) * gap);
+    const c = this.add.container(0, 0);
+    const line = this.add.graphics();
+    line.fillStyle(0xffffff, 0.8);
+    for (let x = xs[0]; x <= xs[n - 1]; x += 18) line.fillCircle(x, PATH_Y, 4);
+    c.add(line);
+    games.forEach((m, k) => {
+      const played = k <= done;
+      const g = this.add.graphics();
+      g.fillStyle(0x000000, 0.15).fillCircle(xs[k], PATH_Y + 5, 38);
+      g.fillStyle(played ? 0xffd21f : 0xffffff, played ? 1 : 0.85).fillCircle(xs[k], PATH_Y, 38);
+      g.lineStyle(5, 0xffffff).strokeCircle(xs[k], PATH_Y, 36);
+      c.add(g);
+      // A bonus game is a surprise until you get there.
+      if (m.bonus && !played) c.add(emoji(this, xs[k], PATH_Y, '❓', 40));
+      else c.add(sprite(this, xs[k], PATH_Y, m.icon, 52).setAlpha(played ? 1 : 0.6));
+      if (played) c.add(emoji(this, xs[k] + 28, PATH_Y + 26, '✅', 24));
+    });
+    const gift = emoji(this, xs[n - 1], PATH_Y, '🎁', 56);
+    c.add(gift);
+    this.tweens.add({ targets: gift, angle: { from: -8, to: 8 }, duration: 400, yoyo: true, repeat: -1 });
+    const me = sprite(this, xs[done], PATH_Y - 58, profile?.avatar ?? 'star', 60);
+    c.add(me);
+    c.setAlpha(0);
+    this.tweens.add({ targets: c, alpha: 1, duration: 300 });
+    return { c, xs, me };
+  }
+
+  private async hop(obj: Phaser.GameObjects.Image, x: number) {
+    audio.sfx.hop();
+    this.tweens.add({ targets: obj, x, duration: 420, ease: 'Sine.InOut' });
+    await tweenP(this, { targets: obj, y: obj.y - 50, duration: 210, yoyo: true, ease: 'Quad.Out' });
+  }
+
+  /** Big go button showing what's next: the game's picture (or ❓ for a bonus) and a ▶ badge. */
+  private nextButton(go: () => void) {
+    const meta = this.session.games[this.session.i + 1];
+    const c = this.add.container(W / 2, 545);
+    c.add(glossyCircle(this, 90, 0x43c35e));
+    c.add(meta.bonus ? emoji(this, 0, 4, '❓', 90) : sprite(this, 0, 2, meta.icon, 125));
+    const badge = this.add.graphics();
+    badge.fillStyle(0xffffff).fillCircle(64, 62, 30);
+    badge.fillStyle(0x43c35e).fillTriangle(54, 46, 54, 78, 82, 62);
+    c.add(badge);
+    tappable(c, 180, 180);
+    onTap(c, () => { audio.sfx.tap(); go(); });
+    c.setScale(0);
+    this.tweens.add({ targets: c, scale: 1, duration: 350, ease: 'Back.Out', onComplete: () =>
+      this.tweens.add({ targets: c, scale: 1.08, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.InOut' }) });
+    return c;
   }
 
   private async sequence() {
@@ -54,6 +116,11 @@ export class Reward extends Phaser.Scene {
     }
     await speech;
 
+    // Hop along the path toward what's next.
+    const path = this.path();
+    await new Promise(r => this.time.delayedCall(350, r));
+    if (this.alive) await this.hop(path.me, path.xs[this.session.i + 1]);
+
     // New lesson unlocked?
     const lvl = learner.takeLevelUp();
     if (lvl && this.alive) await this.levelUp(lvl);
@@ -62,10 +129,12 @@ export class Reward extends Phaser.Scene {
     if (!this.session.isLast) {
       let moved = false;
       const go = () => { if (!moved) { moved = true; this.session.next(this); } };
-      const next = roundButton(this, W / 2, 500, 90, 0x43c35e, 'play', go);
-      this.tweens.add({ targets: next, scale: 1.1, duration: 600, yoyo: true, repeat: -1 });
+      this.nextButton(go);
       this.time.delayedCall(5000, go);
     } else {
+      // Made it to the present!
+      burst(this, path.xs[path.xs.length - 1], PATH_Y, ['🎉', '⭐', '✨'], 16);
+      await tweenP(this, { targets: path.c, alpha: 0, duration: 400, delay: 300 });
       await this.giftBox();
     }
   }
@@ -73,7 +142,7 @@ export class Reward extends Phaser.Scene {
   private async levelUp(lesson: number) {
     const l = lessonInfo(lesson)!;
     audio.sfx.fanfare();
-    const banner = this.add.container(W / 2, 440);
+    const banner = this.add.container(W / 2, 440).setDepth(10);
     banner.add(this.add.rectangle(0, 0, 640, 200, 0xffffff, 0.95).setStrokeStyle(8, 0xffc94d));
     burst(this, W / 2, 440, ['🎉', '⭐', '🎊'], 20);
     if (l.g.length) {

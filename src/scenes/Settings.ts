@@ -9,6 +9,7 @@ export class Settings extends Phaser.Scene {
   constructor() { super('Settings'); }
 
   create() {
+    this.cameras.main.fadeIn(220, 255, 255, 255);
     this.add.image(640, 360, 'bgHome');
     roundButton(this, 60, 56, 40, 0xff7043, '🏠', () => this.scene.start('Home'));
     this.toggle(W / 2 - 200, 'music', '🎵', LINES.musicOn, LINES.musicOff);
