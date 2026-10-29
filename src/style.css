@@ -1,0 +1,80 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #7fd3ff;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+#game { width: 100vw; height: 100dvh; }
+
+#rotate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: #7fd3ff;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  font-size: 96px;
+}
+#rotate .phone { animation: turn 2s ease-in-out infinite; }
+#rotate .arrow { font-size: 72px; color: #fff; }
+@keyframes turn { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+@media (orientation: portrait) and (pointer: coarse) {
+  #rotate { display: flex; }
+}
+
+/* Grown-up area */
+#parent {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow-y: auto;
+  background: rgba(20, 30, 50, .55);
+  touch-action: pan-y;
+  user-select: text;
+  -webkit-user-select: text;
+  font: 16px/1.45 system-ui, -apple-system, sans-serif;
+  color: #1f2430;
+}
+#parent .panel {
+  max-width: 760px;
+  margin: 24px auto;
+  padding: 20px 24px 32px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.25);
+}
+#parent h1 { margin: 0 0 8px; font-size: 26px; }
+#parent h2 { font-size: 18px; margin: 0 0 8px; }
+#parent h3 { font-size: 15px; margin: 12px 0 4px; }
+#parent section { border-top: 1px solid #e6e8ee; padding: 16px 0 8px; }
+#parent button, #parent select {
+  font: inherit;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid #c9cfdb;
+  background: #f6f7fb;
+  cursor: pointer;
+}
+#parent button:hover { background: #eceff6; }
+#parent .close { float: right; }
+#parent .danger { color: #b3261e; border-color: #e7b7b3; }
+#parent .muted { color: #6b7280; font-size: 14px; }
+#parent .lesson { display: flex; gap: 12px; align-items: center; font-size: 18px; }
+#parent .lessons { columns: 2; font-size: 13px; padding-left: 20px; }
+#parent .lessons .cur { font-weight: 700; color: #1e4fd8; }
+#parent label { display: block; margin: 8px 0; }
+#parent label select, #parent label input { margin-left: 8px; vertical-align: middle; }
+#parent table { border-collapse: collapse; margin-top: 8px; }
+#parent td, #parent th { padding: 4px 14px 4px 0; text-align: left; }
+#parent .clips { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+#parent .clip { display: flex; gap: 6px; align-items: center; padding: 6px 8px; background: #f6f7fb; border-radius: 10px; }
+#parent .clip b { min-width: 34px; font-size: 20px; }
+#parent .clip .muted { flex: 1; }

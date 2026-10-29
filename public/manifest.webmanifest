@@ -1,0 +1,10 @@
+{
+  "name": "Kids Read",
+  "short_name": "Kids Read",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#7fd3ff",
+  "theme_color": "#7fd3ff",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
