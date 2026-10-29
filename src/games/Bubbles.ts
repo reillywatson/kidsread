@@ -67,6 +67,7 @@ export class Bubbles extends BaseGame {
       });
 
       let popped = 0, misses = 0;
+      const stopIdle = this.idleNudge([]);
       await this.guard(new Promise<void>(resolve => {
         const pop = (c: Phaser.GameObjects.Container) => {
           if (c.getData('popped')) return;
@@ -85,6 +86,7 @@ export class Bubbles extends BaseGame {
           c.setData('popped', true);
           this.tweens.killTweensOf(c);
           this.sfx.pop();
+          this.sfx.charge(popped + 1);
           burst(this, c.x, c.y, ['💧', '✨', '🫧'], 8);
           this.tweens.add({ targets: c, scale: 1.4, alpha: 0, duration: 150, onComplete: () => c.setVisible(false) });
           if (++popped === TARGETS) resolve();
@@ -93,6 +95,7 @@ export class Bubbles extends BaseGame {
         if (import.meta.env.DEV) Object.assign(window, { __answer: () => { const t = bubbles.find(b => b.getData('g') === g && !b.getData('popped')); if (t) pop(t); } });
         this.signal.addEventListener('abort', () => resolve(), { once: true });
       }));
+      stopIdle();
       if (this.signal.aborted) throw new Aborted();
 
       this.record('g:' + g, misses === 0 ? 'correct' : 'wrong');

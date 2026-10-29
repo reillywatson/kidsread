@@ -4,7 +4,7 @@ import { BaseGame, type GameMeta } from './BaseGame';
 import { rhymeRound } from '../choices';
 import { pickOne } from '../learner';
 import { LINES } from '../lines';
-import { burst, picture, sprite } from '../widgets';
+import { burst, emoji, picture, sprite } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'frog',
@@ -26,7 +26,23 @@ export class Frog extends BaseGame {
   protected setup() {
     this.add.image(640, 360, 'bgPond');
     sprite(this, HOME.x, HOME.y + 40, 'lilypad', 110);
-    this.frog = sprite(this, HOME.x, HOME.y, 'frog', 130);
+    this.frog = this.tickle(sprite(this, HOME.x, HOME.y, 'frog', 130), () => void this.say(pickOne(LINES.ribbit), 'frog').catch(() => {}));
+  }
+
+  /** A fly buzzes by and the frog's tongue snaps it up. */
+  private async catchFly() {
+    const f = this.frog;
+    const fly = emoji(this, f.x + 260, f.y - 220, '🪰', 44);
+    this.sfx.buzz();
+    await this.tween({ targets: fly, x: f.x + 130, y: f.y - 120, duration: 700, ease: 'Sine.InOut' });
+    const mouth = { x: f.x + 20, y: f.y - 10 };
+    const tongue = this.add.graphics();
+    tongue.lineStyle(12, 0xff6f91).lineBetween(mouth.x, mouth.y, fly.x, fly.y).fillStyle(0xff6f91).fillCircle(fly.x, fly.y, 10);
+    this.sfx.slurp();
+    await this.wait(140);
+    fly.destroy();
+    tongue.destroy();
+    await this.tween({ targets: f, scaleY: f.scaleY * 1.12, duration: 120, yoyo: true });
   }
 
   protected async run() {
@@ -71,6 +87,7 @@ export class Frog extends BaseGame {
         })(),
       ]);
       burst(this, xs[i], 380, ['💧', '✨', '🐸']);
+      if (Math.random() < 0.5) await this.catchFly();
       await this.say(pickOne(LINES.ribbit), 'frog');
       await this.say(round.target);
       await this.say(round.answer);

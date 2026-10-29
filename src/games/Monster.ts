@@ -30,13 +30,23 @@ export class Monster extends BaseGame {
   protected setup() {
     this.add.image(640, 360, 'bgKitchen');
     this.add.ellipse(380, 600, 700, 90, 0xffffff, 0.8).setStrokeStyle(5, 0xd9a066);
-    this.monster = sprite(this, 1000, 400, 'monster', 400);
+    this.monster = this.tickle(sprite(this, 1000, 400, 'monster', 400));
     // The monster's letter, on a round badge on its tummy (below the big mouth).
     const badge = this.add.container(1000, 562);
     badge.add(this.add.circle(0, 0, 46, 0xffffff).setStrokeStyle(7, 0x5a1a2a));
     this.belly = text(this, 0, 0, '', 64, '#5a1a2a');
     badge.add(this.belly);
     this.tweens.add({ targets: [this.monster, badge], y: '-=12', duration: 700, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+  }
+
+  /** BUUURP. Little kids find this hilarious. */
+  private async burp() {
+    await this.wait(250);
+    this.sfx.burp();
+    const puff = emoji(this, MOUTH.x - 90, MOUTH.y - 20, '💨', 70).setFlipX(true);
+    this.tweens.add({ targets: puff, x: puff.x - 120, alpha: 0, scale: 1.6, duration: 700, onComplete: () => puff.destroy() });
+    await this.tween({ targets: this.monster, scaleY: this.monster.scaleY * 1.1, scaleX: this.monster.scaleX * 0.94, duration: 140, yoyo: true });
+    await this.wait(200);
   }
 
   protected async run() {
@@ -88,6 +98,7 @@ export class Monster extends BaseGame {
       this.monster.setTexture('monsterHappy');
       burst(this, MOUTH.x, MOUTH.y, ['😋', '✨', '💜']);
       await this.tween({ targets: this.monster, scale: this.monster.scale * 1.06, duration: 150, yoyo: true });
+      if (Math.random() < 0.4) await this.burp();
       await this.letterSound(g);
       await this.say(answer);
       await this.praise(res.firstTry);

@@ -32,7 +32,8 @@ export class Evolve extends BaseGame {
   protected setup() {
     this.add.image(640, 360, 'bgField');
     this.glow = this.add.circle(170, 430, 130, 0xfff59d, 0);
-    this.mon = sprite(this, 170, 450, pickOne(MONS), 200);
+    this.mon = this.tickle(sprite(this, 170, 450, pickOne(MONS), 200),
+      () => { if (this.mon.texture.key.startsWith('pikachu')) void audio.say(pickOne(LINES.pika), { style: 'pika' }); });
   }
 
   protected async run() {

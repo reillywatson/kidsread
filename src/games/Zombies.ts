@@ -31,7 +31,10 @@ export class Zombies extends BaseGame {
   protected setup() {
     this.add.image(640, 360, 'bgLawn');
     this.shooters = LANES.map(y => sprite(this, 130, y - 20, 'peashooter', 130));
-    this.shooters.forEach((s, i) => this.tweens.add({ targets: s, scaleY: s.scaleY * 1.05, duration: 600 + i * 90, yoyo: true, repeat: -1 }));
+    this.shooters.forEach((s, i) => {
+      this.tweens.add({ targets: s, scaleY: s.scaleY * 1.05, duration: 600 + i * 90, yoyo: true, repeat: -1 });
+      this.tickle(s);
+    });
     this.bubble = this.add.container(640, 120).setVisible(false).setDepth(50);
     this.bubble.add([this.add.circle(0, 0, 52, 0xffffff).setStrokeStyle(5, 0xffc94d), emoji(this, 0, 2, '', 60)]);
   }
@@ -105,7 +108,9 @@ export class Zombies extends BaseGame {
       burst(this, z.x, z.y - 80, ['💥', '✨', '🟢']);
       zs.filter(o => o !== z).forEach(o => { this.tweens.killTweensOf(o); this.tweens.add({ targets: o, x: 1500, duration: 900 }); });
       this.bubble.setVisible(false);
-      await this.tween({ targets: z, angle: 90, alpha: 0, y: z.y + 30, duration: 450 });
+      // Bonk! The zombie goes spinning off the lawn.
+      this.sfx.boing();
+      await this.tween({ targets: z, x: z.x + 240, y: z.y - 260, angle: 540, alpha: 0, scale: 0.6, duration: 650, ease: 'Quad.Out' });
       await this.letterSound(g);
       await this.praise(res.firstTry);
       zs.forEach(o => o.destroy());

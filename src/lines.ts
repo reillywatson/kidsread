@@ -3,6 +3,8 @@
 // No imports: the voice script loads this file directly in Node.
 
 export const LINES = {
+  // Power meter full (three right in a row).
+  streak: ['Three in a row!', "You're on fire!", 'Super power!', 'Unstoppable!'],
   praise: ['Great job!', 'Awesome!', 'You did it!', 'Wow!', 'Super!', 'Yes!', 'Amazing!', 'Nice!'],
   like: 'like',
 

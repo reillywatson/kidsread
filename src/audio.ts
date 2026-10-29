@@ -72,6 +72,9 @@ export function stop() {
   if (currentEl) { currentEl.pause(); currentEl = null; }
 }
 
+/** True while the narrator (or a letter sound) is talking. */
+export const isSpeaking = () => speaking > 0;
+
 function duck(on: boolean) {
   speaking = Math.max(0, speaking + (on ? 1 : -1));
   applySettings();
@@ -245,4 +248,24 @@ export const sfx = {
   sparkle: () => [1568, 2093, 2637, 3136].forEach((f, i) => tone(f, 0.12, { type: 'sine', vol: 0.08, delay: i * 0.06 })),
   grow: () => tone(200, 0.5, { to: 900, type: 'triangle', vol: 0.12 }),
   bark: () => { noise(0.07, { vol: 0.25, hp: 500 }); tone(420, 0.09, { to: 260, type: 'sawtooth', vol: 0.1 }); },
+  /** A ding that climbs a major scale with each answer in a streak. */
+  chime: (step: number) => {
+    const f = 660 * 2 ** ([0, 2, 4, 5, 7, 9, 11, 12][Math.min(step, 7)] / 12);
+    tone(f, 0.15, { type: 'triangle' });
+    tone(f * 1.5, 0.3, { type: 'triangle', delay: 0.1 });
+  },
+  /** One step of the power meter filling up. */
+  charge: (step: number) => tone(500 + step * 180, 0.18, { to: 900 + step * 260, type: 'triangle', vol: 0.12 }),
+  /** The power meter is full: a big rising run and a crash. */
+  power: () => {
+    [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, i === 5 ? 0.7 : 0.12, { type: 'square', vol: 0.06, delay: i * 0.07 }));
+    noise(0.6, { vol: 0.18, hp: 1200, delay: 0.42 });
+  },
+  burp: () => { tone(110, 0.45, { to: 70, type: 'sawtooth', vol: 0.18 }); noise(0.3, { vol: 0.12, hp: 150 }); },
+  /** A tickled-character giggle: three quick wobbly hops up. */
+  giggle: () => [0, 1, 2, 3].forEach(i => tone(700 + i * 90, 0.09, { to: 950 + i * 90, type: 'sine', vol: 0.14, delay: i * 0.09 })),
+  tick: () => tone(1800, 0.04, { type: 'triangle', vol: 0.08 }),
+  twinkle: () => tone(1400 + Math.random() * 1200, 0.12, { type: 'sine', vol: 0.06 }),
+  buzz: () => { for (let i = 0; i < 6; i++) tone(180 + (i % 2) * 30, 0.08, { type: 'sawtooth', vol: 0.03, delay: i * 0.08 }); },
+  slurp: () => tone(300, 0.25, { to: 1400, type: 'sine', vol: 0.18 }),
 };

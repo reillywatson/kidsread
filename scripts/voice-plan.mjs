@@ -10,7 +10,7 @@ const PRONOUNCE = { a: 'uh' };
 // Delivery for each kind of line (v4 audio tags). Single words get none: clarity first.
 const TAGS = new Map();
 const tag = (t, ...groups) => groups.flat(2).forEach(x => TAGS.set(x, t));
-tag('[excited]', LINES.praise, LINES.stars.slice(1), Object.values(LINES.worldHello), LINES.evolved, LINES.foundAll, LINES.hiNew,
+tag('[excited]', LINES.praise, LINES.streak, LINES.stars.slice(1), Object.values(LINES.worldHello), LINES.evolved, LINES.foundAll, LINES.hiNew,
   LINES.welcomeBack, LINES.gotSticker, LINES.newSound, LINES.levelUp, LINES.tapPresent, LINES.pawRoll, LINES.musicOn, LINES.soundsOn,
   LINES.bonus, LINES.timesUp);
 tag('[cheerfully]', Object.values(LINES.intro));

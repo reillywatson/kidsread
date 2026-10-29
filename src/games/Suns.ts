@@ -25,7 +25,7 @@ export class Suns extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgSky');
-    this.flower = sprite(this, 150, 520, 'sunflower', 300);
+    this.flower = this.tickle(sprite(this, 150, 520, 'sunflower', 300));
     this.count = 0;
   }
 
@@ -63,8 +63,12 @@ export class Suns extends BaseGame {
       this.sfx.star();
       await this.tween({ targets: sun, x: this.flower.x, y: this.flower.y - 100, scale: 0.3, duration: 600, ease: 'Cubic.In' });
       burst(this, this.flower.x, this.flower.y - 100, ['☀️', '✨', '🌻']);
+      // Every sun makes the sunflower grow a little taller.
       this.count++;
-      this.tweens.add({ targets: this.flower, scaleX: this.flower.scaleX * 1.12, scaleY: this.flower.scaleY * 1.12, duration: 200, yoyo: true });
+      const grown = (300 / this.flower.height) * (1 + 0.07 * this.count);
+      this.sfx.grow();
+      this.tweens.add({ targets: this.flower, scale: grown * 1.12, duration: 200, ease: 'Quad.Out',
+        onComplete: () => this.tweens.add({ targets: this.flower, scale: grown, duration: 250, ease: 'Back.Out' }) });
       await this.say(w);
       await this.praise(res.firstTry);
       suns.forEach(s => s.destroy());

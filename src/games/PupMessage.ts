@@ -62,7 +62,7 @@ export class PupMessage extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgBay');
-    this.pup = sprite(this, 140, 470, 'pup-chase', 300);
+    this.pup = this.tickle(sprite(this, 140, 470, 'pup-chase', 300), () => void audio.say(LINES.ruff, { style: 'pup' }));
     const g = this.add.graphics();
     g.fillStyle(0x000000, 0.2).fillRoundedRect(196, 110, 900, 200, 34);
     g.fillStyle(0x1e4fd8).fillRoundedRect(186, 100, 900, 200, 34);

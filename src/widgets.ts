@@ -156,6 +156,20 @@ export function burst(scene: Scene, x: number, y: number, chars = ['⭐', '✨',
   }
 }
 
+const CONFETTI = [0xff5c7a, 0xffd21f, 0x42a5f5, 0x66bb6a, 0xab47bc, 0xff9800];
+
+/** Confetti raining down over the whole screen. */
+export function confetti(scene: Scene, n = 60) {
+  for (let i = 0; i < n; i++) {
+    const p = scene.add.rectangle(Math.random() * W, -20 - Math.random() * 200, 14, 22, CONFETTI[i % CONFETTI.length]).setDepth(1000);
+    p.setAngle(Math.random() * 360);
+    scene.tweens.add({
+      targets: p, y: H + 40, x: p.x + (Math.random() - 0.5) * 240, angle: p.angle + 360 + Math.random() * 360,
+      scaleX: { from: 1, to: 0.2 }, duration: 1600 + Math.random() * 1200, ease: 'Sine.In', onComplete: () => p.destroy(),
+    });
+  }
+}
+
 export function wiggle(scene: Scene, obj: Tappable) {
   scene.tweens.add({ targets: obj, angle: { from: -10, to: 10 }, duration: 70, yoyo: true, repeat: 3, onComplete: () => { obj.angle = 0; } });
 }

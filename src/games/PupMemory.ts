@@ -7,6 +7,7 @@ import { readableWords } from '../choices';
 import { shuffle, pickOne } from '../learner';
 import { LINES } from '../lines';
 import { PUP_NAMES } from '../art';
+import * as audio from '../audio';
 import { WordView, burst, emoji, sprite, tappable, text } from '../widgets';
 
 export const meta: GameMeta = {
@@ -24,13 +25,15 @@ interface Face { kind: 'letter' | 'pic' | 'word'; value: string; item: string; s
 const CW = 170, CH = 200;
 
 export class PupMemory extends BaseGame {
+  private pup!: Phaser.GameObjects.Image;
+
   constructor() { super(meta); }
 
   protected setup() {
     this.add.image(640, 360, 'bgBay');
     this.add.rectangle(640, 400, 1280, 640, 0xffffff, 0.35);
     const pupId = pickOne(PUP_NAMES);
-    sprite(this, 110, 580, `pup-${pupId}`, 250);
+    this.pup = this.tickle(sprite(this, 110, 580, `pup-${pupId}`, 250), () => void audio.say(LINES.ruff, { style: 'pup' }));
   }
 
   private pairs(n: number): [Face, Face][] {
@@ -143,16 +146,18 @@ export class PupMemory extends BaseGame {
       if (a.getData('pair') === b.getData('pair')) {
         matched++;
         a.setData('done', true); b.setData('done', true);
-        this.score(slips === 0);
-        this.learner.pushRecent(this.meta.skill, slips === 0);
+        const clean = slips === 0;
+        this.score(clean);
+        this.learner.pushRecent(this.meta.skill, clean);
         slips = 0;
         const face = a.getData('face') as Face;
         this.learner.record(face.item, 'seen');
-        this.sfx.ding();
         this.sfx.bark();
         burst(this, (a.x + b.x) / 2, (a.y + b.y) / 2, ['🐾', '⭐', '🦴']);
+        this.tweens.add({ targets: this.pup, y: this.pup.y - 50, duration: 180, yoyo: true, repeat: 1, ease: 'Quad.Out' });
         await Promise.all([a, b].map(c => this.tween({ targets: c, scale: 1.15, duration: 150, yoyo: true })));
         await face.say();
+        await this.praise(clean);
         this.progress();
         await Promise.all([a, b].map(c => this.tween({ targets: c, alpha: 0.35, duration: 250 })));
       } else {

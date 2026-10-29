@@ -25,6 +25,7 @@ export class Garden extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgGarden');
+    this.tickle(sprite(this, 120, 540, 'sunflower', 230));
   }
 
   protected async run() {

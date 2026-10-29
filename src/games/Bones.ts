@@ -6,6 +6,7 @@ import { PIC, WORD_LESSON, segment } from '../data/curriculum';
 import { countable, soundCount } from '../choices';
 import { pickOne, shuffle } from '../learner';
 import { LINES } from '../lines';
+import * as audio from '../audio';
 import { burst, picture, sprite, tappable } from '../widgets';
 
 export const meta: GameMeta = {
@@ -25,7 +26,7 @@ export class Bones extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgBay');
-    this.rubble = sprite(this, 160, 470, 'pup-rubble', 310);
+    this.rubble = this.tickle(sprite(this, 160, 470, 'pup-rubble', 310), () => void audio.say(LINES.ruff, { style: 'pup' }));
     this.add.ellipse(160, 640, 200, 50, 0xb0bec5).setStrokeStyle(5, 0x546e7a);
   }
 
@@ -84,8 +85,13 @@ export class Bones extends BaseGame {
         await this.letterSound(toks[k].g!);
       }
       await this.say(w);
+      // Rubble crunches the bones and does a happy dance.
+      this.sfx.chomp();
+      this.children.list.filter(o => o instanceof Phaser.GameObjects.Image && o.texture.key === 'bone')
+        .forEach(o => this.tweens.add({ targets: o, x: this.rubble.x, y: this.rubble.y - 40, scale: 0, duration: 300, ease: 'Cubic.In' }));
       this.sfx.bark();
       this.tweens.add({ targets: this.rubble, y: this.rubble.y - 40, duration: 200, yoyo: true, repeat: 1 });
+      this.tweens.add({ targets: this.rubble, angle: { from: -8, to: 8 }, duration: 120, yoyo: true, repeat: 3, onComplete: () => { this.rubble.angle = 0; } });
       burst(this, 160, 560, ['🦴', '⭐', '🐾']);
       if (Math.random() < 0.4) await this.say(LINES.ruff, 'pup');
       await this.praise(res.firstTry);

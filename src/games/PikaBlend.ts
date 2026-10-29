@@ -29,7 +29,7 @@ export class PikaBlend extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgField');
-    this.pika = sprite(this, 150, 450, 'pikachu', 280);
+    this.pika = this.tickle(sprite(this, 150, 450, 'pikachu', 280), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
     const g = this.add.graphics();
     g.fillStyle(0x8d6e3f).fillRect(630, 290, 20, 60);
     g.fillStyle(0x000000, 0.15).fillRoundedRect(372, 128, 560, 180, 30);

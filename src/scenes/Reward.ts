@@ -38,7 +38,21 @@ export class Reward extends Phaser.Scene {
       await tweenP(this, { targets: s, scale: 150 / s.height, angle: { from: -90, to: 0 }, duration: 350, ease: 'Back.Out' });
       if (i < this.stars) burst(this, s.x, s.y);
     }
-    await say(LINES.stars[this.stars - 1]);
+    // Earned stars fly into the star jar, which counts up.
+    const jar = this.add.container(210, 66);
+    const count = text(this, 22, 0, String(learner.s.stars - this.stars), 38);
+    jar.add([this.add.rectangle(0, 0, 150, 64, 0xffffff, 0.85).setStrokeStyle(4, 0xffc94d), sprite(this, -42, 0, 'star', 50), count]);
+    const speech = say(LINES.stars[this.stars - 1]);
+    for (let i = 0; i < this.stars && this.alive; i++) {
+      const s = stars[i];
+      const fly = sprite(this, s.x, s.y, 'star', 70);
+      await tweenP(this, { targets: fly, x: jar.x - 42, y: jar.y, scale: 50 / fly.height, duration: 450, ease: 'Cubic.In' });
+      fly.destroy();
+      audio.sfx.tick();
+      count.setText(String(learner.s.stars - this.stars + i + 1));
+      this.tweens.add({ targets: jar, scale: { from: 1.25, to: 1 }, duration: 220, ease: 'Back.Out' });
+    }
+    await speech;
 
     // New lesson unlocked?
     const lvl = learner.takeLevelUp();

@@ -4,7 +4,7 @@ import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { PIC, segment, GRAPHEMES } from '../data/curriculum';
 import { graphemeDistractors, readableWords } from '../choices';
-import { shuffle } from '../learner';
+import { shuffle, pickOne } from '../learner';
 import { LINES } from '../lines';
 import * as audio from '../audio';
 import { burst, picture, sprite, tappable, text, wiggle, roundButton } from '../widgets';
@@ -27,7 +27,7 @@ export class PikaSpell extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgField');
-    sprite(this, 1150, 470, 'pikachu', 220);
+    this.tickle(sprite(this, 1150, 470, 'pikachu', 220), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
   }
 
   protected async run() {
