@@ -6,3 +6,4 @@ voice-samples
 voice-rejects
 voice-cache
 voice-audition
+.claude/settings.local.json
