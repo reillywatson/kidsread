@@ -1,0 +1,5 @@
+# Vite's hashed bundles never change; voice clips change only when `npm run voice` is re-run.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+/voice/*
+  Cache-Control: public, max-age=86400

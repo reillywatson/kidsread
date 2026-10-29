@@ -8,7 +8,8 @@
     "preview": "vite preview --host",
     "typecheck": "tsc",
     "test": "vitest run",
-    "voice": "node scripts/voice.mjs"
+    "voice": "node scripts/voice.mjs",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@fontsource/andika": "^5.3.0",
@@ -17,6 +18,7 @@
   "devDependencies": {
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "vitest": "^5.0.5",
+    "wrangler": "^4.155.0"
   }
 }
