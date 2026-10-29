@@ -11,9 +11,8 @@
   <title>Kids Read</title>
 </head>
 <body>
-  <div id="game"></div>
-  <!-- Shown on portrait phones: a picture, no words. -->
-  <div id="rotate" aria-label="Turn your device sideways"><div class="phone">📱</div><div class="arrow">↻</div></div>
+  <!-- Turned sideways on portrait phones and tablets (see style.css), so rotation-locked devices work. -->
+  <div id="stage"><div id="game"></div></div>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
