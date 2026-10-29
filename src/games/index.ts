@@ -8,6 +8,13 @@ import * as pupmemory from './PupMemory';
 import * as monster from './Monster';
 import * as frog from './Frog';
 import * as bubbles from './Bubbles';
+import * as wordtruck from './WordTruck';
+import * as truesilly from './TrueSilly';
+import * as missingword from './MissingWord';
+import * as boss from './Boss';
+import * as river from './River';
+import * as ladder from './Ladder';
+import * as rocket from './Rocket';
 import * as evolve from './Evolve';
 import * as bones from './Bones';
 import * as garden from './Garden';
@@ -29,6 +36,14 @@ export const GAMES = [
   { meta: monster.meta, scene: monster.Monster },
   { meta: frog.meta, scene: frog.Frog },
   { meta: bubbles.meta, scene: bubbles.Bubbles },
+  { meta: wordtruck.meta, scene: wordtruck.WordTruck },
+  { meta: truesilly.meta, scene: truesilly.TrueSilly },
+  { meta: missingword.meta, scene: missingword.MissingWord },
+  // Goal games: every answer moves a character toward a goal.
+  { meta: boss.meta, scene: boss.Boss },
+  { meta: river.meta, scene: river.River },
+  { meta: ladder.meta, scene: ladder.Ladder },
+  { meta: rocket.meta, scene: rocket.Rocket },
   // Bonus games: just for fun, never chosen directly (see session.ts).
   { meta: bowling.meta, scene: bowling.Bowling },
   { meta: whack.meta, scene: whack.Whack },

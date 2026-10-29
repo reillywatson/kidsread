@@ -1,6 +1,7 @@
 // Reusable Phaser building blocks: tappable things, emoji pictures, readable words.
 import Phaser from 'phaser';
 import { segment, HEART, PIC, BANK } from './data/curriculum';
+import type { Pair } from './sentences';
 import * as audio from './audio';
 
 export const W = 1280;
@@ -43,8 +44,13 @@ export function emoji(scene: Scene, x: number, y: number, e: string, size: numbe
   return scene.add.text(x, y, e, { fontFamily: EMOJI_FONT, fontSize: `${size}px`, padding: { x: 8, y: 12 } }).setOrigin(0.5);
 }
 
-/** A picture card for a word (curriculum PIC or phonemic BANK), optionally big/small or wearing a hat. */
-export function picture(scene: Scene, x: number, y: number, word: string, { size = 110, card = true, scale = 1, hat = false } = {}) {
+
+/**
+ * A picture card for a word (curriculum PIC or phonemic BANK), optionally big/small, wearing a
+ * hat, or paired with a second thing (the cat on the bed, the pup in the box, a cat and a dog).
+ */
+export function picture(scene: Scene, x: number, y: number, word: string,
+  { size = 110, card = true, scale = 1, hat = false, pair }: { size?: number; card?: boolean; scale?: number; hat?: boolean; pair?: Pair } = {}) {
   const c = scene.add.container(x, y);
   const box = size * 1.45;
   if (card) {
@@ -57,9 +63,14 @@ export function picture(scene: Scene, x: number, y: number, word: string, { size
     g.lineStyle(5, 0xffc94d, 1).strokeRoundedRect(-box / 2, -box / 2, box, box, 26);
     c.add(g);
   }
-  const e = emoji(scene, 0, hat ? 10 : 0, PIC[word] || BANK[word] || '❓', size * scale);
-  c.add(e);
-  if (hat) c.add(emoji(scene, 0, -size * scale * 0.55, '🎩', size * 0.5));
+  const pic = (w: string, dx: number, dy: number, s: number) => emoji(scene, dx, dy, PIC[w] || BANK[w] || '❓', s);
+  if (pair?.how === 'on') c.add([pic(pair.word, 0, size * 0.3, size * 0.62), pic(word, 0, -size * 0.28, size * 0.55)]);
+  else if (pair?.how === 'in') c.add([pic(pair.word, 0, 0, size * 0.95), pic(word, 0, size * 0.1, size * 0.42)]);
+  else if (pair) c.add([pic(word, -size * 0.32, 0, size * 0.58), pic(pair.word, size * 0.32, 0, size * 0.58)]);
+  else {
+    c.add(pic(word, 0, hat ? 10 : 0, size * scale));
+    if (hat) c.add(emoji(scene, 0, -size * scale * 0.55, '🎩', size * 0.5));
+  }
   return tappable(c, box, box);
 }
 

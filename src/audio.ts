@@ -268,4 +268,8 @@ export const sfx = {
   twinkle: () => tone(1400 + Math.random() * 1200, 0.12, { type: 'sine', vol: 0.06 }),
   buzz: () => { for (let i = 0; i < 6; i++) tone(180 + (i % 2) * 30, 0.08, { type: 'sawtooth', vol: 0.03, delay: i * 0.08 }); },
   slurp: () => tone(300, 0.25, { to: 1400, type: 'sine', vol: 0.18 }),
+  stomp: () => { tone(90, 0.3, { to: 40, type: 'sine', vol: 0.4 }); noise(0.2, { vol: 0.2, hp: 100 }); },
+  hammer: () => { tone(900, 0.05, { type: 'square', vol: 0.06 }); noise(0.06, { vol: 0.15, hp: 1500 }); },
+  /** Rocket engines: a long rising roar. */
+  launch: () => { noise(1.6, { vol: 0.25, hp: 200 }); tone(80, 1.6, { to: 400, type: 'sawtooth', vol: 0.06 }); },
 };

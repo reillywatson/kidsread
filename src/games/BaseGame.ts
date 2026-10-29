@@ -6,11 +6,11 @@ import Phaser from 'phaser';
 import * as audio from '../audio';
 import { playMusic } from '../music';
 import { LINES } from '../lines';
-import { GRAPHEMES } from '../data/curriculum';
+import { GRAPHEMES, HEART } from '../data/curriculum';
 import * as state from '../state';
 import type { Session } from '../session';
 import { pickOne, type Result, type Skill, type Tier } from '../learner';
-import { H, W, burst, confetti, emoji, roundButton, sprite, text, tweenP, wiggle, type Tappable } from '../widgets';
+import { H, W, burst, confetti, emoji, roundButton, sprite, text, tweenP, wiggle, type Tappable, type WordView } from '../widgets';
 
 export type Theme = 'pvz' | 'pokemon' | 'paw' | 'friends';
 
@@ -30,6 +30,11 @@ export interface GameMeta {
    * can't be chosen directly, always give 3 stars, and don't touch learning progress.
    */
   bonus?: boolean;
+  /**
+   * Goal games show their own progress (a boss's health, a path across a river, a ladder,
+   * a rocket), so they skip the progress track and trophy.
+   */
+  goal?: boolean;
 }
 
 export class Aborted extends Error { constructor() { super('aborted'); this.name = 'Aborted'; } }
@@ -144,6 +149,7 @@ export abstract class BaseGame extends Phaser.Scene {
    */
   rounds(base: number) {
     const n = base + (this.tier === 2 ? 1 : 0);
+    if (this.meta.goal) return n;
     const gap = 40;
     const x0 = W / 2 - ((n - 1) * gap) / 2;
     this.dots = Array.from({ length: n }, (_, i) =>
@@ -374,6 +380,24 @@ export abstract class BaseGame extends Phaser.Scene {
   }
 
   record(id: string, result: Result) { this.learner.record(id, result, this.meta.skill); }
+
+  /** Exposure for the other words of a sentence (everything but the word being tested). */
+  sawWords(words: string[], except?: string) {
+    for (const w of new Set(words)) if (w !== except) this.learner.record((HEART[w] ? 'h:' : 'w:') + w, 'seen');
+  }
+
+  /**
+   * Read a sentence aloud, lighting up each word as it's said. A null view is a gap; `words`
+   * supplies what to say there.
+   */
+  async readAloud(views: (WordView | null)[], words?: string[]) {
+    for (let i = 0; i < views.length; i++) {
+      const v = views[i];
+      v?.setAllColor('#1e88e5');
+      await this.say(v?.word ?? words?.[i] ?? '');
+      v?.setAllColor('#2b2b2b');
+    }
+  }
 
   /** Count an answer. Right-first-time answers also build the streak that fills the power meter. */
   score(firstTry: boolean) {

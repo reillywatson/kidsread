@@ -50,6 +50,13 @@ test('every single-letter sound has pictures starting with it', () => {
   }
   expect(initialSound('ship')).toBe('sh');
   expect(picsStartingWith('c')).toContain('kite'); // same sound, different letter
+  expect(picsStartingWith('f')).toContain('phone');
+  expect(picsStartingWith('p')).not.toContain('phone');
+  expect(picsStartingWith('o')).not.toContain('one');
+  expect(picsStartingWith('u')).not.toContain('unicorn');
+  // Every starting sound has enough pictures to vary between rounds.
+  for (const g of ['a', 'e', 'i', 'o', 'u', 'm', 's', 't', 'p', 'f', 'n', 'd', 'g', 'b', 'h', 'r', 'l', 'w', 'j', 'y', 'v', 'z', 'sh', 'ch', 'th'])
+    expect(picsStartingWith(g).length, g).toBeGreaterThanOrEqual(3);
 });
 
 test('distractors never include the answer or a same-sound grapheme', () => {
@@ -73,5 +80,7 @@ test('rhyme rounds contain the answer and no other rhyme', () => {
     const fam = RHYMES.find(f => f.includes(r.target))!;
     expect(r.choices).toContain(r.answer);
     expect(r.choices.filter(c => fam.includes(c))).toEqual([r.answer]);
+    const pics = [r.target, ...r.choices].map(c => BANK[c]);
+    expect(new Set(pics).size).toBe(pics.length);
   }
 });

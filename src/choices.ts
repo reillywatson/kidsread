@@ -62,6 +62,9 @@ export function picsStartingWith(g: string): string[] {
   return Object.keys(BANK).filter(w => soundClass(initialSound(w)) === cls);
 }
 
+/** Bank pictures whose first letter is grapheme g as written (cat for c, but not kite). */
+export const picsStartingWithLetter = (g: string) => picsStartingWith(g).filter(w => w.startsWith(GRAPHEMES[g].label));
+
 export function picsNotStartingWith(g: string, n: number, tier: Tier): string[] {
   const cls = soundClass(g);
   const other = Object.keys(BANK).filter(w => soundClass(initialSound(w)) !== cls);
@@ -79,7 +82,14 @@ export function rhymeRound(nChoices: number, tier: Tier) {
   const others = RHYMES.filter(f => f !== fam).flat();
   // Harder: distractors that share the target's first sound (cat → car), so only the ending helps.
   const sameStart = others.filter(w => w[0] === target[0]);
-  const ds = tier === 2 ? prefer(sameStart, others, nChoices - 1) : pickN(others, nChoices - 1);
+  const pool = tier === 2 ? prefer(sameStart, others, others.length) : pickN(others, others.length);
+  // No two cards with the same picture (sock / socks).
+  const shown = [BANK[target], BANK[answer]];
+  const ds: string[] = [];
+  for (const w of pool) {
+    if (ds.length >= nChoices - 1) break;
+    if (!shown.includes(BANK[w])) { ds.push(w); shown.push(BANK[w]); }
+  }
   return { target, answer, choices: shuffle([answer, ...ds]) };
 }
 

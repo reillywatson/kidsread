@@ -5,7 +5,8 @@
 export const LINES = {
   // Power meter full (three right in a row).
   streak: ['Three in a row!', "You're on fire!", 'Super power!', 'Unstoppable!'],
-  praise: ['Great job!', 'Awesome!', 'You did it!', 'Wow!', 'Super!', 'Yes!', 'Amazing!', 'Nice!'],
+  praise: ['Great job!', 'Awesome!', 'You did it!', 'Wow!', 'Super!', 'Yes!', 'Amazing!', 'Nice!',
+    'Fantastic!', 'Way to go!', 'High five!', 'Woo-hoo!', "You're a star!", 'Brilliant!'],
   like: 'like',
 
   // Profiles & home
@@ -42,6 +43,13 @@ export const LINES = {
     monster: "I'm the Letter Monster, and I'm hungry! Feed me things that start with my sound.",
     frog: 'Froggy wants to hop! Tap the picture that rhymes.',
     bubbles: 'Bubbles! Pop every bubble with the sound you hear.',
+    wordtruck: 'Marshall needs help! Listen to the sentence, then tap the words in order to load the truck.',
+    truesilly: 'Read the sentence. Does the picture match? Thumbs up for yes. Thumbs down if it is silly!',
+    missingword: 'Oh no! A zombie ate a word! Read the sentence and find the missing word.',
+    boss: 'Here comes the Zombie Boss! Listen for the sound, and tap the seed with that letter to power up the peashooter!',
+    river: 'Help Pikachu cross the river to see Squirtle! Read the stones, and tap the one that matches the picture.',
+    ladder: 'A kitten is stuck in the tree! Listen to the sounds and find the picture, to build a ladder for Chase.',
+    rocket: "Let's build a rocket to the moon! Tap the letter that each picture starts with.",
     bowling: 'Tap a lane to roll a Wall-nut and knock down the zombies!',
     whack: 'Pokémon are popping out of the grass! Tap them to catch them!',
     treats: 'Move the pup to catch the yummy treats!',
@@ -70,6 +78,13 @@ export const LINES = {
   popBubbles: 'Pop all the bubbles with',
   thisSays: 'This says', nowMake: 'Now make it say', evolved: ['It evolved!', 'Wow, it evolved!'],
   howManySounds: 'How many sounds in', ruff: 'Ruff!',
+  buildSentence: 'Build the sentence!', tapNext: 'What comes next?',
+  doesItMatch: ['Does it match?', 'Is it true?', 'Thumbs up or thumbs down?'],
+  silly: ["That's silly!", 'So silly!'], itMatches: 'It matches!', itSays: 'It says',
+  whichWord: 'Which word is missing?', zombieAte: 'The zombie ate a word!',
+  bossDown: 'You beat the Zombie Boss!', madeIt: 'We made it across!', savedKitten: 'You saved the kitten!',
+  blastOff: 'Three, two, one, blast off!', listenSounds: 'Listen to the sounds.', whatIsIt: 'What is it?',
+  firstLetter: 'What letter does it start with?', meow: 'Meow!',
   whichPot: 'Which pot does it go in?', readAndPlant: 'Read the word. Which vowel do you hear?',
   testVoice: "Hi! Let's read together.",
 };

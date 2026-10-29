@@ -12,13 +12,14 @@ const TAGS = new Map();
 const tag = (t, ...groups) => groups.flat(2).forEach(x => TAGS.set(x, t));
 tag('[excited]', LINES.praise, LINES.streak, LINES.stars.slice(1), Object.values(LINES.worldHello), LINES.evolved, LINES.foundAll, LINES.hiNew,
   LINES.welcomeBack, LINES.gotSticker, LINES.newSound, LINES.levelUp, LINES.tapPresent, LINES.pawRoll, LINES.musicOn, LINES.soundsOn,
-  LINES.bonus, LINES.timesUp);
+  LINES.bonus, LINES.timesUp, LINES.silly, LINES.itMatches, LINES.bossDown, LINES.madeIt, LINES.savedKitten, LINES.blastOff);
 tag('[cheerfully]', Object.values(LINES.intro));
 tag('[squeaky, high-pitched cartoon voice]', LINES.pika);
 tag('[slow, groaning zombie voice]', LINES.groans);
 tag('[grossed out, silly]', LINES.yuck);
 tag('[croaky, playful]', LINES.ribbit);
 tag('[playful puppy bark]', LINES.ruff);
+tag('[tiny kitten voice]', LINES.meow);
 const phraseSet = new Set(allLines());
 // Connecting words read plainly, like single words ("like" + "apple").
 const PLAIN = new Set([LINES.like]);

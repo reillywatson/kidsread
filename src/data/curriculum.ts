@@ -124,23 +124,23 @@ export const LESSONS: Lesson[] = [
   { n: 28, title: 'qu', g: ['qu'], w: ['quit'] },
   { n: 29, title: 'v', g: ['v'], w: ['van', 'vet'] },
   { n: 30, title: 'z', g: ['z'], w: ['zip', 'zap', 'quiz', 'zag'], h: [H('has', 30, [2]), H('his', 30, [2]), H('as', 30, [1])] },
-  { n: 35, title: 'blends with a', g: [], w: ['flag', 'crab', 'clap', 'hand', 'lamp', 'ant', 'camp', 'glad', 'plan', 'sand', 'snap', 'trap', 'raft', 'grab', 'fast'], h: [H('for', 35, [1, 2]), H('or', 35, [0, 1])] },
+  { n: 35, title: 'blends with a', g: [], w: ['flag', 'crab', 'clap', 'hand', 'lamp', 'ant', 'camp', 'glad', 'plan', 'sand', 'snap', 'trap', 'raft', 'grab', 'fast', 'pants', 'plant', 'mask'], h: [H('for', 35, [1, 2]), H('or', 35, [0, 1])] },
   { n: 36, title: 'blends with i', g: [], w: ['milk', 'gift', 'swim', 'skip', 'spin', 'twin', 'list', 'drip', 'grin', 'crib', 'trip', 'lift', 'mist'] },
   { n: 37, title: 'blends with o', g: [], w: ['frog', 'stop', 'drop', 'pond', 'spot', 'plop', 'soft', 'crop', 'trot', 'blob'] },
   { n: 38, title: 'blends with u', g: [], w: ['drum', 'plum', 'jump', 'bump', 'dust', 'hunt', 'snug', 'slug', 'plug', 'crust', 'stump'] },
-  { n: 39, title: 'blends with e', g: [], w: ['nest', 'tent', 'desk', 'belt', 'sled', 'step', 'vest', 'help', 'left', 'went', 'spend', 'best'] },
+  { n: 39, title: 'blends with e', g: [], w: ['nest', 'tent', 'desk', 'belt', 'sled', 'step', 'vest', 'help', 'left', 'went', 'spend', 'best', 'elf'] },
   { n: 42, title: 'ff ll ss zz', g: ['ff', 'll', 'ss', 'zz'], w: ['bell', 'hill', 'kiss', 'buzz', 'puff', 'cliff', 'dress', 'grass', 'doll', 'well', 'spill', 'cuff', 'stuff', 'off', 'glass', 'fizz'] },
   { n: 43, title: 'all oll ull', g: ['all', 'oll', 'ull'], w: ['ball', 'wall', 'tall', 'call', 'fall', 'small', 'mall', 'roll', 'troll', 'bull', 'full', 'pull'] },
   { n: 44, title: 'ck', g: ['ck'], w: ['duck', 'sock', 'rock', 'lock', 'clock', 'truck', 'sick', 'kick', 'back', 'neck', 'black', 'stick', 'snack', 'quack', 'luck', 'pack'] },
-  { n: 45, title: 'sh', g: ['sh'], w: ['ship', 'fish', 'shell', 'dish', 'shop', 'cash', 'shut', 'wish', 'shed', 'brush', 'trash', 'splash', 'shelf', 'shock'], h: [H('she', 45, [2])] },
+  { n: 45, title: 'sh', g: ['sh'], w: ['ship', 'fish', 'shell', 'dish', 'shop', 'cash', 'shut', 'wish', 'shed', 'brush', 'trash', 'splash', 'shelf', 'shock', 'shrimp'], h: [H('she', 45, [2])] },
   { n: 46, title: 'th (this)', g: ['th_v'], w: ['this', 'that', 'them', 'then', 'with', 'than'], h: [H('they', 46, [2, 3])] },
   { n: 47, title: 'th (thin)', g: ['th'], w: ['bath', 'math', 'moth', 'thin', 'thick', 'cloth', 'path', 'thud', 'broth'], h: [H('what', 47, [2])] },
   { n: 48, title: 'ch', g: ['ch'], w: ['chip', 'chick', 'lunch', 'bench', 'chin', 'rich', 'chop', 'much', 'chest', 'check', 'inch', 'punch', 'crunch', 'chat'], h: [H('from', 48, [2])] },
   { n: 50, title: 'wh ph', g: ['wh', 'ph'], w: ['whip', 'when', 'which', 'whisk', 'whiz', 'graph'] },
   { n: 51, title: 'ng', g: ['ng'], w: ['ring', 'king', 'swing', 'sing', 'long', 'song', 'thing', 'bang', 'hang', 'sting', 'strong', 'lung'], h: [H('have', 51, [1, 3])] },
   { n: 52, title: 'nk', g: ['nk'], w: ['sink', 'drink', 'pink', 'skunk', 'bank', 'trunk', 'wink', 'think', 'honk', 'junk', 'tank', 'ink', 'stink', 'bunk'], h: [H('one', 52, [0, 1, 2]), H('two', 52, [1, 2])] },
-  { n: 54, title: 'a_e', g: ['a_e'], w: ['cake', 'snake', 'gate', 'cape', 'lake', 'plane', 'grape', 'game', 'tape', 'wave', 'cave', 'rake', 'skate', 'plate', 'name', 'made', 'bake', 'shake', 'whale'], h: [H('there', 54, [2, 3, 4]), H('here', 54, [1, 3])] },
-  { n: 55, title: 'i_e', g: ['i_e'], w: ['bike', 'kite', 'five', 'dime', 'nine', 'slide', 'pine', 'smile', 'hike', 'bite', 'ride', 'hide', 'side', 'time', 'line', 'vine', 'wipe', 'pipe', 'prize', 'white', 'shine'] },
+  { n: 54, title: 'a_e', g: ['a_e'], w: ['cake', 'snake', 'gate', 'cape', 'lake', 'plane', 'grape', 'game', 'tape', 'wave', 'cave', 'rake', 'skate', 'plate', 'name', 'made', 'bake', 'shake', 'whale', 'flame', 'frame'], h: [H('there', 54, [2, 3, 4]), H('here', 54, [1, 3])] },
+  { n: 55, title: 'i_e', g: ['i_e'], w: ['bike', 'kite', 'five', 'dime', 'nine', 'slide', 'pine', 'smile', 'hike', 'bite', 'ride', 'hide', 'side', 'time', 'line', 'vine', 'wipe', 'pipe', 'prize', 'white', 'shine', 'bride'] },
   { n: 56, title: 'o_e', g: ['o_e'], w: ['rope', 'bone', 'nose', 'home', 'rose', 'stone', 'hole', 'cone', 'robe', 'globe', 'pole', 'note', 'hope', 'joke', 'smoke', 'stove', 'broke', 'those', 'phone'] },
   { n: 57, title: 'u_e', g: ['u_e'], w: ['cube', 'mule', 'flute', 'tube', 'cute', 'dune', 'prune', 'rule', 'tune', 'use'] },
   { n: 58, title: 'e_e', g: ['e_e'], w: ['these', 'theme', 'eve'] },
@@ -178,11 +178,14 @@ export const PIC: Record<string, string> = {
   cake: '🎂', snake: '🐍', lake: '🏞️', plane: '✈️', grape: '🍇', game: '🎮', wave: '🌊', skate: '⛸️', whale: '🐳',
   bike: '🚲', kite: '🪁', five: '5️⃣', nine: '9️⃣', slide: '🛝', smile: '😊', pine: '🌲',
   rope: '🪢', bone: '🦴', nose: '👃', home: '🏠', rose: '🌹', cone: '🍦', globe: '🌍', phone: '📱', smoke: '💨', cube: '🧊',
+  ram: '🐏', yum: '😋', trap: '🪤', plug: '🔌', doll: '🪆', strong: '💪', hole: '🕳️', note: '📝', left: '⬅️', call: '📞',
+  pants: '👖', plant: '🌱', mask: '😷', elf: '🧝', shrimp: '🦐', flame: '🔥', frame: '🖼️', bride: '👰',
 };
 
 // Words whose pictures look alike — never shown side by side.
 const PIC_CONFLICTS = [['pup', 'dog'], ['cup', 'drink'], ['tub', 'bath'], ['hot', 'sick'], ['mom', 'dad'], ['rock', 'log'],
-  ['sad', 'mad'], ['smoke', 'fog'], ['jet', 'plane'], ['six', 'five', 'nine', 'ten']];
+  ['sad', 'mad'], ['smoke', 'fog'], ['jet', 'plane'], ['six', 'five', 'nine', 'ten'], ['call', 'phone'], ['plant', 'pot', 'pine'],
+  ['flame', 'smoke'], ['up', 'left']];
 export const picConflict = (a: string, b: string) =>
   a === b || PIC[a] === PIC[b] || PIC_CONFLICTS.some(g => g.includes(a) && g.includes(b));
 
@@ -191,7 +194,8 @@ export const NOUNS = new Set(['map', 'pan', 'pin', 'pot', 'cat', 'cap', 'can', '
   'bat', 'bag', 'bus', 'cab', 'tub', 'bug', 'bed', 'net', 'pen', 'kid', 'hat', 'hen', 'hut', 'rat', 'log', 'web', 'jet',
   'box', 'fox', 'ox', 'van', 'flag', 'crab', 'ant', 'tent', 'frog', 'drum', 'nest', 'sled', 'vest', 'bell', 'ball',
   'troll', 'duck', 'sock', 'rock', 'lock', 'clock', 'truck', 'ship', 'fish', 'shell', 'dish', 'brush',
-  'chick', 'ring', 'king', 'skunk', 'cake', 'snake', 'plane', 'whale', 'bike', 'kite', 'bone', 'cone', 'globe', 'phone', 'cube']);
+  'chick', 'ring', 'king', 'skunk', 'cake', 'snake', 'plane', 'whale', 'bike', 'kite', 'bone', 'cone', 'globe', 'phone', 'cube',
+  'ram', 'trap', 'plug', 'doll', 'hole', 'note', 'plant', 'mask', 'elf', 'shrimp', 'flame', 'frame', 'bride']);
 
 export interface Token {
   /** Letters as written. */
@@ -260,22 +264,34 @@ export const BANK: Record<string, string> = {
   ship: '🚢', shell: '🐚', shoe: '👟', sheep: '🐑',
   chick: '🐤', chair: '🪑', cheese: '🧀', cherries: '🍒', chain: '⛓️',
   bug: '🐛', bike: '🚲', box: '📦',
+  inch: '📏', underwear: '🩲', elf: '🧝', ox: '🐂', olive: '🫒', yawn: '🥱', zombie: '🧟', question: '❓',
+  vest: '🦺', vampire: '🧛', think: '🤔', shark: '🦈', shirt: '👕', fork: '🍴', foot: '🦶', gorilla: '🦍',
+  wolf: '🐺', watch: '⌚', popcorn: '🍿', panda: '🐼', pumpkin: '🎃', ladder: '🪜', mushroom: '🍄', mitten: '🧤',
+  dolphin: '🐬', dragon: '🐉', taco: '🌮', turkey: '🦃', hippo: '🦛', helicopter: '🚁', honey: '🍯',
+  balloon: '🎈', hug: '🤗', two: '2️⃣', unicorn: '🦄', truck: '🚚', lake: '🏞️', parrot: '🦜', pie: '🥧',
+  tie: '👔', fly: '🪰', sand: '🏖️', leg: '🦵', plant: '🪴',
 };
+
+// Words whose first letter doesn't make its usual sound.
+const ODD_START: Record<string, string> = { one: 'w', unicorn: 'y' };
 
 // Initial sound of a bank word, as a grapheme id.
 export function initialSound(word: string) {
-  for (const d of ['sh', 'ch', 'th', 'wh', 'qu']) if (word.startsWith(d)) return d;
+  if (ODD_START[word]) return ODD_START[word];
+  for (const d of ['sh', 'ch', 'th', 'wh', 'qu', 'ph']) if (word.startsWith(d)) return d;
   return word[0];
 }
 
 // Rhyme families, all drawn from BANK.
 export const RHYMES: string[][] = [
   ['cat', 'hat', 'bat', 'rat'], ['dog', 'frog', 'log'], ['bee', 'tree', 'key', 'three'], ['car', 'star', 'jar'],
-  ['cake', 'snake'], ['moon', 'spoon'], ['fox', 'box', 'socks'], ['goat', 'boat', 'coat'], ['mouse', 'house'],
+  ['cake', 'snake', 'lake'], ['moon', 'spoon', 'balloon'], ['fox', 'box', 'socks'], ['goat', 'boat', 'coat'], ['mouse', 'house'],
   ['bear', 'pear', 'chair'], ['ring', 'king', 'sing'], ['clock', 'sock', 'rock', 'lock'], ['fish', 'dish'],
-  ['bed', 'sled', 'bread'], ['bug', 'mug'], ['sun', 'run', 'one'], ['ball', 'wall'], ['bell', 'shell'],
+  ['bed', 'sled', 'bread'], ['bug', 'mug', 'hug'], ['sun', 'run', 'one'], ['ball', 'wall'], ['bell', 'shell'],
   ['bone', 'phone', 'cone'], ['ten', 'pen', 'hen'], ['whale', 'snail', 'mail'], ['train', 'rain', 'chain'],
   ['kite', 'light'], ['nose', 'rose'], ['pig', 'wig'], ['net', 'jet'],
+  ['shoe', 'two', 'kangaroo'], ['corn', 'unicorn'], ['duck', 'truck'], ['carrot', 'parrot'], ['pie', 'tie', 'fly'],
+  ['hand', 'sand'], ['egg', 'leg'], ['ant', 'plant'],
 ];
 
 export const itemId = (kind: ItemKind, x: string) => `${kind}:${x}`;
