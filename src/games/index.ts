@@ -15,6 +15,10 @@ import * as boss from './Boss';
 import * as river from './River';
 import * as ladder from './Ladder';
 import * as rocket from './Rocket';
+import * as ispy from './ISpy';
+import * as drum from './Drum';
+import * as dash from './Dash';
+import * as sort from './Sort';
 import * as evolve from './Evolve';
 import * as bones from './Bones';
 import * as garden from './Garden';
@@ -44,6 +48,10 @@ export const GAMES = [
   { meta: river.meta, scene: river.River },
   { meta: ladder.meta, scene: ladder.Ladder },
   { meta: rocket.meta, scene: rocket.Rocket },
+  { meta: ispy.meta, scene: ispy.ISpy },
+  { meta: drum.meta, scene: drum.Drum },
+  { meta: dash.meta, scene: dash.Dash },
+  { meta: sort.meta, scene: sort.Sort },
   // Bonus games: just for fun, never chosen directly (see session.ts).
   { meta: bowling.meta, scene: bowling.Bowling },
   { meta: whack.meta, scene: whack.Whack },

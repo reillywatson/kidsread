@@ -2,7 +2,7 @@ import { test, expect } from 'vitest';
 import { neighbors, buildChain, bestChain, chainStarts, decodable, shortVowel, soundCount, countable } from '../src/choices';
 import { segment, LESSONS, HEART, PIC, BANK, GRAPHEMES } from '../src/data/curriculum';
 import { STICKERS } from '../src/data/stickers';
-import { allLines, slug } from '../src/lines';
+import { LINES, allLines, slug } from '../src/lines';
 import manifest from '../src/voice/manifest.json';
 
 test('word chains change exactly one sound per step', () => {
@@ -55,4 +55,13 @@ test('every phrase, word and letter sound has a recording', () => {
   ].filter(t => !clips[slug(t)]);
   expect(missing, 'run `npm run voice`').toEqual([]);
   expect(Object.keys(manifest.sounds).sort()).toEqual(Object.keys(GRAPHEMES).sort());
+});
+
+test('drum words have pictures and sensible syllable splits', () => {
+  for (const [w, s] of Object.entries(LINES.syllables)) {
+    expect(BANK[w], w).toBeTruthy();
+    const n = s.split('...').length;
+    expect(n, w).toBeGreaterThanOrEqual(2);
+    expect(n, w).toBeLessThanOrEqual(4);
+  }
 });

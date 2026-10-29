@@ -51,6 +51,10 @@ export const LINES = {
     river: 'Help Pikachu cross the river to see Squirtle! Read the stones, and tap the one that matches the picture.',
     ladder: 'A kitten is stuck in the tree! Listen to the sounds and find the picture, to build a ladder for Chase.',
     rocket: "Let's build a rocket to the moon! Tap the letter that each picture starts with.",
+    ispy: "Let's play I Spy with Chase! Find everything that starts with the sound.",
+    drum: "Let's play the drum! Tap the drum once for each part of the word.",
+    dash: 'Help Pikachu run! Listen for the word, then tap a lane to run through the right sign.',
+    sort: 'Plant the seeds! Drag each picture to the pot with the letter it starts with.',
     bowling: 'Tap a lane to roll a Wall-nut and knock down the zombies!',
     whack: 'Pokémon are popping out of the grass! Tap them to catch them!',
     treats: 'Move the pup to catch the yummy treats!',
@@ -86,6 +90,22 @@ export const LINES = {
   bossDown: 'You beat the Zombie Boss!', madeIt: 'We made it across!', savedKitten: 'You saved the kitten!',
   blastOff: 'Three, two, one, blast off!', listenSounds: 'Listen to the sounds.', whatIsIt: 'What is it?',
   firstLetter: 'What letter does it start with?', meow: 'Meow!',
+  iSpy: 'I spy something that starts with', findAnother: 'Find another one!', foundAll2: 'You found them all!',
+  tapDrum: 'Tap the drum for each part.', listenDrum: 'Listen, and tap along!', tryAgain: "Let's try again!",
+  runTo: 'Run to', whichPotPic: 'Which pot does it go in?',
+
+  // Words said in parts, for the drum game. One-part words aren't listed (they're just the word).
+  syllables: {
+    rabbit: 'rab... bit', pizza: 'piz... za', monkey: 'mon... key', robot: 'ro... bot', rocket: 'rock... et',
+    turtle: 'tur... tle', zebra: 'ze... bra', apple: 'ap... ple', tiger: 'ti... ger', lemon: 'lem... on',
+    carrot: 'car... rot', rainbow: 'rain... bow', donut: 'do... nut', panda: 'pan... da', popcorn: 'pop... corn',
+    pumpkin: 'pump... kin', dragon: 'drag... on', dolphin: 'dol... phin', hippo: 'hip... po', taco: 'ta... co',
+    ladder: 'lad... der', mitten: 'mit... ten', penguin: 'pen... guin', otter: 'ot... ter', 'yo-yo': 'yo... yo',
+    banana: 'ba... na... na', elephant: 'el... e... phant', dinosaur: 'di... no... saur', octopus: 'oc... to... pus',
+    kangaroo: 'kan... ga... roo', tomato: 'to... ma... to', gorilla: 'go... ril... la', umbrella: 'um... brel... la',
+    volcano: 'vol... ca... no', unicorn: 'u... ni... corn', hamburger: 'ham... bur... ger', astronaut: 'as... tro... naut',
+    alligator: 'al... li... ga... tor', watermelon: 'wa... ter... mel... on', helicopter: 'hel... i... cop... ter',
+  } as Record<string, string>,
   whichPot: 'Which pot does it go in?', readAndPlant: 'Read the word. Which vowel do you hear?',
   testVoice: "Hi! Let's read together.",
 };
