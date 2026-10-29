@@ -30,7 +30,7 @@ export class PupMemory extends BaseGame {
     this.add.image(640, 360, 'bgBay');
     this.add.rectangle(640, 400, 1280, 640, 0xffffff, 0.35);
     const pupId = pickOne(PUP_NAMES);
-    sprite(this, 110, 600, `pup-${pupId}`, 190);
+    sprite(this, 110, 580, `pup-${pupId}`, 250);
   }
 
   private pairs(n: number): [Face, Face][] {

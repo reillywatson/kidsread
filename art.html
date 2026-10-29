@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Art Gallery</title>
+  <style>
+    body { margin: 0; padding: 12px; background: #cfe8ff; font: 12px system-ui, sans-serif; }
+    .grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .cell { background: #fff; border-radius: 10px; padding: 6px; text-align: center; }
+    .cell img { display: block; object-fit: contain; }
+    .ch img { width: 170px; height: 170px; }
+    .bg img { width: 400px; height: 225px; }
+  </style>
+</head>
+<body>
+  <!-- Dev-only page: every texture in src/art, with blink frames. Open /art.html while `npm run dev` runs. -->
+  <div class="grid" id="chars"></div><br>
+  <div class="grid" id="bgs"></div>
+  <script type="module">
+    import { TEXTURES } from '/src/art/index.ts';
+    const url = s => 'data:image/svg+xml;base64,' + btoa(s);
+    for (const [k, [s]] of Object.entries(TEXTURES)) {
+      const bg = k.startsWith('bg');
+      const el = document.createElement('div');
+      el.className = 'cell ' + (bg ? 'bg' : 'ch');
+      el.innerHTML = `<img src="${url(s)}"><div>${k}</div>`;
+      document.getElementById(bg ? 'bgs' : 'chars').append(el);
+    }
+  </script>
+</body>
+</html>

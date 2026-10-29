@@ -70,10 +70,16 @@ or word is missing a recording, so add new phrases to `src/lines.ts` and re-run 
 
 ## Art
 
-Characters are SVG drawings in `src/art/` (Pokémon, Plants vs. Zombies, Paw Patrol and the
-unbranded friends), rasterized at load. To use your own images instead, drop a PNG/WebP/JPG into
-`src/assets/art/` named after the texture key — `pikachu.png`, `pup-chase.png`, `zombie.png`,
-`bgLawn.jpg`, … (see `TEXTURES` in `src/art/index.ts`). It replaces the drawing everywhere.
+Characters and scenes are SVG drawings in `src/art/` (Pokémon, Plants vs. Zombies, Paw Patrol and
+the unbranded friends), rasterized at load. They're cel-shaded with `cel()` in `src/art/util.ts`:
+each shape gets a crisp shadow crescent and highlight inside its outline. Characters that have an
+eyes-shut frame (generated automatically with `withBlink`) blink on their own wherever they appear.
+
+Browse everything at **/art.html** while `npm run dev` is running.
+
+To use your own images instead, drop a PNG/WebP/JPG into `src/assets/art/` named after the texture
+key — `pikachu.png`, `pup-chase.png`, `zombie.png`, `bgLawn.jpg`, … (see `TEXTURES` in
+`src/art/index.ts`). It replaces the drawing everywhere.
 
 ## How the learning works
 

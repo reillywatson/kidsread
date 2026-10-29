@@ -25,7 +25,7 @@ export class Bones extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgBay');
-    this.rubble = sprite(this, 160, 470, 'pup-rubble', 240);
+    this.rubble = sprite(this, 160, 470, 'pup-rubble', 310);
     this.add.ellipse(160, 640, 200, 50, 0xb0bec5).setStrokeStyle(5, 0x546e7a);
   }
 

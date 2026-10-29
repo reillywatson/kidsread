@@ -48,9 +48,12 @@ export function picture(scene: Scene, x: number, y: number, word: string, { size
   const c = scene.add.container(x, y);
   const box = size * 1.45;
   if (card) {
+    // Cel-shaded card: a darker base peeking out below a white face, and a gold rim.
     const g = scene.add.graphics();
-    g.fillStyle(0x000000, 0.12).fillRoundedRect(-box / 2 + 4, -box / 2 + 8, box, box, 26);
-    g.fillStyle(0xffffff, 1).fillRoundedRect(-box / 2, -box / 2, box, box, 26);
+    g.fillStyle(0x000000, 0.14).fillRoundedRect(-box / 2 + 4, -box / 2 + 12, box, box, 26);
+    g.fillStyle(0xe6dccb, 1).fillRoundedRect(-box / 2, -box / 2, box, box, 26);
+    g.fillStyle(0xffffff, 1).fillRoundedRect(-box / 2, -box / 2, box, box - 9, 26);
+    g.fillStyle(0xffffff, 0.6).fillRoundedRect(-box / 2 + 12, -box / 2 + 8, box - 24, box * 0.18, 12);
     g.lineStyle(5, 0xffc94d, 1).strokeRoundedRect(-box / 2, -box / 2, box, box, 26);
     c.add(g);
   }
@@ -60,14 +63,22 @@ export function picture(scene: Scene, x: number, y: number, word: string, { size
   return tappable(c, box, box);
 }
 
+/** A shaded, glossy disc: darker rim on the lower right, highlight on the upper left. */
+export function glossyCircle(scene: Scene, r: number, color: number) {
+  const dark = Phaser.Display.Color.IntegerToColor(color).darken(22).color;
+  const g = scene.add.graphics();
+  g.fillStyle(0x000000, 0.2).fillCircle(0, 8, r);
+  g.fillStyle(dark, 1).fillCircle(0, 0, r);
+  g.fillStyle(color, 1).fillCircle(-r * 0.06, -r * 0.08, r * 0.9);
+  g.fillStyle(0xffffff, 0.35).fillEllipse(-r * 0.22, -r * 0.48, r * 0.95, r * 0.42);
+  g.lineStyle(Math.max(4, r * 0.08), 0xffffff, 1).strokeCircle(0, 0, r - 3);
+  return g;
+}
+
 /** A round button with an emoji or SVG texture icon. */
 export function roundButton(scene: Scene, x: number, y: number, r: number, color: number, icon: string, onPress: () => void, { texture = false } = {}) {
   const c = scene.add.container(x, y);
-  const g = scene.add.graphics();
-  g.fillStyle(0x000000, 0.18).fillCircle(0, 6, r);
-  g.fillStyle(color, 1).fillCircle(0, 0, r);
-  g.lineStyle(6, 0xffffff, 1).strokeCircle(0, 0, r - 3);
-  c.add(g);
+  c.add(glossyCircle(scene, r, color));
   if (icon === 'play') {
     c.add(scene.add.triangle(r * 0.1, 0, 0, 0, 0, r, r * 0.85, r / 2, 0xffffff).setOrigin(0.5));
   } else if (texture) {
@@ -149,9 +160,22 @@ export function wiggle(scene: Scene, obj: Tappable) {
   scene.tweens.add({ targets: obj, angle: { from: -10, to: 10 }, duration: 70, yoyo: true, repeat: 3, onComplete: () => { obj.angle = 0; } });
 }
 
-/** Image scaled to a target height. */
+/**
+ * Image scaled to a target height. Characters with an eyes-shut frame ("<key>-blink")
+ * blink every few seconds — whatever texture the game has given them at the time.
+ */
 export function sprite(scene: Scene, x: number, y: number, key: string, height: number) {
   const img = scene.add.image(x, y, key);
   img.setScale(height / img.height);
+  if (scene.textures.exists(key + '-blink')) {
+    scene.time.addEvent({
+      delay: 2400 + Math.random() * 2400, loop: true, callback: () => {
+        const k = img.texture.key;
+        if (!img.active || !scene.textures.exists(k + '-blink')) return;
+        img.setTexture(k + '-blink');
+        scene.time.delayedCall(140, () => { if (img.active && img.texture.key === k + '-blink') img.setTexture(k); });
+      },
+    });
+  }
   return img;
 }

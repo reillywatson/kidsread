@@ -8,6 +8,7 @@ import * as pvz from './pvz';
 import * as paw from './paw';
 import * as fr from './friends';
 import * as bg from './scenes';
+import { withBlink } from './util';
 
 export { PUP_NAMES, pupName, type PupId } from './paw';
 
@@ -30,7 +31,8 @@ export const TEXTURES: Record<string, [string, number, number]> = {
   pea: [pvz.pea(), 60, 60],
   sun: [pvz.sunToken(), 260, 260],
   pot: [pvz.flowerPot(), 320, 300],
-  ...Object.fromEntries(paw.PUP_NAMES.map(p => [`pup-${p}`, [paw.pup(p), 360, 393]])),
+  ...Object.fromEntries(paw.PUP_NAMES.map(p => [`pup-${p}`, [paw.pup(p), 336, 476]])),
+  ...Object.fromEntries(paw.PUP_NAMES.map(p => [`pupHead-${p}`, [paw.pupHead(p), 336, 367]])),
   pawBadge: [paw.pawBadge(), 200, 220],
   truck: [paw.pupTruck('#2f6fe0', '#173e96'), 440, 260],
   fireTruck: [paw.pupTruck('#ef4b3f', '#a51b12'), 440, 260],
@@ -58,6 +60,18 @@ export const TEXTURES: Record<string, [string, number, number]> = {
   bgGarden: [bg.bgGarden(), W, H],
 };
 
+// Eyes-shut frames for characters that blink (see liven() in widgets.ts).
+const BLINKERS: Record<string, () => string> = {
+  pikachu: () => pk.pikachu('happy'), bulbasaur: pk.bulbasaur, charmander: pk.charmander, squirtle: pk.squirtle,
+  peashooter: pvz.peashooter, sunflower: () => pvz.sunflower(true), wallnut: pvz.wallnut, zombie: () => pvz.zombie(false),
+  zombieCone: () => pvz.zombie(true), monster: () => fr.monster('open'), monsterHappy: () => fr.monster('smile'), frog: fr.frog,
+  ...Object.fromEntries(paw.PUP_NAMES.flatMap(p => [[`pup-${p}`, () => paw.pup(p)], [`pupHead-${p}`, () => paw.pupHead(p)]])),
+};
+for (const [key, draw] of Object.entries(BLINKERS)) {
+  const [, w, h] = TEXTURES[key];
+  TEXTURES[`${key}-blink`] = [withBlink(draw), w, h];
+}
+
 /** Images placed in src/assets/art/, keyed by texture name. */
 export const OVERRIDES: Record<string, string> = Object.fromEntries(
   Object.entries(import.meta.glob('../assets/art/*.{png,webp,jpg,jpeg}', { eager: true, query: '?url', import: 'default' }))
@@ -65,5 +79,5 @@ export const OVERRIDES: Record<string, string> = Object.fromEntries(
 );
 
 /** Profile avatars (texture keys). */
-export const AVATARS = ['pikachu', 'bulbasaur', 'charmander', 'squirtle', 'pup-chase', 'pup-marshall', 'pup-skye', 'pup-rubble',
+export const AVATARS = ['pikachu', 'bulbasaur', 'charmander', 'squirtle', 'pupHead-chase', 'pupHead-marshall', 'pupHead-skye', 'pupHead-rubble',
   'peashooter', 'sunflower', 'wallnut', 'zombie', 'monsterHappy', 'frog'];

@@ -19,7 +19,7 @@ export const meta: GameMeta = {
   eligible: () => true,
 };
 
-const MOUTH = { x: 1000, y: 380 };
+const MOUTH = { x: 1000, y: 410 };
 
 export class Monster extends BaseGame {
   private monster!: Phaser.GameObjects.Image;
@@ -30,9 +30,13 @@ export class Monster extends BaseGame {
   protected setup() {
     this.add.image(640, 360, 'bgKitchen');
     this.add.ellipse(380, 600, 700, 90, 0xffffff, 0.8).setStrokeStyle(5, 0xd9a066);
-    this.monster = sprite(this, 1000, 420, 'monster', 400);
-    this.belly = text(this, 1000, 545, '', 80, '#ffffff').setStroke('#5a1a2a', 10);
-    this.tweens.add({ targets: [this.monster, this.belly], y: '-=12', duration: 700, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+    this.monster = sprite(this, 1000, 400, 'monster', 400);
+    // The monster's letter, on a round badge on its tummy (below the big mouth).
+    const badge = this.add.container(1000, 562);
+    badge.add(this.add.circle(0, 0, 46, 0xffffff).setStrokeStyle(7, 0x5a1a2a));
+    this.belly = text(this, 0, 0, '', 64, '#5a1a2a');
+    badge.add(this.belly);
+    this.tweens.add({ targets: [this.monster, badge], y: '-=12', duration: 700, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
   }
 
   protected async run() {

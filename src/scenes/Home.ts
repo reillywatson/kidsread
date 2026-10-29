@@ -6,12 +6,12 @@ import { LINES } from '../lines';
 import * as audio from '../audio';
 import { playMusic } from '../music';
 import { openParentArea } from '../parent';
-import { H, W, emoji, roundButton, sprite, tappable, text, onTap } from '../widgets';
+import { H, W, emoji, glossyCircle, roundButton, sprite, tappable, text, onTap } from '../widgets';
 
 const WORLDS: { theme: Theme; texture: string; color: number }[] = [
   { theme: 'pvz', texture: 'peashooter', color: 0x7cc242 },
   { theme: 'pokemon', texture: 'pikachu', color: 0xffd83b },
-  { theme: 'paw', texture: 'pup-chase', color: 0x42a5f5 },
+  { theme: 'paw', texture: 'pupHead-chase', color: 0x42a5f5 },
   { theme: 'friends', texture: 'monsterHappy', color: 0xb388ff },
 ];
 
@@ -44,11 +44,7 @@ export class Home extends Phaser.Scene {
     WORLDS.forEach((w, i) => {
       const x = W / 2 + (i - 1.5) * 230;
       const c = this.add.container(x, 560);
-      const bg = this.add.graphics();
-      bg.fillStyle(0x000000, 0.15).fillCircle(0, 8, 92);
-      bg.fillStyle(w.color).fillCircle(0, 0, 92);
-      bg.lineStyle(7, 0xffffff).strokeCircle(0, 0, 88);
-      c.add([bg, sprite(this, 0, 0, w.texture, 150)]);
+      c.add([glossyCircle(this, 92, w.color), sprite(this, 0, 2, w.texture, 150)]);
       tappable(c, 184, 184);
       onTap(c, () => {
         if (this.starting) return;
