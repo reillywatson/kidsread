@@ -6,6 +6,50 @@ import { TEXTURES, AVATARS } from './art';
 import { settings, updateSettings } from './settings';
 import { LINES } from './lines';
 import * as audio from './audio';
+import { GAMES } from './games';
+import { summarize, duration, ago } from './usage';
+import type { Theme } from './games/BaseGame';
+
+const WORLD: Record<Theme, string> = { pvz: '🌻', pokemon: '⚡', paw: '🐾', friends: '💜' };
+const gameName = (id: string) => {
+  if (id === 'stickers') return '📒 Sticker playground';
+  const m = GAMES.find(g => g.meta.id === id)?.meta;
+  return m ? `${WORLD[m.theme]} ${m.title.split(' — ')[0].replace(' (bonus)', '')}${m.bonus ? ' <span class="muted">(bonus)</span>' : ''}` : esc(id);
+};
+
+/** "What got played": time per day this week, and how each game is going. */
+function usage(learner: typeof state.learner) {
+  const plays = learner.s.plays ?? [];
+  if (!plays.length) return '<p class="muted">Nothing played yet. Games show up here as they’re played.</p>';
+  const u = summarize(plays);
+  const max = Math.max(...u.days.map(d => d.ms), 60e3);
+  const days = u.days.map((d, i) => `
+    <div class="day" title="${duration(d.ms)}">
+      <div class="bar" style="height:${Math.round((d.ms / max) * 100)}%"></div>
+      <span>${i === 6 ? 'Today' : new Date(d.start).toLocaleDateString(undefined, { weekday: 'short' })}</span>
+    </div>`).join('');
+  const pct = (x?: number) => (x == null ? '—' : `${Math.round(x * 100)}%`);
+  const rows = u.perGame.map(g => `
+    <tr class="${u.struggles.includes(g.game) ? 'warn' : ''}">
+      <td>${u.favorites.includes(g.game) ? '⭐ ' : ''}${gameName(g.game)}</td>
+      <td>${g.plays}</td><td>${duration(g.avgMs)}</td>
+      <td>${g.game === 'stickers' ? '—' : pct(g.leftEarly)}</td>
+      <td>${g.avgStars == null ? '—' : g.avgStars.toFixed(1)}</td>
+      <td>${pct(g.accuracy)}</td><td>${ago(g.last)}</td>
+    </tr>`).join('');
+  const struggles = u.struggles.length
+    ? `<p class="note">Often left early: ${u.struggles.map(gameName).join(', ')}. It might be too hard right now,
+       or just not a favorite. You can lower the lesson above, or sit with them for a round.</p>` : '';
+  return `
+    <p>This week: <b>${duration(u.weekMs)}</b> over ${u.weekGames} games${u.weekLeftEarly ? ` (${u.weekLeftEarly} left early)` : ''} · Today: <b>${duration(u.todayMs)}</b></p>
+    <div class="days">${days}</div>
+    ${struggles}
+    <table class="usage">
+      <tr><th>Game</th><th>Played</th><th>Avg time</th><th>Left early</th><th>Avg stars</th><th>First try</th><th>Last played</th></tr>
+      ${rows}
+    </table>
+    <p class="muted">⭐ = most played. “First try” is answers right without a hint. Kept on this device only.</p>`;
+}
 
 const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 const avatarImg = (key: string, size = 44) =>
@@ -27,7 +71,7 @@ export function openParentArea(onClose: () => void) {
       const a = learner.accuracy(skill);
       return a == null ? '—' : `${Math.round(a * 100)}%`;
     };
-    const skills = (['grapheme', 'word', 'spelling', 'sentence', 'heart', 'phonemic', 'rhyme'] as const)
+    const skills = (['grapheme', 'word', 'spelling', 'sentence', 'heart', 'phonemic', 'rhyme', 'syllable', 'writing'] as const)
       .map(k => `<tr><td>${k}</td><td>${['easy', 'medium', 'hard'][learner.tier(k)]}</td><td>${pct(k)}</td></tr>`).join('');
     const tricky = sum.tricky.map(t => `<li><b>${esc(t.id.slice(2))}</b> — ${t.right} right, ${t.wrong + t.help} missed</li>`).join('') || '<li>Nothing yet</li>';
     const players = state.profiles().map(p => `
@@ -77,6 +121,11 @@ export function openParentArea(onClose: () => void) {
           <p>${sum.practiced} sounds/words practiced · ${sum.mastered} solid · ${sum.due} due for review</p>
           <table><tr><th>Skill</th><th>Level</th><th>Recent</th></tr>${skills}</table>
           <h3>Trickiest</h3><ul>${tricky}</ul>
+        </section>
+
+        <section>
+          <h2>What got played ${state.profile?.name ? `by ${esc(state.profile.name)}` : ''}</h2>
+          ${usage(learner)}
         </section>
 
         <section>

@@ -33,7 +33,27 @@ export interface LearnerState {
   settings: Settings;
   /** Stickers placed in the sticker playground: page -> stickers. */
   board?: Record<string, PlacedSticker[]>;
+  /** Play log for the grown-up area (most recent last). */
+  plays?: Play[];
 }
+
+/** One game (or sticker playground visit), for the grown-ups' "What got played". */
+export interface Play {
+  game: string;
+  /** Start time (ms since epoch). */
+  at: number;
+  ms: number;
+  /** Finished, or left early (home button, closed the app). */
+  done: boolean;
+  /** Answers right on the first try, out of all answers. */
+  right: number;
+  total: number;
+  stars?: number;
+}
+
+const MAX_PLAYS = 500;
+/** Longer than this, the app was probably left open in the background. */
+const MAX_PLAY_MS = 15 * 60e3;
 
 export interface PlacedSticker { id: string; x: number; y: number }
 
@@ -223,6 +243,13 @@ export class Learner {
 
   addStars(k: number) { this.s.stars += k; this.save(); }
   addSticker(id: string) { if (!this.s.stickers.includes(id)) this.s.stickers.push(id); this.save(); }
+  logPlay(p: Play) {
+    const plays = (this.s.plays ??= []);
+    plays.push({ ...p, ms: Math.min(p.ms, MAX_PLAY_MS) });
+    if (plays.length > MAX_PLAYS) plays.splice(0, plays.length - MAX_PLAYS);
+    this.save();
+  }
+
   noteGames(ids: string[]) { this.s.lastGames = ids.slice(-6); this.s.sessions++; this.save(); }
 
   /** For the grown-up screen. */

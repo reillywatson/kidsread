@@ -63,6 +63,8 @@ export abstract class BaseGame extends Phaser.Scene {
   private streak = 0;
   private meter: Phaser.GameObjects.Text[] = [];
   private runner: Phaser.GameObjects.Image | null = null;
+  private startedAt = 0;
+  private logged = false;
   private trophy: Phaser.GameObjects.Text | null = null;
 
   constructor(public meta: GameMeta) { super(meta.id); }
@@ -87,7 +89,10 @@ export abstract class BaseGame extends Phaser.Scene {
     this.lesson = this.learner.lesson;
     playMusic(this.meta.theme);
     audio.preload([this.meta.intro, ...LINES.praise]);
-    this.events.once('shutdown', () => { this.ctl.abort(); audio.stop(); });
+    this.startedAt = Date.now();
+    this.logged = false;
+    // Leaving any other way than finishing (home button, closing) counts as left early.
+    this.events.once('shutdown', () => { this.ctl.abort(); audio.stop(); this.logPlay(false); });
     this.setup();
     roundButton(this, 60, 56, 40, 0xff7043, '🏠', () => this.session.quit(this)).setDepth(900);
     roundButton(this, W - 60, 56, 40, 0x42a5f5, '👂', () => { void this.replayFn?.().catch(() => {}); }).setDepth(900);
@@ -420,10 +425,19 @@ export abstract class BaseGame extends Phaser.Scene {
     if (firstTry && Math.random() < 0.45) await this.say(pickOne(LINES.praise));
   }
 
+  private logPlay(done: boolean, stars?: number) {
+    if (this.logged) return;
+    this.logged = true;
+    const ms = Date.now() - this.startedAt;
+    if (!done && ms < 3000) return; // tapped in and straight back out: not really a play
+    this.learner.logPlay({ game: this.meta.id, at: this.startedAt, ms, done, right: this.right, total: this.total, stars });
+  }
+
   private finish() {
-    if (this.meta.bonus) { this.session.gameDone(this, 3); return; }
+    if (this.meta.bonus) { this.logPlay(true, 3); this.session.gameDone(this, 3); return; }
     const acc = this.total ? this.right / this.total : 1;
     const stars = acc >= 0.9 ? 3 : acc >= 0.6 ? 2 : 1;
+    this.logPlay(true, stars);
     this.learner.adjustTier(this.meta.skill);
     this.learner.checkLessonUp();
     this.session.gameDone(this, stars);

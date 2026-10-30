@@ -31,6 +31,8 @@ export class Stickers extends Phaser.Scene {
 
   create() {
     this.cameras.main.fadeIn(220, 255, 255, 255);
+    const at = Date.now();
+    this.events.once('shutdown', () => learner.logPlay({ game: 'stickers', at, ms: Date.now() - at, done: true, right: 0, total: 0 }));
     this.placed = [];
     this.bg = this.add.image(640, 360, PAGES[this.page]);
     roundButton(this, 60, 56, 40, 0xff7043, '🏠', () => this.scene.start('Home')).setDepth(900);
