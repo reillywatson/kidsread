@@ -18,8 +18,8 @@ export interface Sentence { kind: Kind; words: string[]; answer: Pic; alts: Pic[
 /** Lesson each kind of sentence unlocks (when its last word is taught). */
 const UNLOCK: Record<Kind, number> = { is: 9, in: 9, on: 12, and: 13, big: 17, notbig: 17, hat: 30 };
 /** Things a picture can show something inside of. */
-const CONTAINERS = new Set(['box', 'cup', 'bag', 'tub', 'pot', 'can', 'nest', 'dish', 'van', 'bus', 'cab', 'truck', 'net',
-  'hat', 'sock', 'ship', 'tent', 'hole']);
+const CONTAINERS = new Set(['box', 'cup', 'bag', 'tub', 'pot', 'pan', 'can', 'nest', 'dish', 'van', 'bus', 'cab', 'truck', 'net',
+  'hat', 'sock', 'ship', 'tent', 'hole', 'tin', 'jar', 'cart', 'car', 'pail', 'boat', 'bowl', 'jeep', 'train', 'boot']);
 
 export const nounsAt = (lesson: number) => [...NOUNS].filter(n => WORD_LESSON[n] <= lesson);
 

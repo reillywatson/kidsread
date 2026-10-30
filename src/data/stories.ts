@@ -28,6 +28,15 @@ export const STORIES: Story[] = [
     ],
   },
   {
+    id: 'pot', title: 'The Pot', cover: '🪴', bg: 'home', pages: [
+      { text: 'It is a pot.', art: [['🪴', 0, 0, 170]] },
+      { text: 'A pin is in the pot.', art: [['🪴', 0, 30, 190], ['📌', 50, -60, 60]] },
+      { text: 'A map is in the pot.', art: [['🪴', 0, 30, 190], ['🗺️', -40, -60, 70]] },
+      { text: 'A man is on the pot!', art: [['🪴', 0, 60, 170], ['🧔', 0, -60, 110]] },
+      { text: 'Mom is in the pot!', art: [['🪴', 0, 50, 200], ['👩', 0, -50, 100], ['😮', 130, -100, 60]] },
+    ],
+  },
+  {
     id: 'mom', title: 'Mom and Dad', cover: '👩', bg: 'home', pages: [
       { text: 'Mom is sad.', art: [['👩', 0, 0, 150], ['💧', 70, -40, 40]] },
       { text: 'Dad is sad.', art: [['👨', 0, 0, 150], ['💧', 70, -40, 40]] },
@@ -43,6 +52,24 @@ export const STORIES: Story[] = [
       { text: 'Dad can tap the pan.', art: [['👨', -170, 0, 140], ['🍳', 60, 40, 150], ['🐱', 60, -20, 80], ['💥', 140, -70, 60]] },
       { text: 'The cat is mad!', art: [['😾', 0, 0, 150], ['💢', 90, -80, 60]] },
       { text: 'Dad and the cat nap.', art: [['👨', -110, 10, 130], ['🐱', 90, 40, 100], ['💤', 10, -90, 70]] },
+    ],
+  },
+  {
+    id: 'pup', title: 'The Pup', cover: '🐶', bg: 'park', pages: [
+      { text: 'It is a pup.', art: [['🐶', 0, 0, 160]] },
+      { text: 'The pup is in a cup.', art: [['☕', 0, 40, 200], ['🐶', 0, -60, 90]] },
+      { text: 'Up, pup, up!', art: [['🐶', 0, -60, 130], ['⬆️', -150, 30, 70], ['⬆️', 150, 30, 70]] },
+      { text: 'The pup is on top of a pot.', art: [['🪴', 0, 50, 180], ['🐶', 0, -80, 90]] },
+      { text: 'The pup can nap in the sun.', art: [['🐶', -40, 40, 140], ['☀️', 150, -90, 90], ['💤', 60, -50, 60]] },
+    ],
+  },
+  {
+    id: 'mud', title: 'Mud', cover: '🟤', bg: 'farm', pages: [
+      { text: 'A dog dug in the mud.', art: [['🟤', 0, 70, 190], ['🐕', 0, -20, 120], ['💨', 120, 0, 60]] },
+      { text: 'The dog got mud on a cat.', art: [['🐕', -110, 10, 120], ['🐱', 100, 10, 120], ['🟤', 120, -50, 40]] },
+      { text: 'The cat is mad!', art: [['😾', 0, 0, 150], ['💢', 90, -80, 60]] },
+      { text: 'The dog and the cat tug.', art: [['🐕', -120, 10, 120], ['🪢', 0, 20, 90], ['🐱', 120, 10, 120]] },
+      { text: 'Mom got the dog and the cat.', art: [['👩', 0, -10, 140], ['🐕', -150, 60, 90], ['🐱', 150, 60, 90]] },
     ],
   },
   {
@@ -151,6 +178,42 @@ export const STORIES: Story[] = [
       { text: 'A cat got the bone!', art: [['🐱', 60, 10, 130], ['🦴', -60, 40, 80], ['😮', -170, -60, 60]] },
       { text: 'The dog and the cat had a nap.', art: [['🐕', -90, 20, 120], ['🐱', 90, 20, 110], ['💤', 0, -90, 60]] },
       { text: 'The bone is home.', art: [['🏠', 0, 0, 170], ['🦴', 130, 70, 70]] },
+    ],
+  },
+  {
+    id: 'shark', title: 'The Shark and the Star', cover: '🦈', bg: 'pond', pages: [
+      { text: 'A shark can swim far.', art: [['🌊', 0, 70, 220], ['🦈', 0, -10, 150]] },
+      { text: 'The shark had a star.', art: [['🦈', -90, 10, 150], ['⭐', 120, -40, 90]] },
+      { text: 'The star is in a jar.', art: [['🫙', 0, 30, 190], ['⭐', 0, 20, 70]] },
+      { text: 'The jar is in a car.', art: [['🚗', 0, 30, 220], ['🫙', 30, -60, 70]] },
+      { text: 'The shark and the star are in the park.', art: [['🌳', -170, 0, 130], ['🦈', 10, 30, 130], ['⭐', 150, -70, 80]] },
+    ],
+  },
+  {
+    id: 'sheep', title: 'The Sheep and the Bee', cover: '🐑', bg: 'park', pages: [
+      { text: 'A sheep is in a green tree.', art: [['🌳', 0, 10, 240], ['🐑', 10, -40, 90]] },
+      { text: 'A bee is on the sheep.', art: [['🐑', 0, 30, 170], ['🐝', 10, -70, 70]] },
+      { text: 'The bee and the sheep sleep.', art: [['🐑', -40, 40, 150], ['🐝', 110, -30, 70], ['💤', 30, -100, 60]] },
+      { text: 'The sheep had a dream.', art: [['🐑', -80, 50, 140], ['💭', 90, -60, 140], ['🌳', 90, -70, 60]] },
+      { text: 'It is a dream of a big green tree.', art: [['🌳', 0, 0, 230], ['✨', -150, -90, 60], ['✨', 150, -90, 60]] },
+    ],
+  },
+  {
+    id: 'moon', title: 'The Moon', cover: '🌕', bg: 'night', pages: [
+      { text: 'It is the moon.', art: [['🌕', 0, -10, 170]] },
+      { text: 'A spoon is on the moon!', art: [['🌕', 0, 30, 190], ['🥄', 10, -90, 80]] },
+      { text: 'A goat in a boat can see the moon.', art: [['🌕', 140, -80, 90], ['⛵', -60, 50, 170], ['🐐', -60, -20, 80]] },
+      { text: 'Look at the moon, goat!', art: [['🐐', -90, 30, 140], ['👀', -60, -80, 60], ['🌕', 140, -70, 100]] },
+      { text: 'The goat and the moon say good night.', art: [['🐐', -100, 40, 130], ['🌕', 110, -60, 110], ['💤', 0, -100, 60]] },
+    ],
+  },
+  {
+    id: 'boy', title: 'The Boy and the Toy', cover: '👦', bg: 'home', pages: [
+      { text: 'A boy had a toy.', art: [['👦', -80, 10, 150], ['🧸', 110, 30, 110]] },
+      { text: 'The boy had a coin.', art: [['👦', -60, 10, 150], ['🪙', 110, 0, 80]] },
+      { text: 'The boy got a toy cow.', art: [['👦', -90, 10, 140], ['🐮', 110, 30, 100], ['🎁', 160, -70, 50]] },
+      { text: 'The toy cow can say moo.', art: [['🐮', 0, 20, 160], ['💬', 120, -90, 80]] },
+      { text: 'The boy is full of joy.', art: [['👦', 0, 10, 150], ['😄', 120, -80, 60], ['💖', -120, -80, 60]] },
     ],
   },
 ];

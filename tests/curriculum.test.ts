@@ -33,6 +33,19 @@ test('segmentation', () => {
   expect(s('quit')).toBe('qu i t');
   expect(s('these')).toBe('th_v e_e s _');
   expect(s('ring')).toBe('r i ng');
+  // Second half: r-controlled vowels and vowel teams, including spellings with two sounds.
+  expect(s('shark')).toBe('sh ar k');
+  expect(s('church')).toBe('ch ur ch');
+  expect(s('three')).toBe('th r ee');
+  expect(s('queen')).toBe('qu ee n');
+  expect(s('night')).toBe('n igh t');
+  expect(s('tie')).toBe('t ie');
+  expect(s('snow')).toBe('s n ow_o');
+  expect(s('clown')).toBe('c l ow n');
+  expect(s('moon')).toBe('m oo n');
+  expect(s('book')).toBe('b oo_u k');
+  expect(s('blue')).toBe('b l ue');
+  expect(s('coin')).toBe('c oi n');
 });
 
 test('pictures, nouns and rhymes line up with the word lists', () => {

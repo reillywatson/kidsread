@@ -52,7 +52,9 @@ export function wordDistractors(word: string, n: number, tier: Tier, lesson: num
 }
 
 // Graphemes that never start a word (or whose sound at the start would be misleading).
-const NOT_INITIAL = new Set(['x', 'ck', 'ff', 'll', 'ss', 'zz', 'all', 'oll', 'ull', 'ng', 'nk', 'th_v', 'ph', 'a_e', 'i_e', 'o_e', 'u_e', 'e_e']);
+const NOT_INITIAL = new Set(['x', 'ck', 'ff', 'll', 'ss', 'zz', 'all', 'oll', 'ull', 'ng', 'nk', 'th_v', 'ph', 'a_e', 'i_e', 'o_e', 'u_e', 'e_e',
+  // Vowel teams and r-controlled vowels: the picture bank is sorted by first letter, not these.
+  'ar', 'or', 'er', 'ir', 'ur', 'ai', 'ay', 'ee', 'ea', 'oa', 'ow_o', 'ie', 'igh', 'oo', 'oo_u', 'ou', 'ow', 'oi', 'oy', 'aw', 'ew', 'ue']);
 export const canStartWord = (g: string) => !NOT_INITIAL.has(g);
 
 /** Bank pictures starting with grapheme g's sound. */

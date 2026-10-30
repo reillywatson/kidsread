@@ -19,7 +19,15 @@ export const timesRead = (s: Story) => learner.s.books?.[s.id] ?? 0;
 /** Unlocked books not read yet (for the "new book" badge on the home screen). */
 export const newBooks = () => STORIES.filter(s => unlocked(s) && !timesRead(s));
 
+/** Books per shelf page: six to a shelf, three shelves. */
+const PER_PAGE = 18;
+
 export class Bookshelf extends Phaser.Scene {
+  /** Which shelf page is showing (kept while the app is open; -1 until first opened). */
+  private static page = -1;
+  private books: Phaser.GameObjects.Container[] = [];
+  private busy = false;
+
   constructor() { super('Bookshelf'); }
 
   create() {
@@ -32,11 +40,35 @@ export class Bookshelf extends Phaser.Scene {
       g.fillStyle(0x6d4c41).fillRect(90, y, 1100, 22);
       g.fillStyle(0x8d6e63).fillRect(90, y, 1100, 8);
     }
-    let busy = false;
-    // Six to a shelf, three shelves.
+    this.busy = false;
+    const pages = Math.ceil(STORIES.length / PER_PAGE);
+    // The first time, open to the page with the newest book this child can read.
+    if (Bookshelf.page < 0 || Bookshelf.page >= pages) {
+      const newest = STORIES.reduce((last, st, i) => (unlocked(st) ? i : last), 0);
+      Bookshelf.page = Math.floor(newest / PER_PAGE);
+    }
+    if (pages > 1) {
+      roundButton(this, 50, 400, 36, 0xffc94d, '◀️', () => this.turn(-1));
+      roundButton(this, 1230, 400, 36, 0xffc94d, '▶️', () => this.turn(1));
+    }
+    this.show();
+    void audio.say(LINES.pickBook);
+  }
+
+  private turn(d: number) {
+    const pages = Math.ceil(STORIES.length / PER_PAGE);
+    Bookshelf.page = (Bookshelf.page + d + pages) % pages;
+    audio.sfx.flip();
+    this.show();
+  }
+
+  private show() {
+    this.books.forEach(b => b.destroy());
     const CW = 172, CH = 124;
-    STORIES.forEach((s, i) => {
-      const col = i % 6, row = Math.floor(i / 6);
+    const first = Bookshelf.page * PER_PAGE;
+    this.books = STORIES.slice(first, first + PER_PAGE).map((s, k) => {
+      const i = first + k;
+      const col = k % 6, row = Math.floor(k / 6);
       const c = this.add.container(640 + (col - 2.5) * 188, 205 + row * 180);
       const open = unlocked(s);
       const b = this.add.graphics();
@@ -56,16 +88,18 @@ export class Bookshelf extends Phaser.Scene {
         this.tweens.add({ targets: sp, scale: 1.3, duration: 500, yoyo: true, repeat: -1 });
         c.add(sp);
       }
+      c.setAlpha(0);
+      this.tweens.add({ targets: c, alpha: 1, duration: 200, delay: k * 15 });
       tappable(c, CW, CH);
       onTap(c, () => {
-        if (busy) return;
+        if (this.busy) return;
         if (!open) { audio.sfx.boing(); wiggle(this, c); return; }
-        busy = true;
+        this.busy = true;
         audio.sfx.flip();
         this.tweens.add({ targets: c, scale: 1.15, duration: 200, yoyo: true, onComplete: () => this.scene.start('Book', { id: s.id }) });
       });
+      return c;
     });
-    void audio.say(LINES.pickBook);
   }
 }
 

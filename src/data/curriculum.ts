@@ -1,6 +1,8 @@
 // UFLI Foundations–style scope & sequence.
-// Lesson numbers follow the UFLI order (alphabet, then short-vowel blends, FLSZ,
-// digraphs, VCe). Practice/review lessons are folded into the surrounding lessons.
+// Lessons 1–58 follow the UFLI order and numbering (alphabet, then short-vowel blends, FLSZ,
+// digraphs, VCe); practice/review lessons are folded into the surrounding lessons. After that
+// come r-controlled vowels and vowel teams, in UFLI's order but with our own lesson numbers
+// (60–82): UFLI spends its lessons 59–68 on suffixes and syllable types, which these games skip.
 // Every word is checked by tests/curriculum.test.ts to only use graphemes taught
 // by its lesson.
 
@@ -83,13 +85,39 @@ export const GRAPHEMES: Record<string, Grapheme> = Object.fromEntries([
   G('o_e', 56, 'bone', '🦴', 'o_e'),
   G('u_e', 57, 'cube', '🧊', 'u_e'),
   G('e_e', 58, 'these', '👇', 'e_e'),
+  // Second half: r-controlled vowels, then vowel teams. Two spellings of one sound share a lesson.
+  G('ar', 60, 'car', '🚗'),
+  G('or', 62, 'corn', '🌽'),
+  G('er', 64, 'her', '👧'),
+  G('ir', 64, 'bird', '🐦'),
+  G('ur', 64, 'turtle', '🐢'),
+  G('ai', 66, 'rain', '🌧️'),
+  G('ay', 66, 'hay', '🌾'),
+  G('ee', 68, 'tree', '🌳'),
+  G('ea', 68, 'leaf', '🍃'),
+  G('oa', 70, 'boat', '⛵'),
+  G('ow_o', 70, 'snow', '❄️', 'ow'),
+  G('ie', 72, 'pie', '🥧'),
+  G('igh', 72, 'night', '🌃'),
+  G('oo', 74, 'moon', '🌕'),
+  G('oo_u', 74, 'book', '📕', 'oo'),
+  G('ou', 76, 'cloud', '☁️'),
+  G('ow', 76, 'cow', '🐮'),
+  G('oi', 78, 'coin', '🪙'),
+  G('oy', 78, 'boy', '👦'),
+  G('aw', 80, 'saw', '🪚'),
+  G('ew', 82, 'new', '🆕'),
+  G('ue', 82, 'blue', '🔵'),
 ].map(g => [g.id, g]));
 
 // Graphemes that make the same sound — never offered as distractors for each other.
-const SAME_SOUND = [['c', 'k', 'ck'], ['f', 'ff', 'ph'], ['l', 'll'], ['s', 'ss'], ['z', 'zz'], ['w', 'wh']];
+const SAME_SOUND = [['c', 'k', 'ck'], ['f', 'ff', 'ph'], ['l', 'll'], ['s', 'ss'], ['z', 'zz'], ['w', 'wh'],
+  ['a_e', 'ai', 'ay'], ['e_e', 'ee', 'ea'], ['o_e', 'oa', 'ow_o'], ['i_e', 'ie', 'igh'], ['oo', 'ew', 'ue'],
+  ['er', 'ir', 'ur'], ['ou', 'ow'], ['oi', 'oy']];
 // Visually or aurally confusable — used as distractors only at the hardest tier.
 const CONFUSABLE = [['b', 'd'], ['b', 'p'], ['d', 'p'], ['m', 'n'], ['n', 'u'], ['n', 'h'], ['f', 't'],
-  ['e', 'i'], ['a', 'o'], ['o', 'u'], ['a', 'u'], ['sh', 'ch'], ['th', 'f'], ['v', 'f'], ['i', 'l'], ['ng', 'nk']];
+  ['e', 'i'], ['a', 'o'], ['o', 'u'], ['a', 'u'], ['sh', 'ch'], ['th', 'f'], ['v', 'f'], ['i', 'l'], ['ng', 'nk'],
+  ['ar', 'or'], ['oo', 'oo_u'], ['ou', 'oi'], ['ai', 'ee'], ['oa', 'ou'], ['aw', 'ow']];
 
 export const soundClass = (g: string) => (SAME_SOUND.find(s => s.includes(g)) || [g])[0];
 export const confusable = (a: string, b: string) =>
@@ -144,6 +172,27 @@ export const LESSONS: Lesson[] = [
   { n: 56, title: 'o_e', g: ['o_e'], w: ['rope', 'bone', 'nose', 'home', 'rose', 'stone', 'hole', 'cone', 'robe', 'globe', 'pole', 'note', 'hope', 'joke', 'smoke', 'stove', 'broke', 'those', 'phone'] },
   { n: 57, title: 'u_e', g: ['u_e'], w: ['cube', 'mule', 'flute', 'tube', 'cute', 'dune', 'prune', 'rule', 'tune', 'use'] },
   { n: 58, title: 'e_e', g: ['e_e'], w: ['these', 'theme', 'eve'] },
+  { n: 60, title: 'ar', g: ['ar'], w: ['car', 'star', 'jar', 'far', 'farm', 'park', 'shark', 'arm', 'cart', 'yard', 'barn', 'dark', 'card', 'hard', 'art', 'scarf', 'smart', 'start'],
+    h: [H('come', 60, [1, 3]), H('some', 60, [1, 3])] },
+  { n: 62, title: 'or', g: ['or'], w: ['corn', 'horn', 'fork', 'fort', 'storm', 'sport', 'born', 'torn', 'short', 'north', 'porch', 'cord', 'sort', 'thorn'],
+    h: [H('were', 62, [2, 3])] },
+  { n: 64, title: 'er ir ur', g: ['er', 'ir', 'ur'], w: ['her', 'fern', 'herd', 'perch', 'bird', 'girl', 'shirt', 'first', 'dirt', 'skirt', 'third', 'stir', 'swirl',
+    'fur', 'burn', 'turn', 'hurt', 'church', 'surf', 'curl', 'burp', 'burst'], h: [H('where', 64, [2, 3, 4]), H('who', 64, [0, 1, 2])] },
+  { n: 66, title: 'ai ay', g: ['ai', 'ay'], w: ['rain', 'tail', 'mail', 'snail', 'paint', 'train', 'nail', 'sail', 'chain', 'wait', 'pail', 'brain',
+    'day', 'play', 'say', 'way', 'hay', 'tray', 'may', 'pay', 'stay', 'spray', 'gray', 'clay'], h: [H('could', 66, [1, 2, 3]), H('would', 66, [1, 2, 3]), H('should', 66, [2, 3, 4])] },
+  { n: 68, title: 'ee ea', g: ['ee', 'ea'], w: ['tree', 'bee', 'see', 'feet', 'sheep', 'seed', 'week', 'green', 'sleep', 'wheel', 'cheek', 'three', 'teeth', 'jeep', 'queen',
+    'leaf', 'seal', 'eat', 'sea', 'team', 'beach', 'peach', 'bean', 'meat', 'clean', 'dream', 'tea'], h: [H('your', 68, [1, 2]), H('four', 68, [1, 2])] },
+  { n: 70, title: 'oa ow', g: ['oa', 'ow_o'], w: ['boat', 'goat', 'coat', 'road', 'soap', 'toad', 'coach', 'float', 'oak', 'loaf', 'toast',
+    'snow', 'bowl', 'grow', 'slow', 'show', 'row', 'blow', 'throw', 'low', 'glow'], h: [H('many', 70, [1, 3]), H('any', 70, [0, 2])] },
+  { n: 72, title: 'ie igh', g: ['ie', 'igh'], w: ['pie', 'tie', 'lie', 'night', 'light', 'right', 'high', 'bright', 'flight', 'might', 'sight', 'tight', 'fright'],
+    h: [H('does', 72, [1, 2, 3])] },
+  { n: 74, title: 'oo', g: ['oo', 'oo_u'], w: ['moon', 'spoon', 'food', 'zoo', 'boot', 'pool', 'room', 'broom', 'tooth', 'cool', 'noon', 'hoop', 'moo',
+    'book', 'cook', 'look', 'foot', 'good', 'wood', 'hook', 'took', 'hood', 'stood', 'wool'], h: [H('again', 74, [3, 4])] },
+  { n: 76, title: 'ou ow', g: ['ou', 'ow'], w: ['out', 'shout', 'cloud', 'loud', 'mouth', 'south', 'round', 'sound', 'ground', 'couch', 'proud', 'found',
+    'cow', 'now', 'how', 'owl', 'town', 'down', 'brown', 'crown', 'clown', 'gown', 'howl', 'growl'], h: [H('water', 76, [1])] },
+  { n: 78, title: 'oi oy', g: ['oi', 'oy'], w: ['coin', 'oil', 'boil', 'soil', 'point', 'join', 'spoil', 'foil', 'moist', 'boy', 'toy', 'joy', 'soy'] },
+  { n: 80, title: 'aw', g: ['aw'], w: ['saw', 'paw', 'claw', 'draw', 'straw', 'jaw', 'yawn', 'hawk', 'lawn', 'crawl', 'dawn', 'raw', 'law'] },
+  { n: 82, title: 'ew ue', g: ['ew', 'ue'], w: ['new', 'few', 'chew', 'grew', 'blew', 'flew', 'crew', 'stew', 'drew', 'screw', 'blue', 'glue', 'clue', 'true'] },
 ];
 
 export const LESSON_NUMS = LESSONS.map(l => l.n);
@@ -179,13 +228,25 @@ export const PIC: Record<string, string> = {
   bike: '🚲', kite: '🪁', five: '5️⃣', nine: '9️⃣', slide: '🛝', smile: '😊', pine: '🌲',
   rope: '🪢', bone: '🦴', nose: '👃', home: '🏠', rose: '🌹', cone: '🍦', globe: '🌍', phone: '📱', smoke: '💨', cube: '🧊',
   ram: '🐏', yum: '😋', trap: '🪤', plug: '🔌', doll: '🪆', strong: '💪', hole: '🕳️', note: '📝', left: '⬅️', call: '📞',
-  pants: '👖', plant: '🌱', mask: '😷', elf: '🧝', shrimp: '🦐', flame: '🔥', frame: '🖼️', bride: '👰',
+  pants: '👖', plant: '🌱', mask: '😷', elf: '🧝', shrimp: '🦐', flame: '🔥', frame: '🖼️', bride: '👰', man: '🧔', tin: '🥫', mop: '🧹', pad: '🗒️', dot: '🔴',
+  car: '🚗', star: '⭐', jar: '🫙', shark: '🦈', arm: '💪', cart: '🛒', card: '🃏', art: '🎨', scarf: '🧣',
+  corn: '🌽', horn: '📯', fork: '🍴', storm: '⛈️', fern: '🌿', bird: '🐦', girl: '👧', shirt: '👕', first: '🥇', third: '🥉',
+  hurt: '🤕', church: '⛪', surf: '🏄', rain: '🌧️', mail: '📬', snail: '🐌', train: '🚂', chain: '⛓️', pail: '🪣', brain: '🧠',
+  hay: '🌾', tree: '🌳', bee: '🐝', feet: '🦶', sheep: '🐑', wheel: '🛞', three: '3️⃣', teeth: '🦷', jeep: '🚙', queen: '👸',
+  leaf: '🍃', seal: '🦭', beach: '🏖️', peach: '🍑', bean: '🫘', tea: '🍵', dream: '💭', boat: '⛵', goat: '🐐', coat: '🧥',
+  road: '🛣️', soap: '🧼', loaf: '🍞', snow: '❄️', bowl: '🥣', row: '🚣', pie: '🥧', tie: '👔', night: '🌃', light: '💡',
+  moon: '🌕', spoon: '🥄', boot: '👢', broom: '🧹', stew: '🍲', book: '📕', cook: '🧑‍🍳', hook: '🪝', look: '👀',
+  cloud: '☁️', couch: '🛋️', cow: '🐮', owl: '🦉', clown: '🤡', town: '🏘️', down: '⬇️', coin: '🪙', oil: '🛢️', point: '👉',
+  boy: '👦', toy: '🧸', saw: '🪚', paw: '🐾', yawn: '🥱', hawk: '🦅', new: '🆕', screw: '🔩', blue: '🔵', clue: '🔍',
 };
 
 // Words whose pictures look alike — never shown side by side.
 const PIC_CONFLICTS = [['pup', 'dog'], ['cup', 'drink'], ['tub', 'bath'], ['hot', 'sick'], ['mom', 'dad'], ['rock', 'log'],
   ['sad', 'mad'], ['smoke', 'fog'], ['jet', 'plane'], ['six', 'five', 'nine', 'ten'], ['call', 'phone'], ['plant', 'pot', 'pine'],
-  ['flame', 'smoke'], ['up', 'left']];
+  ['flame', 'smoke'], ['up', 'left'], ['man', 'dad'], ['arm', 'strong'], ['art', 'paint'], ['sail', 'boat'], ['light', 'lamp'],
+  ['beach', 'sand'], ['up', 'down'], ['feet', 'foot'], ['tooth', 'teeth'], ['stew', 'pot'], ['rain', 'storm'], ['bird', 'hawk', 'owl'],
+  ['girl', 'kid', 'boy'], ['night', 'moon'], ['bee', 'buzz'], ['tree', 'pine'], ['snow', 'cube'], ['tin', 'can'], ['mop', 'broom'],
+  ['dot', 'red']];
 export const picConflict = (a: string, b: string) =>
   a === b || PIC[a] === PIC[b] || PIC_CONFLICTS.some(g => g.includes(a) && g.includes(b));
 
@@ -195,7 +256,10 @@ export const NOUNS = new Set(['map', 'pan', 'pin', 'pot', 'cat', 'cap', 'can', '
   'box', 'fox', 'ox', 'van', 'flag', 'crab', 'ant', 'tent', 'frog', 'drum', 'nest', 'sled', 'vest', 'bell', 'ball',
   'troll', 'duck', 'sock', 'rock', 'lock', 'clock', 'truck', 'ship', 'fish', 'shell', 'dish', 'brush',
   'chick', 'ring', 'king', 'skunk', 'cake', 'snake', 'plane', 'whale', 'bike', 'kite', 'bone', 'cone', 'globe', 'phone', 'cube',
-  'ram', 'trap', 'plug', 'doll', 'hole', 'note', 'plant', 'mask', 'elf', 'shrimp', 'flame', 'frame', 'bride']);
+  'ram', 'trap', 'plug', 'doll', 'hole', 'note', 'plant', 'mask', 'elf', 'shrimp', 'flame', 'frame', 'bride', 'man', 'tin', 'mop', 'pad', 'dot',
+  'car', 'star', 'jar', 'shark', 'cart', 'scarf', 'corn', 'horn', 'fork', 'bird', 'girl', 'shirt', 'mail', 'snail', 'train', 'pail',
+  'tree', 'bee', 'sheep', 'wheel', 'jeep', 'queen', 'leaf', 'seal', 'peach', 'boat', 'goat', 'coat', 'soap', 'bowl', 'pie', 'tie',
+  'moon', 'spoon', 'boot', 'broom', 'book', 'hook', 'cloud', 'couch', 'cow', 'owl', 'clown', 'coin', 'boy', 'toy', 'saw', 'hawk']);
 
 export interface Token {
   /** Letters as written. */
@@ -204,8 +268,12 @@ export interface Token {
   g: string | null;
 }
 
-const MULTI = ['all', 'oll', 'ull', 'ck', 'sh', 'th', 'ch', 'wh', 'ph', 'ng', 'nk', 'qu', 'ff', 'll', 'ss', 'zz'];
+const MULTI = ['all', 'oll', 'ull', 'igh', 'ck', 'sh', 'th', 'ch', 'wh', 'ph', 'ng', 'nk', 'qu', 'ff', 'll', 'ss', 'zz',
+  'ar', 'or', 'er', 'ir', 'ur', 'ai', 'ay', 'ee', 'ea', 'oa', 'ow', 'ie', 'oo', 'ou', 'oi', 'oy', 'aw', 'ew', 'ue'];
 const VOICED_TH = new Set(['this', 'that', 'them', 'then', 'than', 'with', 'these', 'those']);
+/** Words where ow says /ō/ (snow), not /ow/ (cow); and where oo says /ŏŏ/ (book), not /ōō/ (moon). */
+const OW_LONG = new Set(['snow', 'bowl', 'grow', 'slow', 'show', 'row', 'blow', 'throw', 'low', 'glow']);
+const OO_SHORT = new Set(['book', 'cook', 'look', 'foot', 'good', 'wood', 'hook', 'took', 'hood', 'stood', 'wool']);
 
 // Split a word into grapheme tokens. Only graphemes taught by the word's lesson are used,
 // so "doll" (lesson 42) is d-o-ll, not d-oll.
@@ -221,7 +289,8 @@ export function segment(word: string, lesson = WORD_LESSON[word] ?? Infinity): T
   for (let i = 0; i < w.length;) {
     if (vce >= 0 && i === w.length - 1) { toks.push({ t: 'e', g: null }); i++; continue; }
     if (i === vce) { toks.push({ t: w[i], g: w[i] + '_e' }); i++; continue; }
-    const gid = (mg: string) => (mg === 'th' && VOICED_TH.has(w) ? 'th_v' : mg);
+    const gid = (mg: string) => (mg === 'th' && VOICED_TH.has(w) ? 'th_v' : mg === 'ow' && OW_LONG.has(w) ? 'ow_o'
+      : mg === 'oo' && OO_SHORT.has(w) ? 'oo_u' : mg);
     const m = MULTI.find(mg => w.startsWith(mg, i) && taught(gid(mg)));
     if (m) {
       toks.push({ t: m, g: gid(m) });

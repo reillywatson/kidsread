@@ -17,7 +17,7 @@ test('sentences only use words taught by the lesson, with distinct near-miss pic
       }
     }
   }
-});
+}, 60_000); // every lesson × kind × noun: thorough, so it takes a few seconds
 
 test('sentence kinds unlock as their words are taught', () => {
   expect(kindsAt(9)).toEqual(expect.arrayContaining<Kind>(['is', 'in']));

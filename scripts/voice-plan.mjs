@@ -87,6 +87,18 @@ export const SOUND_OPTIONS = {
   oll: [{ rime: 'toll' }, { rime: 'roll' }, { say: 'ohl' }, { rime: 'pole' }, { rime: 'goal' }, { say: 'oal' }],
   a_e: [{ say: 'A' }, { say: 'ay' }], i_e: [{ say: 'eye' }, { say: 'eye', max: 400 }], o_e: [{ say: 'O' }, { say: 'oh' }],
   u_e: [{ say: 'U' }, { say: 'you' }], e_e: [{ say: 'E' }, { say: 'ee' }],
+  // Second half. Spellings of a sound already recorded share its recording.
+  ar: [{ say: 'ar', max: 500 }, { rime: 'car' }], or: [{ say: 'or', max: 500 }, { say: 'ore', max: 500 }],
+  er: [{ say: 'er', max: 450 }, { say: 'ur', max: 450 }], ir: { same: 'er' }, ur: { same: 'er' },
+  ai: { same: 'a_e' }, ay: { same: 'a_e' }, ee: { same: 'e_e' }, ea: { same: 'e_e' },
+  oa: { same: 'o_e' }, ow_o: { same: 'o_e' }, ie: { same: 'i_e' }, igh: { same: 'i_e' },
+  oo: [{ say: 'oo', max: 450 }, { say: 'ooh', max: 450 }], ew: { same: 'oo' }, ue: { same: 'oo' },
+  // The vowel in "book": said directly (cutting it out of a word always kept some of the consonants).
+  // Respellings, since there's no ordinary way to write the sound on its own.
+  oo_u: [{ say: 'ŏŏ', max: 400 }, { say: 'uu', max: 400 }, { say: 'ʊ', max: 400 }, { say: '/ʊ/', max: 400 }, { say: 'oo', max: 250 }],
+  ou: [{ say: 'ow', max: 450 }, { say: 'ow!', max: 450 }], ow: { same: 'ou' },
+  oi: [{ say: 'oy', max: 450 }, { say: 'oi', max: 450 }], oy: { same: 'oi' },
+  aw: [{ say: 'aw', max: 450 }, { say: 'ah', max: 450 }],
 };
 
 /** The recipe each letter sound uses, given saved picks ({ id: option index }). */
