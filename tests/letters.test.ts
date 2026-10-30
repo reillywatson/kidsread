@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest';
-import { LETTERS, resample, bounds } from '../src/data/letters';
+import { LETTERS, CAPITALS, resample, bounds } from '../src/data/letters';
 
 const near = (a: number[], b: number[], d = 1.5) => Math.hypot(a[0] - b[0], a[1] - b[1]) <= d;
 
@@ -41,4 +41,21 @@ test('circles close and "a" starts near 1 o\'clock going counterclockwise', () =
   const a = LETTERS.a[0];
   expect(a[0][0]).toBeGreaterThan(40); // starts on the right
   expect(a[3][1]).toBeLessThan(a[0][1]); // heads up toward the top first
+});
+
+test('capitals: every letter, standing on the baseline, continuous strokes', () => {
+  expect(Object.keys(CAPITALS).sort().join('')).toBe('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  for (const [ch, strokes] of Object.entries(CAPITALS)) {
+    const b = bounds(strokes);
+    expect(b.y0, ch).toBeGreaterThanOrEqual(-1);
+    expect(b.y0, ch).toBeLessThanOrEqual(2); // reaches the top line
+    expect(b.y1, ch).toBeGreaterThanOrEqual(98); // reaches the baseline
+    expect(b.y1, ch).toBeLessThanOrEqual(106);
+    expect(b.x0, ch).toBeGreaterThanOrEqual(0);
+    expect(b.x1, ch).toBeLessThanOrEqual(76);
+    for (const s of strokes) {
+      const pts = resample(s, 2);
+      for (let i = 1; i < pts.length; i++) expect(near(pts[i - 1], pts[i], 2.2), `${ch} at ${i}`).toBe(true);
+    }
+  }
 });

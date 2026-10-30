@@ -37,7 +37,7 @@ export class Road extends BaseGame {
     for (let r = 0; r < letters.length && !this.timeUp(); r++) {
       const g = letters[r];
       const truck = sprite(this, 0, 0, 'truck', 52);
-      const t = new Tracer(this, g, {
+      const t = new Tracer(this, this.traceForm(g), {
         mode: 'trace',
         ink: () => 0x42a5f5,
         track: 0x607d8b,

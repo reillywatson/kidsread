@@ -3,6 +3,7 @@ import '@fontsource/andika/400.css';
 import '@fontsource/andika/700.css';
 import './style.css';
 import * as audio from './audio';
+import { startAutoBackup } from './sync';
 import { GAMES } from './games';
 import { Boot } from './scenes/Boot';
 import { Home } from './scenes/Home';
@@ -32,7 +33,7 @@ async function start() {
   });
   turnWithStage(game);
   if (import.meta.env.DEV) Object.assign(window, { game });
-  else keepOffline();
+  else { keepOffline(); startAutoBackup(); }
 }
 
 /**

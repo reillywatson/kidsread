@@ -52,6 +52,43 @@ export const LETTERS: Record<string, Stroke[]> = {
   z: [[[10, 50], [52, 50], [10, 100], [52, 100]]],
 };
 
+/**
+ * Capital letters, in the same grid: they stand from the top line (y=0) to the baseline (y=100).
+ * Stroke order follows common manuscript teaching (straight lines first, top to bottom).
+ */
+export const CAPITALS: Record<string, Stroke[]> = {
+  A: [line(8, 100, 34, 0), line(34, 0, 60, 100), line(18, 62, 50, 62)],
+  B: [line(10, 0, 10, 100), path(line(10, 0, 32, 0), arc(32, 24, 22, 24, -90, 90), line(32, 48, 10, 48)),
+    path(line(10, 48, 36, 48), arc(36, 74, 24, 26, -90, 90), line(36, 100, 10, 100))],
+  C: [arc(40, 50, 32, 50, -40, -320)],
+  D: [line(10, 0, 10, 100), path(line(10, 0, 26, 0), arc(26, 50, 34, 50, -90, 90), line(26, 100, 10, 100))],
+  E: [line(10, 0, 10, 100), line(10, 0, 52, 0), line(10, 50, 44, 50), line(10, 100, 52, 100)],
+  F: [line(10, 0, 10, 100), line(10, 0, 52, 0), line(10, 50, 44, 50)],
+  G: [path(arc(40, 50, 32, 50, -40, -360), line(72, 50, 46, 50))],
+  H: [line(10, 0, 10, 100), line(60, 0, 60, 100), line(10, 50, 60, 50)],
+  I: [line(30, 0, 30, 100), line(12, 0, 48, 0), line(12, 100, 48, 100)],
+  J: [path(line(48, 0, 48, 74), arc(30, 74, 18, 26, 0, 160))],
+  K: [line(10, 0, 10, 100), [[54, 0], [12, 54], [56, 100]]],
+  L: [path(line(10, 0, 10, 100), line(10, 100, 52, 100))],
+  M: [line(8, 0, 8, 100), [[8, 0], [36, 64], [64, 0]], line(64, 0, 64, 100)],
+  N: [line(10, 0, 10, 100), line(10, 0, 56, 100), line(56, 100, 56, 0)],
+  O: [arc(38, 50, 32, 50, -90, -450)],
+  P: [line(10, 0, 10, 100), path(line(10, 0, 32, 0), arc(32, 25, 22, 25, -90, 90), line(32, 50, 10, 50))],
+  Q: [arc(38, 50, 32, 50, -90, -450), line(42, 72, 68, 104)],
+  R: [line(10, 0, 10, 100), path(line(10, 0, 32, 0), arc(32, 25, 22, 25, -90, 90), line(32, 50, 10, 50)), line(26, 50, 56, 100)],
+  S: [path(arc(36, 25, 26, 25, -20, -270), arc(36, 75, 26, 25, -90, 160))],
+  T: [line(30, 0, 30, 100), line(6, 0, 54, 0)],
+  U: [path(line(10, 0, 10, 70), arc(34, 70, 24, 30, 180, 0), line(58, 70, 58, 0))],
+  V: [[[8, 0], [32, 100], [56, 0]]],
+  W: [[[6, 0], [20, 100], [36, 40], [52, 100], [66, 0]]],
+  X: [line(10, 0, 56, 100), line(56, 0, 10, 100)],
+  Y: [line(10, 0, 33, 50), line(56, 0, 33, 50), line(33, 50, 33, 100)],
+  Z: [[[10, 0], [56, 0], [10, 100], [56, 100]]],
+};
+
+/** Strokes for a letter, small or capital. */
+export const strokesFor = (ch: string) => LETTERS[ch] ?? CAPITALS[ch];
+
 /** Points every `step` grid units along a stroke (so tracing progress can be measured evenly). */
 export function resample(stroke: Stroke, step = 2): Pt[] {
   if (stroke.length === 1) return [stroke[0]];

@@ -19,6 +19,7 @@ import * as ispy from './ISpy';
 import * as drum from './Drum';
 import * as dash from './Dash';
 import * as sort from './Sort';
+import * as biglittle from './BigLittle';
 import * as rainbow from './Rainbow';
 import * as road from './Road';
 import * as starletters from './StarLetters';
@@ -55,6 +56,7 @@ export const GAMES = [
   { meta: drum.meta, scene: drum.Drum },
   { meta: dash.meta, scene: dash.Dash },
   { meta: sort.meta, scene: sort.Sort },
+  { meta: biglittle.meta, scene: biglittle.BigLittle },
   // Letter tracing (letter formation).
   { meta: rainbow.meta, scene: rainbow.Rainbow },
   { meta: road.meta, scene: road.Road },

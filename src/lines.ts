@@ -58,6 +58,7 @@ export const LINES = {
     rainbow: "Let's paint rainbow letters! Watch me, then trace the letter with your finger.",
     road: 'Help Chase drive on the letter road! Start at the green light and follow the road.',
     stars: 'Connect the stars to make a letter! Touch the glowing stars in order.',
+    biglittle: 'Big letters and little letters! The mama has a big letter. Tap the baby with the little letter that matches.',
     bowling: 'Tap a lane to roll a Wall-nut and knock down the zombies!',
     whack: 'Pokémon are popping out of the grass! Tap them to catch them!',
     treats: 'Move the pup to catch the yummy treats!',
@@ -98,6 +99,7 @@ export const LINES = {
   runTo: 'Run to', whichPotPic: 'Which pot does it go in?',
   pickBook: 'Pick a book to read!', yourTurnRead: 'Your turn to read! Tap a word if you need help.',
   readBook: 'You read a whole book!', theEnd: 'The end!', whichInBook: 'Which one was in the book?',
+  whichBaby: ['Which baby goes with this mama?', 'Find the little letter!', 'Where is the baby?'], foundMama: 'You found the mama!',
   watchMe: 'Watch me!', yourTurn: 'Your turn! Start at the green dot.', touchStars: 'Touch the stars in order!',
 
   // Words said in parts, for the drum game. One-part words aren't listed (they're just the word).

@@ -1,8 +1,9 @@
 // Paw Patrol — memory match. Early on: letter ↔ keyword picture (m ↔ 🐵).
-// Later: word ↔ picture and heart word ↔ heart word.
+// Later: word ↔ picture and heart word ↔ heart word. At the medium and hard levels, sometimes
+// big letter ↔ little letter (B ↔ b).
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
-import { GRAPHEMES, PIC, HEART, LESSONS } from '../data/curriculum';
+import { GRAPHEMES, PIC, HEART, LESSONS, capitalOf } from '../data/curriculum';
 import { readableWords } from '../choices';
 import { shuffle, pickOne } from '../learner';
 import { LINES } from '../lines';
@@ -20,7 +21,7 @@ export const meta: GameMeta = {
   eligible: () => true,
 };
 
-interface Face { kind: 'letter' | 'pic' | 'word'; value: string; item: string; say: () => Promise<void> }
+interface Face { kind: 'letter' | 'upper' | 'pic' | 'word'; value: string; item: string; say: () => Promise<void> }
 
 const CW = 170, CH = 200;
 
@@ -37,6 +38,14 @@ export class PupMemory extends BaseGame {
   }
 
   private pairs(n: number): [Face, Face][] {
+    // Big letter ↔ little letter, some of the time once a child is past the easiest level.
+    if (this.tier >= 1 && Math.random() < 0.45) {
+      const gs = [...new Set(this.learner.pick(['g'], n * 2, { filter: g => !!capitalOf(g) }))].slice(0, n);
+      if (gs.length === n) return gs.map(g => {
+        const say = () => this.letterSound(g);
+        return [{ kind: 'upper', value: g, item: 'g:' + g, say }, { kind: 'letter', value: g, item: 'g:' + g, say }];
+      });
+    }
     const wordsOk = readableWords(this.lesson, { pic: true }).length >= n;
     const out: [Face, Face][] = [];
     if (wordsOk) {
@@ -76,6 +85,7 @@ export class PupMemory extends BaseGame {
     g.lineStyle(6, 0x1e88e5).strokeRoundedRect(-CW / 2, -CH / 2, CW, CH, 22);
     c.add(g);
     if (face.kind === 'letter') c.add(text(this, 0, 0, GRAPHEMES[face.value].label, 96));
+    else if (face.kind === 'upper') c.add(text(this, 0, 0, capitalOf(face.value)!, 96));
     else if (face.kind === 'word') c.add(new WordView(this, 0, 0, face.value, { size: face.value.length > 4 ? 44 : 56, dots: !HEART[face.value], tapSounds: false }));
     else c.add(emoji(this, 0, 0, PIC[face.value] || face.value, 96));
     return c;

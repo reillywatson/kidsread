@@ -42,7 +42,7 @@ export class StarLetters extends BaseGame {
 
     for (let r = 0; r < letters.length && !this.timeUp(); r++) {
       const g = letters[r];
-      const t = new Tracer(this, g, {
+      const t = new Tracer(this, this.traceForm(g), {
         mode: 'dots',
         ink: () => 0xffd21f,
         track: 0x283593,

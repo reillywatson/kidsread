@@ -35,7 +35,7 @@ export class Rainbow extends BaseGame {
     for (let r = 0; r < letters.length && !this.timeUp(); r++) {
       const g = letters[r];
       const brush = emoji(this, 0, 0, '🖌️', 54).setOrigin(0.15, 0.85);
-      const t = new Tracer(this, g, {
+      const t = new Tracer(this, this.traceForm(g), {
         mode: 'trace',
         ink: (i, total) => Phaser.Display.Color.HSVToRGB(i / total, 0.75, 1).color,
         track: 0xe0e0e0,

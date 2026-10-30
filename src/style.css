@@ -91,3 +91,6 @@ html.turn #stage {
 #parent .usage td:first-child { white-space: nowrap; }
 #parent .usage tr.warn td { background: #fff4e5; }
 #parent .note { background: #fff4e5; border-radius: 10px; padding: 8px 12px; }
+#parent code.restore { font: 700 20px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 1px; background: #f6f7fb;
+  border: 1px solid #c9cfdb; border-radius: 8px; padding: 6px 10px; user-select: all; -webkit-user-select: all; }
+#parent [data-restore-code] { font: 600 17px ui-monospace, Menlo, monospace; padding: 6px 10px; border-radius: 10px; border: 1px solid #c9cfdb; width: 12em; }

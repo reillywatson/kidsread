@@ -21,7 +21,7 @@ tag('[croaky, playful]', LINES.ribbit);
 tag('[playful puppy bark]', LINES.ruff);
 tag('[tiny kitten voice]', LINES.meow);
 tag('[slowly, clapping out each part]', Object.values(LINES.syllables));
-tag('[excited]', LINES.foundAll2, LINES.readBook);
+tag('[excited]', LINES.foundAll2, LINES.readBook, LINES.foundMama);
 const phraseSet = new Set(allLines());
 // Connecting words read plainly, like single words ("like" + "apple").
 const PLAIN = new Set([LINES.like]);

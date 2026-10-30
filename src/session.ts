@@ -1,6 +1,7 @@
 // A play session: a short playlist of minigames, then a sticker.
 import type Phaser from 'phaser';
 import { learner } from './state';
+import { backupNow } from './sync';
 import { GAMES } from './games';
 import type { GameMeta, Theme } from './games/BaseGame';
 
@@ -73,6 +74,7 @@ export class Session {
 
   quit(scene: Phaser.Scene) {
     learner.noteGames(this.games.slice(0, this.i + 1).map(g => g.id));
+    if (import.meta.env.PROD) void backupNow();
     scene.scene.start('Home');
   }
 

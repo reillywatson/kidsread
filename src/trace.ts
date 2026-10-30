@@ -5,7 +5,7 @@
 //    the track counts, and wandering off is never punished (it just doesn't paint).
 //  - 'dots' mode: stars along the letter; touch (or drag through) them in order.
 import Phaser from 'phaser';
-import { LETTERS, bounds, resample, type Pt } from './data/letters';
+import { LETTERS, bounds, resample, strokesFor, type Pt } from './data/letters';
 import type { BaseGame } from './games/BaseGame';
 
 export interface TraceSkin {
@@ -43,7 +43,7 @@ export class Tracer {
   off = 0;
 
   constructor(private scene: BaseGame, public letter: string, private skin: TraceSkin, private tol = 46) {
-    const raw = LETTERS[letter];
+    const raw = strokesFor(letter);
     const b = bounds(raw);
     const x0 = 640 - ((b.x0 + b.x1) / 2) * UNIT;
     const toPx = ([x, y]: Pt): Pt => [x0 + x * UNIT, TOP + y * UNIT];

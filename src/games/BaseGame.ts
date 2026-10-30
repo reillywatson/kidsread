@@ -6,7 +6,7 @@ import Phaser from 'phaser';
 import * as audio from '../audio';
 import { playMusic } from '../music';
 import { LINES } from '../lines';
-import { GRAPHEMES, HEART } from '../data/curriculum';
+import { GRAPHEMES, HEART, capitalOf } from '../data/curriculum';
 import * as state from '../state';
 import type { Session } from '../session';
 import { pickOne, type Result, type Skill, type Tier } from '../learner';
@@ -402,6 +402,21 @@ export abstract class BaseGame extends Phaser.Scene {
   }
 
   record(id: string, result: Result) { this.learner.record(id, result, this.meta.skill); }
+
+  /** Which form of a letter to trace: small, or (at the medium and hard levels, sometimes) capital. */
+  traceForm(g: string) {
+    const cap = capitalOf(g);
+    return cap && cap.length === 1 && Math.random() < [0, 0.3, 0.45][this.tier] ? cap : g;
+  }
+
+  /**
+   * How to show a letter: usually small, but at the medium and hard levels sometimes as a capital,
+   * so children learn that B and b make the same sound.
+   */
+  shown(g: string) {
+    const cap = capitalOf(g);
+    return cap && Math.random() < [0, 0.25, 0.4][this.tier] ? cap : GRAPHEMES[g].label;
+  }
 
   /** Exposure for the other words of a sentence (everything but the word being tested). */
   sawWords(words: string[], except?: string) {

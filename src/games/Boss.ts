@@ -3,7 +3,6 @@
 // health bar. A wrong packet lets the boss stomp a little closer (it never reaches the house).
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
-import { GRAPHEMES } from '../data/curriculum';
 import { graphemeDistractors } from '../choices';
 import { pickOne, shuffle } from '../learner';
 import { LINES } from '../lines';
@@ -60,7 +59,7 @@ export class Boss extends BaseGame {
     gr.fillStyle(0xfff8e1).fillRoundedRect(-75, -95, 150, 190, 18);
     gr.fillStyle(0x7cc242).fillRoundedRect(-75, -95, 150, 44, { tl: 18, tr: 18, bl: 0, br: 0 });
     gr.lineStyle(5, 0x8d6e3f).strokeRoundedRect(-75, -95, 150, 190, 18);
-    c.add([gr, emoji(this, 0, -73, '🌱', 30), text(this, 0, 20, GRAPHEMES[g].label, 80)]);
+    c.add([gr, emoji(this, 0, -73, '🌱', 30), text(this, 0, 20, this.shown(g), 80)]);
     return tappable(c, 150, 190);
   }
 

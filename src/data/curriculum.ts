@@ -119,6 +119,9 @@ const CONFUSABLE = [['b', 'd'], ['b', 'p'], ['d', 'p'], ['m', 'n'], ['n', 'u'], 
   ['e', 'i'], ['a', 'o'], ['o', 'u'], ['a', 'u'], ['sh', 'ch'], ['th', 'f'], ['v', 'f'], ['i', 'l'], ['ng', 'nk'],
   ['ar', 'or'], ['oo', 'oo_u'], ['ou', 'oi'], ['ai', 'ee'], ['oa', 'ou'], ['aw', 'ow']];
 
+/** The capital form of a single-letter grapheme ("b" → "B", "qu" → "Qu"), or null. */
+export const capitalOf = (g: string) => (/^[a-z]$/.test(g) ? g.toUpperCase() : g === 'qu' ? 'Qu' : null);
+
 export const soundClass = (g: string) => (SAME_SOUND.find(s => s.includes(g)) || [g])[0];
 export const confusable = (a: string, b: string) =>
   CONFUSABLE.some(([x, y]) => (x === a && y === b) || (x === b && y === a));

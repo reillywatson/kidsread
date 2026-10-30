@@ -2,7 +2,6 @@
 // bubble with the sound you hear (three per round) and leave the others.
 import Phaser from 'phaser';
 import { BaseGame, Aborted, type GameMeta } from './BaseGame';
-import { GRAPHEMES } from '../data/curriculum';
 import { graphemeDistractors } from '../choices';
 import { pickOne, shuffle } from '../learner';
 import { LINES } from '../lines';
@@ -47,7 +46,7 @@ export class Bubbles extends BaseGame {
         const x = 140 + ((i + 0.5) * 1000) / labels.length + Math.random() * 40;
         // Start spread over the screen so there's something to pop right away.
         const c = this.add.container(x, 240 + ((i * 197) % 520) + Math.random() * 40);
-        c.add([sprite(this, 0, 0, 'bubble', 150), text(this, 0, 0, GRAPHEMES[lab].label, 64, '#0d47a1')]);
+        c.add([sprite(this, 0, 0, 'bubble', 150), text(this, 0, 0, this.shown(lab), 64, '#0d47a1')]);
         tappable(c, 150, 150);
         c.setData('g', lab);
         const rise = () => this.tweens.add({

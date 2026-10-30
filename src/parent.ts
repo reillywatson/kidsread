@@ -8,6 +8,7 @@ import { LINES } from './lines';
 import * as audio from './audio';
 import { GAMES } from './games';
 import { summarize, duration, ago } from './usage';
+import { applyBackup, backupNow, fetchBackup, lastBackup, normalizeCode, onBackup, restoreCode, CODE } from './sync';
 import type { Theme } from './games/BaseGame';
 
 const WORLD: Record<Theme, string> = { pvz: '🌻', pokemon: '⚡', paw: '🐾', friends: '💜' };
@@ -56,11 +57,16 @@ const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;
 const avatarImg = (key: string, size = 44) =>
   `<img src="data:image/svg+xml;base64,${btoa(TEXTURES[key][0])}" width="${size}" height="${size}" alt="">`;
 
+const lastBackupText = () => (lastBackup()
+  ? `${ago(lastBackup())}, ${new Date(lastBackup()).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : 'not yet');
+
 export function openParentArea(onClose: () => void) {
   const root = document.createElement('div');
   root.id = 'parent';
   document.body.append(root);
-  const close = () => { root.remove(); onClose(); };
+  // Keep "Last backup" current while the panel is open.
+  const stopWatching = onBackup(() => { const el = root.querySelector('[data-last]'); if (el) el.textContent = lastBackupText(); });
+  const close = () => { stopWatching(); root.remove(); onClose(); };
   let recorder: MediaRecorder | null = null;
 
   const render = () => {
@@ -72,7 +78,7 @@ export function openParentArea(onClose: () => void) {
       const a = learner.accuracy(skill);
       return a == null ? '—' : `${Math.round(a * 100)}%`;
     };
-    const skills = (['grapheme', 'word', 'spelling', 'sentence', 'heart', 'phonemic', 'rhyme', 'syllable', 'writing'] as const)
+    const skills = (['grapheme', 'word', 'spelling', 'sentence', 'heart', 'phonemic', 'rhyme', 'syllable', 'writing', 'capitals'] as const)
       .map(k => `<tr><td>${k}</td><td>${['easy', 'medium', 'hard'][learner.tier(k)]}</td><td>${pct(k)}</td></tr>`).join('');
     const tricky = sum.tricky.map(t => `<li><b>${esc(t.id.slice(2))}</b> — ${t.right} right, ${t.wrong + t.help} missed</li>`).join('') || '<li>Nothing yet</li>';
     const players = state.profiles().map(p => `
@@ -130,6 +136,19 @@ export function openParentArea(onClose: () => void) {
         </section>
 
         <section>
+          <h2>Backup</h2>
+          <p>Every player's progress on this device is backed up automatically.
+            Last backup: <b data-last>${lastBackupText()}</b>
+            ${import.meta.env.DEV ? '<span class="muted">(backups run on the live site, not in development)</span>' : ''}</p>
+          <p>Restore code: <code class="restore">${restoreCode()}</code> <button data-copy>Copy</button> <button data-backup>Back up now</button></p>
+          <p class="muted">Keep this code somewhere safe. On a new device, or after clearing the browser, enter it
+            below to bring everything back: players, progress, stars, stickers and books. Letter sounds you
+            recorded yourself aren't included.</p>
+          <p><input data-restore-code placeholder="XXXX-XXXX-XXXX" maxlength="16" autocapitalize="characters" spellcheck="false">
+            <button data-restore>Restore</button> <span class="muted" data-note></span></p>
+        </section>
+
+        <section>
           <h2>Settings</h2>
           <label><input type="checkbox" data-music ${settings.music ? 'checked' : ''}> Background music</label>
           <label><input type="checkbox" data-sfx ${settings.sfx ? 'checked' : ''}> Sound effects</label>
@@ -159,6 +178,32 @@ export function openParentArea(onClose: () => void) {
     const d = b.dataset;
     const learner = state.learner;
     if ('close' in d) return close();
+    const note = (t: string) => { const n = root.querySelector<HTMLElement>('[data-note]'); if (n) n.textContent = t; };
+    if ('copy' in d) {
+      try { await navigator.clipboard.writeText(restoreCode()); b.textContent = 'Copied!'; } catch { b.textContent = 'Select and copy it'; }
+      return;
+    }
+    if ('backup' in d) {
+      b.textContent = 'Backing up…';
+      b.textContent = (await backupNow(true)) ? 'Backed up!' : 'Couldn’t back up (offline?)';
+      return;
+    }
+    if ('restore' in d) {
+      const input = root.querySelector<HTMLInputElement>('[data-restore-code]')!;
+      const code = normalizeCode(input.value);
+      if (!CODE.test(code)) { note('That doesn’t look like a restore code (it’s 12 letters and numbers).'); return; }
+      if (code === restoreCode()) { note('That’s this device’s own code.'); return; }
+      note('Looking…');
+      let found;
+      try { found = await fetchBackup(code); } catch { note('Couldn’t reach the server. Are you online?'); return; }
+      if (!found) { note('No backup found for that code.'); return; }
+      const players = Object.keys(found.data.data).filter(k => k.startsWith('kidsread.p.')).length;
+      if (!confirm(`Restore the backup from ${new Date(found.at).toLocaleString()} (${players} player${players === 1 ? '' : 's'})?\n\nThis replaces the players and progress on this device. (This device's current progress is backed up first, under its own code.)`)) { note(''); return; }
+      await backupNow(true);
+      applyBackup(code, found.data);
+      location.reload();
+      return;
+    }
     if (d.lesson) {
       learner.setLesson(d.lesson === '1' ? nextLesson(learner.lesson) : prevLesson(learner.lesson));
     } else if ('test' in d) {

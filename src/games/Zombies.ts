@@ -63,7 +63,7 @@ export class Zombies extends BaseGame {
         sign.fillStyle(0x8d6e3f).fillRect(-5, -150, 10, 60);
         sign.fillStyle(0xfff8e1).fillRoundedRect(-62, -225, 124, 90, 14);
         sign.lineStyle(5, 0x8d6e3f).strokeRoundedRect(-62, -225, 124, 90, 14);
-        z.add([sign, text(this, 0, -180, GRAPHEMES[x].label, 64), sprite(this, 0, -60, Math.random() < 0.35 ? 'zombieCone' : 'zombie', 150)]);
+        z.add([sign, text(this, 0, -180, this.shown(x), 64), sprite(this, 0, -60, Math.random() < 0.35 ? 'zombieCone' : 'zombie', 150)]);
         tappable(z, 150, 260);
         z.setData('g', x);
         this.walk(z, secs);

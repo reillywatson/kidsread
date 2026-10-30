@@ -9,7 +9,7 @@ export const INTERVALS = [0, 2 * MIN, 20 * MIN, DAY, 3 * DAY, 7 * DAY, 21 * DAY,
 export const MASTERED_BOX = 2;
 const RECENT = 12;
 
-export type Skill = 'grapheme' | 'word' | 'sentence' | 'heart' | 'phonemic' | 'rhyme' | 'syllable' | 'spelling' | 'writing' | 'fun';
+export type Skill = 'grapheme' | 'word' | 'sentence' | 'heart' | 'phonemic' | 'rhyme' | 'syllable' | 'spelling' | 'writing' | 'capitals' | 'fun';
 export type Tier = 0 | 1 | 2;
 /** correct = first try; help = needed a model or hint; seen = exposure only. */
 export type Result = 'correct' | 'wrong' | 'help' | 'seen';
@@ -41,6 +41,8 @@ export interface LearnerState {
 
 /** One game (or sticker playground visit), for the grown-ups' "What got played". */
 export interface Play {
+  /** Random, so the server can ignore a play it has already seen. */
+  id?: string;
   game: string;
   /** Start time (ms since epoch). */
   at: number;
@@ -51,6 +53,8 @@ export interface Play {
   right: number;
   total: number;
   stars?: number;
+  /** The child's lesson at the time. */
+  lesson?: number;
 }
 
 const MAX_PLAYS = 500;
@@ -247,7 +251,7 @@ export class Learner {
   addSticker(id: string) { if (!this.s.stickers.includes(id)) this.s.stickers.push(id); this.save(); }
   logPlay(p: Play) {
     const plays = (this.s.plays ??= []);
-    plays.push({ ...p, ms: Math.min(p.ms, MAX_PLAY_MS) });
+    plays.push({ id: Math.random().toString(36).slice(2, 12), lesson: this.s.lesson, ...p, ms: Math.min(p.ms, MAX_PLAY_MS) });
     if (plays.length > MAX_PLAYS) plays.splice(0, plays.length - MAX_PLAYS);
     this.save();
   }
