@@ -149,7 +149,7 @@ export function shortVowel(w: string): string | null {
 }
 
 
-// ---- Counting sounds (Rubble's Bones) ----
+// ---- Counting sounds (Kitten Rescue picks words by length) ----
 // Graphemes whose sound is really two sounds (x = /ks/) — skipped to keep counting clear.
 const TWO_SOUNDS = new Set(['x', 'qu', 'nk', 'all', 'oll', 'ull']);
 export const soundCount = (w: string) => segment(w).filter(t => t.g).length;

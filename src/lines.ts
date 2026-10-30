@@ -40,7 +40,6 @@ export const LINES = {
     evolve: "Let's evolve! Change one letter to make a new word.",
     pupmessage: 'Ryder sent a message! Read it, then tap the picture that matches.',
     pupmemory: 'Find the matching pairs! Tap two badges to flip them over.',
-    bones: 'Rubble is hungry! Give him one bone for each sound in the word.',
     monster: "I'm the Letter Monster, and I'm hungry! Feed me things that start with my sound.",
     frog: 'Froggy wants to hop! Tap the picture that rhymes.',
     bubbles: 'Bubbles! Pop every bubble with the sound you hear.',

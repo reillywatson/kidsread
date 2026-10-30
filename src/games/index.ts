@@ -24,7 +24,6 @@ import * as rainbow from './Rainbow';
 import * as road from './Road';
 import * as starletters from './StarLetters';
 import * as evolve from './Evolve';
-import * as bones from './Bones';
 import * as garden from './Garden';
 import * as bowling from './Bowling';
 import * as whack from './Whack';
@@ -40,7 +39,6 @@ export const GAMES = [
   { meta: evolve.meta, scene: evolve.Evolve },
   { meta: pupmessage.meta, scene: pupmessage.PupMessage },
   { meta: pupmemory.meta, scene: pupmemory.PupMemory },
-  { meta: bones.meta, scene: bones.Bones },
   { meta: monster.meta, scene: monster.Monster },
   { meta: frog.meta, scene: frog.Frog },
   { meta: bubbles.meta, scene: bubbles.Bubbles },
