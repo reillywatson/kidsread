@@ -1,6 +1,7 @@
 // Pokémon — decoding. Word mode: read a word (tap letters for their sounds), catch the
 // matching picture in a Poké Ball. Letter mode (before enough picture words exist):
-// see a letter, catch the picture that starts with its sound.
+// see a letter, catch the picture that starts with its sound. Caught balls line up on a rack,
+// and at the end they all pop open at once.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES, PIC, segment } from '../data/curriculum';
@@ -22,14 +23,20 @@ export const meta: GameMeta = {
 
 const wordMode = (lesson: number) => readableWords(lesson, { pic: true }).length >= 3;
 
+/** Rack spots for caught Poké Balls, right of the word board; and who's inside them. */
+const RACK = [[1110, 170], [1200, 170], [1110, 260], [1200, 260], [1110, 350], [1200, 350]];
+const INSIDE = ['bulbasaur', 'charmander', 'squirtle', 'pikachu'];
+
 export class PikaBlend extends BaseGame {
   private pika!: Phaser.GameObjects.Image;
+  private rack: Phaser.GameObjects.Image[] = [];
 
   constructor() { super(meta); }
 
   protected setup() {
     this.add.image(640, 360, 'bgField');
     this.pika = this.tickle(sprite(this, 150, 450, 'pikachu', 280), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
+    this.rack = [];
     const g = this.add.graphics();
     g.fillStyle(0x8d6e3f).fillRect(630, 290, 20, 60);
     g.fillStyle(0x000000, 0.15).fillRoundedRect(372, 128, 560, 180, 30);
@@ -50,12 +57,36 @@ export class PikaBlend extends BaseGame {
     this.pika.setTexture('pikachu');
     this.tweens.add({ targets: this.pika, y: this.pika.y - 60, duration: 220, yoyo: true, ease: 'Quad.Out' });
     void audio.say(pickOne(LINES.pika), { style: 'pika' });
-    this.time.delayedCall(900, () => ball.destroy());
+    // Onto the rack it goes.
+    const spot = RACK[this.rack.length % RACK.length];
+    this.rack.push(ball);
+    this.tweens.add({ targets: ball, x: spot[0], y: spot[1], scale: 70 / ball.height, duration: 600, delay: 300, ease: 'Sine.InOut' });
+  }
+
+  /** Every ball on the rack pops open at once, and out come the Pokémon. */
+  private async openAll() {
+    if (!this.rack.length) return;
+    await this.wait(400);
+    this.sfx.zap();
+    this.cameras.main.flash(250, 255, 255, 255);
+    this.rack.forEach((ball, i) => {
+      const mon = sprite(this, ball.x, ball.y, INSIDE[i % INSIDE.length], 100);
+      const full = mon.scale;
+      mon.setScale(0);
+      ball.setVisible(false);
+      burst(this, ball.x, ball.y, ['⭐', '✨'], 5);
+      this.tweens.add({ targets: mon, scale: full, duration: 350, delay: i * 70, ease: 'Back.Out' });
+      this.tweens.add({ targets: mon, y: mon.y - 30, duration: 200, delay: 450 + i * 70, yoyo: true, repeat: 1, ease: 'Quad.Out' });
+    });
+    this.tweens.add({ targets: this.pika, y: this.pika.y - 60, duration: 220, yoyo: true, repeat: 1, ease: 'Quad.Out' });
+    void audio.say(pickOne(LINES.pika), { style: 'pika' });
+    await this.wait(1200);
   }
 
   protected async run() {
     if (wordMode(this.lesson)) await this.runWords();
     else await this.runLetters();
+    await this.openAll();
   }
 
   private async runWords() {

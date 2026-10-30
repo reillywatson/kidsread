@@ -1,9 +1,10 @@
 // Plants vs. Zombies — drag and drop: two pots, each with a letter. Drag each picture into the
 // pot with the letter it starts with (tapping a pot works too). Flowers bloom over each pot as
-// it fills up.
+// it fills up, and each sorted picture stays beside its pot. At the end each pot says its sound
+// and reads back its pictures.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
-import { BANK, GRAPHEMES } from '../data/curriculum';
+import { BANK, GRAPHEMES, PIC } from '../data/curriculum';
 import { canStartWord, graphemeDistractors, picsStartingWithLetter } from '../choices';
 import { pickOne, shuffle } from '../learner';
 import { LINES } from '../lines';
@@ -23,6 +24,8 @@ export const meta: GameMeta = {
 const POT_Y = 560;
 const START = { x: 640, y: 250 };
 const FLOWERS = ['🌷', '🌻', '🌼', '🌸', '🌺'];
+/** Where sorted pictures sit around a pot (offsets from its center), on the outer side first. */
+const BESIDE = [[-150, -10], [-150, 70], [150, -10], [150, 70], [-135, -90], [135, -90]];
 const sortable = (g: string) => canStartWord(g) && picsStartingWithLetter(g).length >= 3;
 
 export class Sort extends BaseGame {
@@ -48,6 +51,7 @@ export class Sort extends BaseGame {
     const pics = letters.flatMap(g => shuffle(picsStartingWithLetter(g).filter((w, i, all) => all.findIndex(o => BANK[o] === BANK[w]) === i))
       .slice(0, Math.ceil(n / 2)).map(w => ({ w, g })));
     const order = shuffle(pics).slice(0, n);
+    const sorted = new Map<Phaser.GameObjects.Container, { w: string; pic: Phaser.GameObjects.Text }[]>(pots.map(p => [p, []]));
 
     for (let r = 0; r < order.length && !this.timeUp(); r++) {
       const { w, g } = order[r];
@@ -83,6 +87,13 @@ export class Sort extends BaseGame {
       this.input.setDraggable(card, false);
       await this.tween({ targets: card, x: pot.x, y: pot.y - 20, scale: 0.2, alpha: 0, duration: 350, ease: 'Cubic.In' });
       card.destroy();
+      // The picture stays beside its pot.
+      const here = sorted.get(pot)!;
+      const [dx, dy] = BESIDE[here.length % BESIDE.length];
+      const side = pot.x < 640 ? 1 : -1; // outer side first, away from the middle
+      const pic = emoji(this, pot.x + dx * side, pot.y + dy, PIC[w] || BANK[w] || '❓', 50).setScale(0);
+      this.tweens.add({ targets: pic, scale: 1, duration: 300, delay: 150, ease: 'Back.Out' });
+      here.push({ w, pic });
       this.sfx.grow();
       const k = pot.getData('bloom') as number;
       pot.setData('bloom', k + 1);
@@ -93,6 +104,21 @@ export class Sort extends BaseGame {
       await this.say(w);
       await this.praise(res.firstTry);
       this.progress();
+    }
+    await this.readBack(sorted);
+  }
+
+  /** Each pot says its sound, then every picture beside it hops as it's named. */
+  private async readBack(sorted: Map<Phaser.GameObjects.Container, { w: string; pic: Phaser.GameObjects.Text }[]>) {
+    for (const [pot, here] of sorted) {
+      if (!here.length) continue;
+      this.tweens.add({ targets: pot, scale: 1.12, duration: 180, yoyo: true, ease: 'Quad.Out' });
+      await this.letterSound(pot.getData('g'));
+      for (const { w, pic } of here) {
+        this.tweens.add({ targets: pic, y: pic.y - 26, duration: 160, yoyo: true, ease: 'Quad.Out' });
+        await this.say(w);
+      }
+      burst(this, pot.x, pot.y - 150, ['🌼', '✨'], 8);
     }
   }
 }

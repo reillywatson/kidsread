@@ -1,5 +1,6 @@
 // Pokémon — encoding (UFLI word work): hear a word, build it sound by sound in
-// Elkonin boxes from letter tiles. Filling the word catches a Poké Ball.
+// Elkonin boxes from letter tiles. Filling the word catches a Pokémon: the ball wobbles, pops
+// open, and the Pokémon joins the team along the top. At the end the whole team cheers.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { PIC, segment, GRAPHEMES } from '../data/curriculum';
@@ -21,13 +22,53 @@ export const meta: GameMeta = {
 
 const BOX_Y = 330;
 const TILE_Y = 580;
+/** Who each spelled word catches, in order. */
+const CATCHES = ['bulbasaur', 'charmander', 'squirtle'];
 
 export class PikaSpell extends BaseGame {
+  private pika!: Phaser.GameObjects.Image;
+  private team: Phaser.GameObjects.Image[] = [];
+
   constructor() { super(meta); }
 
   protected setup() {
     this.add.image(640, 360, 'bgField');
-    this.tickle(sprite(this, 1150, 470, 'pikachu', 220), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
+    this.pika = this.tickle(sprite(this, 1150, 470, 'pikachu', 220), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
+    this.team = [];
+  }
+
+  /** The ball pops open and a Pokémon hops up to join the team (top left, clear of the word's picture). */
+  private async release(ball: Phaser.GameObjects.Image) {
+    const key = CATCHES[this.team.length % CATCHES.length];
+    const slot = { x: 90 + this.team.length * 100, y: 170 };
+    this.sfx.zap();
+    this.cameras.main.flash(150, 255, 255, 255);
+    const mon = sprite(this, ball.x, ball.y, key, 120);
+    const full = mon.scale;
+    mon.setScale(0);
+    this.tickle(mon);
+    this.team.push(mon);
+    ball.setVisible(false);
+    await this.tween({ targets: mon, scale: full, duration: 300, ease: 'Back.Out' });
+    await this.wait(250);
+    this.sfx.hop();
+    await Promise.all([
+      this.tween({ targets: mon, x: slot.x, scale: full * 0.75, duration: 600, ease: 'Sine.InOut' }),
+      (async () => {
+        await this.tween({ targets: mon, y: Math.min(ball.y, slot.y) - 90, duration: 300, ease: 'Quad.Out' });
+        await this.tween({ targets: mon, y: slot.y, duration: 300, ease: 'Quad.In' });
+      })(),
+    ]);
+  }
+
+  /** The whole team jumps for joy with Pikachu. */
+  private async teamCheer() {
+    if (!this.team.length) return;
+    [...this.team, this.pika].forEach((m, i) =>
+      this.tweens.add({ targets: m, y: m.y - 50, duration: 220, delay: i * 90, yoyo: true, repeat: 1, ease: 'Quad.Out' }));
+    this.team.forEach(m => burst(this, m.x, m.y - 30, ['⭐', '✨'], 5));
+    void audio.say(pickOne(LINES.pika), { style: 'pika' });
+    await this.wait(1000);
   }
 
   protected async run() {
@@ -120,9 +161,11 @@ export class PikaSpell extends BaseGame {
       ball.angle = 0;
       burst(this, 640, 470);
       tiles.filter(c => !c.getData('used')).forEach(c => wiggle(this, c));
+      await this.release(ball);
       await this.praise(ok);
       objs.forEach(o => o.destroy());
       this.progress();
     }
+    await this.teamCheer();
   }
 }

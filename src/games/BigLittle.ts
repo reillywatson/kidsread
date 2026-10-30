@@ -1,6 +1,7 @@
 // Friends — capital letters: a big mama animal holds a big letter; tap the baby holding the
 // matching little letter ("big B, little b"), and it runs to its mama. At the hardest level the
-// other babies hold look-alikes (b, d, p).
+// other babies hold look-alikes (b, d, p). Each family that finds each other joins a parade
+// along the bottom beside its letter pair ("Bb"); at the end each family hops as its sound plays.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES, capitalOf } from '../data/curriculum';
@@ -23,9 +24,12 @@ export const meta: GameMeta = {
 const FAMILIES: [string, string][] = [['🐔', '🐤'], ['🦆', '🦆'], ['🐑', '🐑'], ['🐘', '🐘'], ['🐄', '🐄'], ['🐈', '🐈'],
   ['🐕', '🐕'], ['🐢', '🐢'], ['🐖', '🐖'], ['🐓', '🐥']];
 const MAMA = { x: 960, y: 450 };
-const BABY_Y = 560;
+const BABY_Y = 535;
+const PARADE_Y = 672;
 
 export class BigLittle extends BaseGame {
+  private parade: { g: string; items: (Phaser.GameObjects.Text | Phaser.GameObjects.Container)[] }[] = [];
+
   constructor() { super(meta); }
 
   protected setup() {
@@ -47,10 +51,12 @@ export class BigLittle extends BaseGame {
     const n = this.rounds(5);
     const gs = this.learner.pick(['g'], n, { filter: g => !!capitalOf(g) });
     const nBabies = [2, 3, 3][this.tier];
+    this.parade = [];
+    const families = shuffle(FAMILIES);
 
     for (let r = 0; r < gs.length && !this.timeUp(); r++) {
       const g = gs[r];
-      const [mamaPic, babyPic] = pickOne(FAMILIES);
+      const [mamaPic, babyPic] = families[r % families.length];
       const mama = emoji(this, MAMA.x, MAMA.y, mamaPic, 230);
       const big = this.sign(MAMA.x, 190, capitalOf(g)!, 74, 110);
       [mama, big].forEach((o, i) => this.tweens.add({ targets: o, scale: { from: 0, to: 1 }, duration: 350, delay: i * 80, ease: 'Back.Out' }));
@@ -94,9 +100,36 @@ export class BigLittle extends BaseGame {
       if (r === 0) await this.say(LINES.foundMama);
       await this.letterSound(g);
       await this.praise(res.firstTry);
-      await this.tween({ targets: [mama, big, ...babies], alpha: 0, duration: 250 });
-      [mama, big, ...babies].forEach(o => o.destroy());
+      await this.tween({ targets: [big, ...babies.filter(b => b !== baby)], alpha: 0, duration: 250 });
+      [big, ...babies.filter(b => b !== baby)].forEach(o => o.destroy());
+      await this.joinParade(g, mama, baby);
       this.progress();
+    }
+    await this.paradeHop();
+  }
+
+  /** Mama and baby walk down to the parade along the bottom, under their letters. */
+  private async joinParade(g: string, mama: Phaser.GameObjects.Text, baby: Phaser.GameObjects.Container) {
+    const x = 160 + this.parade.length * 200;
+    const tag = text(this, x - 80, PARADE_Y - 4, capitalOf(g)! + GRAPHEMES[g].label, 34, '#5e35b1').setStroke('#ffffff', 7).setScale(0);
+    this.sfx.hop();
+    this.tweens.killTweensOf(mama);
+    await Promise.all([
+      this.tween({ targets: mama, x: x - 10, y: PARADE_Y - 6, scale: 70 / 230, duration: 600, ease: 'Sine.InOut' }),
+      this.tween({ targets: baby, x: x + 48, y: PARADE_Y - 30, scale: 0.42, duration: 600, ease: 'Sine.InOut' }),
+    ]);
+    // The baby's sign has done its job: the tag above shows the pair.
+    (baby.list[1] as Phaser.GameObjects.Container).setVisible(false);
+    this.tweens.add({ targets: tag, scale: 1, duration: 250, ease: 'Back.Out' });
+    this.parade.push({ g, items: [mama, baby, tag] });
+  }
+
+  /** Each family hops in turn as its letter's sound plays. */
+  private async paradeHop() {
+    for (const { g, items } of this.parade) {
+      this.tweens.add({ targets: items, y: '-=30', duration: 180, yoyo: true, ease: 'Quad.Out' });
+      burst(this, items[0].x + 30, PARADE_Y - 40, ['💜', '✨'], 5);
+      await this.letterSound(g);
     }
   }
 }

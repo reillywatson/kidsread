@@ -118,12 +118,58 @@ export const STORIES: Story[] = [
     ],
   },
   {
+    id: 'van', title: 'The Vet and the Van', cover: '🚐', bg: 'town', pages: [
+      { text: 'The vet has a van.', art: [['🚐', 40, 30, 190], ['🧑‍⚕️', -170, 10, 130]] },
+      { text: 'A sad pup is in the van.', art: [['🚐', 0, 30, 200], ['🐶', 30, -40, 80], ['💧', 80, -80, 34]] },
+      { text: 'The vet can fix the pup.', art: [['🧑‍⚕️', -90, 0, 140], ['🐶', 90, 30, 110], ['🩹', 90, -50, 50]] },
+      { text: 'Zip, zap! The pup is not sad.', art: [['🐶', 0, 10, 150], ['✨', -110, -80, 60], ['✨', 110, -70, 50]] },
+      { text: 'The pup and the vet hug.', art: [['🧑‍⚕️', -60, 0, 140], ['🐶', 60, 20, 110], ['💖', 0, -110, 60]] },
+    ],
+  },
+  {
+    id: 'crab', title: 'The Crab and the Flag', cover: '🦀', bg: 'pond', pages: [
+      { text: 'A crab is on the sand.', art: [['🏖️', -70, 20, 190], ['🦀', 130, 70, 100]] },
+      { text: 'The crab has a flag.', art: [['🦀', -40, 30, 140], ['🚩', 80, -40, 100]] },
+      { text: 'Snap! Snap! The crab can clap.', art: [['🦀', 0, 20, 160], ['👏', -130, -80, 60], ['👏', 130, -80, 60]] },
+      { text: 'An ant is on the flag.', art: [['🚩', 0, 0, 180], ['🐜', 20, -60, 60]] },
+      { text: 'The crab and the ant are glad.', art: [['🦀', -80, 30, 130], ['🐜', 90, 40, 80], ['😊', 0, -100, 60]] },
+    ],
+  },
+  {
+    id: 'kit', title: 'Kit Can Swim', cover: '🏊', bg: 'pond', pages: [
+      { text: 'Kit can skip.', art: [['🧒', 0, 0, 160], ['💨', -110, 40, 60]] },
+      { text: 'Kit can spin.', art: [['🧒', 0, 0, 150], ['🌀', 0, -110, 60], ['🌀', 120, 0, 50]] },
+      { text: 'Kit can swim!', art: [['🏊', 0, 20, 170], ['💦', 120, -50, 60]] },
+      { text: 'Dad has a gift for Kit.', art: [['👨', -100, 0, 140], ['🎁', 70, 40, 100], ['🧒', 190, 10, 100]] },
+      { text: 'It is milk! Kit and Dad grin.', art: [['🥛', 0, 30, 120], ['🧒', -150, 10, 110], ['👨', 150, 0, 120], ['😁', 0, -100, 56]] },
+    ],
+  },
+  {
+    id: 'blob', title: 'The Blob', cover: '🔴', bg: 'home', pages: [
+      { text: 'A red blob is on the bed.', art: [['🛏️', 0, 50, 220], ['🔴', 0, -40, 90], ['👀', 0, -50, 44]] },
+      { text: 'The blob can hop.', art: [['🔴', 0, -30, 110], ['👀', 0, -40, 50], ['💨', 0, 80, 60]] },
+      { text: 'The blob can trot.', art: [['🔴', 20, 0, 110], ['👀', 20, -10, 50], ['💨', -120, 20, 60]] },
+      { text: 'Stop, blob! Stop!', art: [['🔴', 0, 0, 130], ['👀', 0, -10, 56], ['🛑', 170, -60, 70]] },
+      { text: 'Plop! The blob is in a pot.', art: [['🪴', 0, 40, 190], ['🔴', 0, -50, 70], ['💥', 120, -90, 50]] },
+      { text: 'The blob is soft and fun.', art: [['🔴', 0, 0, 130], ['👀', 0, -10, 56], ['💖', 120, -80, 50]] },
+    ],
+  },
+  {
     id: 'frog', title: 'The Frog and the Crab', cover: '🐸', bg: 'pond', pages: [
       { text: 'A frog sat on a log.', art: [['🪵', 0, 60, 180], ['🐸', 0, -20, 110]] },
       { text: 'A crab ran to the pond.', art: [['🦀', -130, 20, 110], ['🌊', 110, 50, 160]] },
       { text: 'The frog can jump!', art: [['🐸', 0, -40, 130], ['✨', -100, 60, 50], ['✨', 100, 60, 50]] },
       { text: 'Plop! The frog is in the pond.', art: [['🌊', 0, 60, 200], ['🐸', 0, -30, 100], ['💦', 90, -80, 60]] },
       { text: 'The frog and the crab swim.', art: [['🌊', 0, 70, 220], ['🐸', -80, 0, 100], ['🦀', 90, 10, 100]] },
+    ],
+  },
+  {
+    id: 'elf', title: 'The Elf and the Bell', cover: '🧝', bg: 'park', pages: [
+      { text: 'An elf has a bell.', art: [['🧝', -60, 0, 150], ['🔔', 90, -20, 90]] },
+      { text: 'The bell is on his belt.', art: [['🧝', 0, 0, 170], ['🔔', 50, 50, 66]] },
+      { text: 'The elf went up the hill.', art: [['⛰️', 0, 30, 240], ['🧝', -80, -20, 80]] },
+      { text: 'Puff! Puff! The elf is at the top.', art: [['⛰️', 0, 40, 240], ['🧝', 0, -100, 70], ['💨', 90, -100, 44]] },
+      { text: 'The elf sat on the grass.', art: [['🌿', -60, 70, 90], ['🌿', 60, 70, 90], ['🧝', 0, -10, 130]] },
     ],
   },
   {
@@ -190,12 +236,58 @@ export const STORIES: Story[] = [
     ],
   },
   {
+    id: 'storm', title: 'The Storm', cover: '⛈️', bg: 'farm', pages: [
+      { text: 'A storm is on the farm.', art: [['⛈️', 0, -40, 180], ['🌾', -150, 90, 70], ['🌾', 150, 90, 70]] },
+      { text: 'The hen ran to the barn.', art: [['🏠', 90, 10, 170], ['🐔', -130, 40, 100]] },
+      { text: 'The pig ran to the barn.', art: [['🏠', 90, 10, 170], ['🐷', -130, 40, 100]] },
+      { text: 'The storm is short.', art: [['⛈️', -80, -40, 120], ['🌤️', 100, -20, 120]] },
+      { text: 'Then the sun is up!', art: [['☀️', 0, -20, 170], ['🌈', 0, 90, 90]] },
+      { text: 'The hen has corn in the yard.', art: [['🐔', -60, 10, 140], ['🌽', 80, 40, 90]] },
+    ],
+  },
+  {
+    id: 'bird', title: 'The Girl and the Bird', cover: '🐦', bg: 'park', pages: [
+      { text: 'A girl has a pink shirt.', art: [['👧', -60, 0, 150], ['👚', 100, 20, 100]] },
+      { text: 'A bird sat on her arm.', art: [['👧', 0, 20, 170], ['🐦', 70, -40, 70]] },
+      { text: 'The bird can swirl and turn.', art: [['🐦', 0, -10, 120], ['🌀', -130, 40, 70], ['🌀', 130, -60, 60]] },
+      { text: 'The girl had a nut for the bird.', art: [['👧', -80, 10, 150], ['🥜', 40, 20, 60], ['🐦', 150, -30, 90]] },
+      { text: 'The girl and the bird are glad.', art: [['👧', -70, 10, 150], ['🐦', 90, -30, 90], ['💖', 10, -110, 56]] },
+    ],
+  },
+  {
+    id: 'snail', title: 'The Snail and the Rain', cover: '🐌', bg: 'park', pages: [
+      { text: 'It is a gray day.', art: [['☁️', -80, -40, 150], ['☁️', 100, -20, 120]] },
+      { text: 'Here is the rain!', art: [['🌧️', 0, -30, 180], ['💧', -120, 90, 40], ['💧', 120, 80, 40]] },
+      { text: 'A snail is on a pail.', art: [['🪣', 0, 40, 170], ['🐌', 0, -60, 80]] },
+      { text: 'The snail can wait in the rain.', art: [['🌧️', 0, -80, 130], ['🐌', 0, 60, 110]] },
+      { text: 'The snail can play in the mud.', art: [['🐌', -40, 20, 130], ['🟤', 60, 80, 70], ['🎉', 150, -60, 56]] },
+    ],
+  },
+  {
     id: 'sheep', title: 'The Sheep and the Bee', cover: '🐑', bg: 'park', pages: [
       { text: 'A sheep is in a green tree.', art: [['🌳', 0, 10, 240], ['🐑', 10, -40, 90]] },
       { text: 'A bee is on the sheep.', art: [['🐑', 0, 30, 170], ['🐝', 10, -70, 70]] },
       { text: 'The bee and the sheep sleep.', art: [['🐑', -40, 40, 150], ['🐝', 110, -30, 70], ['💤', 30, -100, 60]] },
       { text: 'The sheep had a dream.', art: [['🐑', -80, 50, 140], ['💭', 90, -60, 140], ['🌳', 90, -70, 60]] },
       { text: 'It is a dream of a big green tree.', art: [['🌳', 0, 0, 230], ['✨', -150, -90, 60], ['✨', 150, -90, 60]] },
+    ],
+  },
+  {
+    id: 'goat', title: 'The Goat and the Boat', cover: '🐐', bg: 'pond', pages: [
+      { text: 'A goat has a boat.', art: [['🐐', -90, 0, 140], ['⛵', 100, 20, 140]] },
+      { text: 'The goat can row the boat.', art: [['🚣', 0, 30, 180], ['🐐', 0, -60, 70]] },
+      { text: 'Slow, slow, the boat can float.', art: [['⛵', 0, 0, 180], ['🌊', -140, 90, 60], ['🌊', 140, 90, 60]] },
+      { text: 'A toad is on the boat!', art: [['⛵', 0, 20, 190], ['🐸', 40, -40, 70], ['😮', -150, -90, 50]] },
+      { text: 'The goat and the toad eat toast.', art: [['🐐', -110, 10, 130], ['🐸', 110, 40, 90], ['🍞', 0, 60, 80]] },
+    ],
+  },
+  {
+    id: 'night', title: 'Night Light', cover: '💡', bg: 'night', pages: [
+      { text: 'It is night.', art: [['🌙', 0, -20, 170], ['⭐', -150, -90, 40], ['⭐', 160, 40, 34]] },
+      { text: 'A light is on.', art: [['💡', 0, 0, 170]] },
+      { text: 'Mom has a pie for me.', art: [['👩', -90, 0, 140], ['🥧', 90, 40, 100]] },
+      { text: 'The light is bright and high.', art: [['💡', 0, -50, 120], ['✨', -110, -90, 50], ['✨', 110, -80, 44], ['🧒', 0, 90, 70]] },
+      { text: 'Sleep tight!', art: [['🛏️', 0, 50, 200], ['😴', 0, -30, 90], ['💤', 110, -100, 56]] },
     ],
   },
   {
@@ -208,6 +300,16 @@ export const STORIES: Story[] = [
     ],
   },
   {
+    id: 'cow', title: 'The Cow and the Owl', cover: '🦉', bg: 'farm', pages: [
+      { text: 'A cow is on the ground.', art: [['🐄', 0, 30, 190]] },
+      { text: 'An owl sat on the cow.', art: [['🐄', 0, 50, 180], ['🦉', 10, -70, 80]] },
+      { text: 'Moo! said the cow.', art: [['🐄', 0, 30, 180], ['💬', 120, -80, 60]] },
+      { text: 'Who? said the owl.', art: [['🦉', 0, 0, 160], ['❓', 110, -80, 60]] },
+      { text: 'The cow and the owl found a crown.', art: [['🐄', -100, 40, 150], ['🦉', 100, 20, 100], ['👑', 0, -90, 70]] },
+      { text: 'Now the cow is proud!', art: [['🐄', 0, 40, 180], ['👑', 0, -80, 70], ['✨', 130, -60, 50]] },
+    ],
+  },
+  {
     id: 'boy', title: 'The Boy and the Toy', cover: '👦', bg: 'home', pages: [
       { text: 'A boy had a toy.', art: [['👦', -80, 10, 150], ['🧸', 110, 30, 110]] },
       { text: 'The boy had a coin.', art: [['👦', -60, 10, 150], ['🪙', 110, 0, 80]] },
@@ -216,6 +318,25 @@ export const STORIES: Story[] = [
       { text: 'The boy is full of joy.', art: [['👦', 0, 10, 150], ['😄', 120, -80, 60], ['💖', -120, -80, 60]] },
     ],
   },
+  {
+    id: 'draw', title: 'I Can Draw', cover: '🖍️', bg: 'home', pages: [
+      { text: 'I can draw.', art: [['🖍️', -60, 0, 140], ['📄', 80, 10, 150]] },
+      { text: 'I draw a hawk. It has a big claw.', art: [['📄', 0, 10, 220], ['🦅', 0, 0, 120]] },
+      { text: 'I draw a cat. It has a paw.', art: [['📄', 0, 10, 220], ['🐱', -20, -10, 100], ['🐾', 70, 60, 50]] },
+      { text: 'I draw the dawn.', art: [['📄', 0, 10, 220], ['🌅', 0, 0, 120]] },
+      { text: 'I yawn. Good night!', art: [['🥱', 0, 0, 160], ['🌙', 140, -90, 60]] },
+    ],
+  },
+  {
+    id: 'stew', title: 'The Stew', cover: '🍲', bg: 'home', pages: [
+      { text: 'Dad made a stew.', art: [['👨', -100, 0, 140], ['🍲', 90, 40, 110]] },
+      { text: 'The stew is hot. I blew on it.', art: [['🍲', 30, 40, 150], ['🧒', -150, 0, 110], ['💨', -50, -10, 56], ['🔥', 120, -70, 44]] },
+      { text: 'I chew and chew.', art: [['😋', 0, 0, 150], ['🍲', 130, 70, 70]] },
+      { text: 'Yum! The stew is good.', art: [['🍲', 0, 40, 140], ['👍', -140, -60, 60], ['😋', 140, -60, 60]] },
+      { text: 'Then Dad drew a blue car for me.', art: [['👨', -140, 0, 130], ['📄', 70, 10, 190], ['🚙', 70, 10, 100]] },
+    ],
+  },
+
 ];
 
 /** A word of a story, as the curriculum lists it ("The" → "the", but "I" stays "I"). */
