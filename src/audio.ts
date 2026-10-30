@@ -60,6 +60,18 @@ export function unlock() {
   try { ac(); } catch { /* no WebAudio */ }
 }
 
+/**
+ * Whether sound can play without a tap first. Browsers (always on iPad) hold audio back until
+ * the first tap, then release everything at once; the boot screen asks for a tap instead.
+ */
+export async function canPlayNow(): Promise<boolean> {
+  let c: AudioContext;
+  try { c = ac(); } catch { return true; }
+  if (c.state === 'running') return true;
+  await Promise.race([c.resume().catch(() => {}), new Promise(r => setTimeout(r, 300))]);
+  return (c.state as AudioContextState) === 'running';
+}
+
 // ---------- Clips ----------
 const buffers = new Map<string, Promise<AudioBuffer | null>>();
 function load(key: string): Promise<AudioBuffer | null> {
@@ -109,8 +121,9 @@ async function playBuffer(key: string, rate = 1): Promise<boolean> {
   await new Promise<void>(resolve => {
     src.onended = () => resolve();
     src.start();
-    // Safety net if onended never fires (backgrounded tab).
-    setTimeout(resolve, (buf.duration / rate) * 1000 + 500);
+    // Safety net if onended never fires: the audio is suspended (sound not unlocked yet, or a
+    // backgrounded tab). Cancel the clip too, or it would play late, over whatever comes next.
+    setTimeout(() => { try { src.stop(); } catch { /* already stopped */ } resolve(); }, (buf.duration / rate) * 1000 + 500);
   });
   duck(false);
   if (current === src) current = null;

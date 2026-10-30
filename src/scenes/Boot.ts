@@ -3,7 +3,7 @@ import { TEXTURES, OVERRIDES } from '../art';
 import { Session } from '../session';
 import { GAMES } from '../games';
 import { profiles, selectProfile, createProfile } from '../state';
-import { preload } from '../audio';
+import { canPlayNow, preload, sfx } from '../audio';
 import { LINES } from '../lines';
 
 /** Rasterizes the SVG art into textures. */
@@ -26,6 +26,30 @@ export class Boot extends Phaser.Scene {
   create() {
     // Just what the first screens say; each game loads its own lines as it starts.
     preload([LINES.whoIsPlaying, LINES.pickPicture, LINES.hiNew, LINES.welcomeBack, ...Object.values(LINES.worldHello)]);
+    // Dev: ?tap shows the tap-to-start screen even where sound could start on its own.
+    const forceTap = import.meta.env.DEV && new URLSearchParams(location.search).has('tap');
+    void canPlayNow().then(ok => (ok && !forceTap ? this.go() : this.tapToStart()));
+  }
+
+  /**
+   * Sound is held back until the first tap, so ask for one: a big play button. (Otherwise the
+   * greeting and music would wait for the tap on a profile and play over "welcome back".)
+   */
+  private tapToStart() {
+    this.children.removeAll(true);
+    this.add.image(640, 360, 'bgHome');
+    const btn = this.add.container(640, 340);
+    const g = this.add.graphics();
+    g.fillStyle(0x000000, 0.15).fillCircle(6, 12, 130);
+    g.fillStyle(0x43c35e).fillCircle(0, 0, 130).lineStyle(10, 0xffffff).strokeCircle(0, 0, 130);
+    g.fillStyle(0xffffff).fillTriangle(-38, -62, -38, 62, 66, 0);
+    btn.add(g);
+    this.tweens.add({ targets: btn, scale: 1.08, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+    // The whole screen works, not just the button; main.ts unlocks sound on this same tap.
+    this.input.once('pointerdown', () => { sfx.pop(); this.go(); });
+  }
+
+  private go() {
     // Dev shortcut: ?game=zombies plays just that minigame (as the first player).
     const only = new URLSearchParams(location.search).get('game');
     const meta = GAMES.find(g => g.meta.id === only)?.meta;
