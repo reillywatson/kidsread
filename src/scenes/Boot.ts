@@ -53,7 +53,9 @@ export class Boot extends Phaser.Scene {
     // Dev shortcut: ?game=zombies plays just that minigame (as the first player).
     const only = new URLSearchParams(location.search).get('game');
     const meta = GAMES.find(g => g.meta.id === only)?.meta;
-    if (meta) {
+    // ?playtest opens the playtest panel directly (handy as a bookmark on the tablet).
+    if (new URLSearchParams(location.search).has('playtest')) this.scene.start('Playtest');
+    else if (meta) {
       selectProfile((profiles()[0] ?? createProfile('pikachu')).id);
       const s = new Session();
       s.games = [meta];

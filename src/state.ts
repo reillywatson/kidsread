@@ -1,6 +1,6 @@
 // Player profiles. Each profile has its own learner progress; device settings and
 // recorded letter sounds are shared.
-import { Learner, type Storage, type LearnerState } from './learner';
+import { Learner, type Storage, type LearnerState, type Skill, type Tier } from './learner';
 
 export interface Profile { id: string; avatar: string; name: string; created: number; lastPlayed: number }
 
@@ -63,6 +63,19 @@ const memoryStorage = (): Storage => { let v: LearnerState | null = null; return
 /** The active player. Until one is chosen, progress goes nowhere. */
 export let profile: Profile | null = null;
 export let learner: Learner = new Learner(memoryStorage());
+
+const SKILLS: Skill[] = ['grapheme', 'word', 'sentence', 'heart', 'phonemic', 'rhyme', 'syllable', 'spelling', 'writing', 'capitals', 'fun'];
+
+/**
+ * Playtesting: a throwaway player at a chosen lesson, every skill at the chosen level. It lives
+ * only in memory, so no one's progress, play history, backup or stats change.
+ */
+export function sandbox(lesson: number, tier: Tier) {
+  profile = null;
+  learner = new Learner(memoryStorage());
+  learner.setLesson(lesson);
+  for (const k of SKILLS) learner.s.tiers[k] = tier;
+}
 
 export function selectProfile(id: string) {
   const p = profiles().find(x => x.id === id);

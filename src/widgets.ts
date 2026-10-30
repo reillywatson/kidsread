@@ -68,7 +68,14 @@ export function picture(scene: Scene, x: number, y: number, word: string,
   }
   const pic = (w: string, dx: number, dy: number, s: number) => emoji(scene, dx, dy, PIC[w] || BANK[w] || '❓', s);
   if (pair?.how === 'on') c.add([pic(pair.word, 0, size * 0.3, size * 0.62), pic(word, 0, -size * 0.28, size * 0.55)]);
-  else if (pair?.how === 'in') c.add([pic(pair.word, 0, 0, size * 0.95), pic(word, 0, size * 0.1, size * 0.42)]);
+  else if (pair?.how === 'in') {
+    // A round window into the container shows what's inside: drawn plainly on top, a small thing
+    // vanishes against it (a brown nest on a brown bag). Stacking would read as "on" instead.
+    const r = size * 0.27, wy = size * 0.08;
+    const win = scene.add.graphics();
+    win.fillStyle(0xffffff, 0.92).fillCircle(0, wy, r).lineStyle(Math.max(2, size * 0.025), 0x2b2b2b, 0.55).strokeCircle(0, wy, r);
+    c.add([pic(pair.word, 0, 0, size * 0.95), win, pic(word, 0, wy, size * 0.44)]);
+  }
   else if (pair) c.add([pic(word, -size * 0.32, 0, size * 0.58), pic(pair.word, size * 0.32, 0, size * 0.58)]);
   else {
     c.add(pic(word, 0, hat ? 10 : 0, size * scale));

@@ -10,6 +10,7 @@ import { Home } from './scenes/Home';
 import { Reward } from './scenes/Reward';
 import { Stickers } from './scenes/Stickers';
 import { Profiles, AvatarPicker } from './scenes/Profiles';
+import { Playtest } from './scenes/Playtest';
 import { Settings } from './scenes/Settings';
 import { Bookshelf, Book } from './scenes/Books';
 import { MapScene } from './scenes/Map';
@@ -30,7 +31,7 @@ async function start() {
     // Centered by style.css: Phaser's own centering measures the canvas on screen, which the turn skews.
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.NO_CENTER },
     input: { activePointers: 3 },
-    scene: [Boot, Profiles, AvatarPicker, Home, Settings, Reward, Stickers, Bookshelf, Book, MapScene, ...GAMES.map(g => g.scene)],
+    scene: [Boot, Profiles, AvatarPicker, Home, Settings, Reward, Stickers, Bookshelf, Book, MapScene, Playtest, ...GAMES.map(g => g.scene)],
   });
   turnWithStage(game);
   if (import.meta.env.DEV) Object.assign(window, { game });

@@ -94,3 +94,10 @@ html.turn #stage {
 #parent code.restore { font: 700 20px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 1px; background: #f6f7fb;
   border: 1px solid #c9cfdb; border-radius: 8px; padding: 6px 10px; user-select: all; -webkit-user-select: all; }
 #parent [data-restore-code] { font: 600 17px ui-monospace, Menlo, monospace; padding: 6px 10px; border-radius: 10px; border: 1px solid #c9cfdb; width: 12em; }
+#parent .seg { display: flex; gap: 6px; align-items: center; margin: 8px 0; }
+#parent .seg button.on { background: #1e4fd8; border-color: #1e4fd8; color: #fff; }
+#parent .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+#parent .game { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; text-align: left; padding: 10px 12px; }
+#parent .game .muted { flex-basis: 100%; font-size: 13px; }
+#parent .game .tag { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #1e4fd8; background: #e8eefc; border-radius: 6px; padding: 1px 6px; }
+#parent .game:disabled { opacity: .45; cursor: default; }

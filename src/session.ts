@@ -48,10 +48,12 @@ function withBonus(games: GameMeta[], theme?: Theme): GameMeta[] {
 }
 
 export interface SessionOptions {
-  /** The scene to go back to afterwards ('Home', or 'Map' from the adventure map). */
+  /** The scene to go back to afterwards ('Home', 'Map' from the adventure map, or 'Playtest'). */
   returnTo?: string;
   /** A map gate: play just this goal game, and win the gate of this land when it's finished. */
   gate?: { land: string; game: string };
+  /** Play just this game (playtesting); "play again" plays it again. */
+  only?: string;
 }
 
 export class Session {
@@ -61,7 +63,8 @@ export class Session {
 
   constructor(public theme?: Theme, public opts: SessionOptions = {}) {
     this.returnTo = opts.returnTo ?? 'Home';
-    const gameMeta = opts.gate && GAMES.find(g => g.meta.id === opts.gate!.game)?.meta;
+    const one = opts.gate?.game ?? opts.only;
+    const gameMeta = one && GAMES.find(g => g.meta.id === one)?.meta;
     this.games = gameMeta ? [gameMeta] : withBonus(chooseGames(learner.s.settings.gamesPerSession, theme), theme);
     learner.startSession();
   }
@@ -95,9 +98,9 @@ export class Session {
     scene.scene.start(this.returnTo);
   }
 
-  /** Play another session in the same world (an ordinary one, even after a gate). */
+  /** Play another session in the same world (an ordinary one, even after a gate; the same game when playtesting). */
   again(scene: Phaser.Scene) {
     learner.noteGames(this.games.map(g => g.id));
-    new Session(this.theme, { returnTo: this.returnTo }).start(scene);
+    new Session(this.theme, { returnTo: this.returnTo, only: this.opts.only }).start(scene);
   }
 }

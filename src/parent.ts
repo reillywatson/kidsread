@@ -60,7 +60,7 @@ const avatarImg = (key: string, size = 44) =>
 const lastBackupText = () => (lastBackup()
   ? `${ago(lastBackup())}, ${new Date(lastBackup()).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : 'not yet');
 
-export function openParentArea(onClose: () => void) {
+export function openParentArea(onClose: () => void, onPlaytest?: () => void) {
   const root = document.createElement('div');
   root.id = 'parent';
   document.body.append(root);
@@ -166,6 +166,12 @@ export function openParentArea(onClose: () => void) {
           <div class="clips">${clips}</div>
         </section>
 
+        ${onPlaytest ? `<section>
+          <h2>Playtest</h2>
+          <p class="muted">Try any game at any lesson and level, as a throwaway player that doesn't change anyone's progress.</p>
+          <button data-playtest>Playtest games</button>
+        </section>` : ''}
+
         <section>
           <button class="danger" data-reset>Reset ${state.profile?.name ? esc(state.profile.name) + '’s' : 'this player’s'} progress</button>
         </section>
@@ -178,6 +184,7 @@ export function openParentArea(onClose: () => void) {
     const d = b.dataset;
     const learner = state.learner;
     if ('close' in d) return close();
+    if ('playtest' in d && onPlaytest) { stopWatching(); root.remove(); return onPlaytest(); }
     const note = (t: string) => { const n = root.querySelector<HTMLElement>('[data-note]'); if (n) n.textContent = t; };
     if ('copy' in d) {
       try { await navigator.clipboard.writeText(restoreCode()); b.textContent = 'Copied!'; } catch { b.textContent = 'Select and copy it'; }

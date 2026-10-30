@@ -117,7 +117,7 @@ export class Home extends Phaser.Scene {
           if (p >= 1) {
             reset();
             this.scene.pause();
-            openParentArea(() => { this.scene.resume(); this.scene.restart(); });
+            openParentArea(() => { this.scene.resume(); this.scene.restart(); }, () => { this.scene.resume(); this.scene.start('Playtest'); });
           }
         },
       });
