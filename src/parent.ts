@@ -13,6 +13,7 @@ import type { Theme } from './games/BaseGame';
 const WORLD: Record<Theme, string> = { pvz: '🌻', pokemon: '⚡', paw: '🐾', friends: '💜' };
 const gameName = (id: string) => {
   if (id === 'stickers') return '📒 Sticker playground';
+  if (id === 'books') return '📚 Storybooks';
   const m = GAMES.find(g => g.meta.id === id)?.meta;
   return m ? `${WORLD[m.theme]} ${m.title.split(' — ')[0].replace(' (bonus)', '')}${m.bonus ? ' <span class="muted">(bonus)</span>' : ''}` : esc(id);
 };

@@ -6,6 +6,7 @@ import { LINES } from '../lines';
 import * as audio from '../audio';
 import { playMusic } from '../music';
 import { openParentArea } from '../parent';
+import { newBooks } from './Books';
 import { H, W, burst, emoji, glossyCircle, roundButton, sprite, tappable, text, onTap } from '../widgets';
 
 const CAMEOS = ['pikachu', 'bulbasaur', 'charmander', 'squirtle', 'pup-chase', 'pup-marshall', 'pup-skye', 'pup-rubble',
@@ -61,6 +62,12 @@ export class Home extends Phaser.Scene {
     });
 
     this.cameos();
+    roundButton(this, W - 304, 66, 46, 0x8d6e63, '📚', () => this.scene.start('Bookshelf'));
+    if (newBooks().length) {
+      // A sparkle on the bookshelf button when there's an unread book.
+      const s = emoji(this, W - 270, 34, '✨', 32);
+      this.tweens.add({ targets: s, scale: 1.4, duration: 500, yoyo: true, repeat: -1 });
+    }
     roundButton(this, W - 190, 66, 46, 0x90a4ae, '⚙️', () => this.scene.start('Settings'));
     roundButton(this, W - 76, 66, 46, 0xff8a65, '📒', () => this.scene.start('Stickers'));
     this.grownUpLock();

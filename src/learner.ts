@@ -35,6 +35,8 @@ export interface LearnerState {
   board?: Record<string, PlacedSticker[]>;
   /** Play log for the grown-up area (most recent last). */
   plays?: Play[];
+  /** Storybooks read to the end: book id -> times. */
+  books?: Record<string, number>;
 }
 
 /** One game (or sticker playground visit), for the grown-ups' "What got played". */

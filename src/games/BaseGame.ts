@@ -404,7 +404,7 @@ export abstract class BaseGame extends Phaser.Scene {
       const v = views[i];
       v?.setAllColor('#1e88e5');
       await this.say(v?.word ?? words?.[i] ?? '');
-      v?.setAllColor('#2b2b2b');
+      v?.resetColor();
     }
   }
 

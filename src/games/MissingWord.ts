@@ -130,7 +130,7 @@ export class MissingWord extends BaseGame {
       const z = this.zombie;
       this.tweens.add({ targets: z, x: z.x + 260, y: z.y - 280, angle: 540, alpha: 0, duration: 700, ease: 'Quad.Out', onComplete: () => z.destroy() });
       await this.readAloud(views);
-      filled.setAllColor('#2b2b2b');
+      filled.resetColor();
       await this.praise(res.firstTry);
       [...items, pic, ...cards].forEach(o => o.destroy());
       this.progress();

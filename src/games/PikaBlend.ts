@@ -103,11 +103,11 @@ export class PikaBlend extends BaseGame {
       if (!toks[i].g) continue;
       view.flash(i, true);
       await this.letterSound(toks[i].g!);
-      view.parts[i].text.setColor('#2b2b2b');
+      view.resetColor(i);
     }
     view.setAllColor('#1e88e5');
     await this.say(w);
-    view.setAllColor('#2b2b2b');
+    view.resetColor();
   }
 
   private async runLetters() {

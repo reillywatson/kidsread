@@ -96,6 +96,8 @@ export const LINES = {
   iSpy: 'I spy something that starts with', findAnother: 'Find another one!', foundAll2: 'You found them all!',
   tapDrum: 'Tap the drum for each part.', listenDrum: 'Listen, and tap along!', tryAgain: "Let's try again!",
   runTo: 'Run to', whichPotPic: 'Which pot does it go in?',
+  pickBook: 'Pick a book to read!', yourTurnRead: 'Your turn to read! Tap a word if you need help.',
+  readBook: 'You read a whole book!', theEnd: 'The end!', whichInBook: 'Which one was in the book?',
   watchMe: 'Watch me!', yourTurn: 'Your turn! Start at the green dot.', touchStars: 'Touch the stars in order!',
 
   // Words said in parts, for the drum game. One-part words aren't listed (they're just the word).

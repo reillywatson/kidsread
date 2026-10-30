@@ -112,7 +112,8 @@ export function roundButton(scene: Scene, x: number, y: number, r: number, color
  * plays its sound (sound-by-sound support, not the whole word).
  */
 export class WordView extends Phaser.GameObjects.Container {
-  parts: { text: Phaser.GameObjects.Text; g: string | null }[] = [];
+  /** Each written part, its grapheme (null = silent), and its resting color (silent letters are grey). */
+  parts: { text: Phaser.GameObjects.Text; g: string | null; base: string }[] = [];
 
   constructor(scene: Scene, x: number, y: number, public word: string, { size = 90, dots = true, tapSounds = true, color = '#2b2b2b', cap = false } = {}) {
     super(scene, x, y);
@@ -135,7 +136,7 @@ export class WordView extends Phaser.GameObjects.Container {
         const g = tok.g;
         onTap(tx, () => { this.flash(this.parts.findIndex(p => p.text === tx)); void audio.sound(g); });
       }
-      this.parts.push({ text: tx, g: tok.g });
+      this.parts.push({ text: tx, g: tok.g, base: tok.g === null && !heart ? '#9a9a9a' : color });
       cx += tx.width + gap;
     }
     // Center horizontally around x.
@@ -148,10 +149,15 @@ export class WordView extends Phaser.GameObjects.Container {
     if (!t) return;
     t.setColor('#e53935');
     this.scene.tweens.add({ targets: t, scale: { from: 1.25, to: 1 }, duration: 300 });
-    if (!on) this.scene.time.delayedCall(450, () => t.setColor('#2b2b2b'));
+    if (!on) this.scene.time.delayedCall(450, () => this.resetColor(i));
   }
 
   setAllColor(c: string) { this.parts.forEach(p => p.text.setColor(c)); }
+
+  /** Back to resting colors (all parts, or just part i). */
+  resetColor(i?: number) {
+    for (const [j, p] of this.parts.entries()) if (i === undefined || i === j) p.text.setColor(p.base);
+  }
 }
 
 /** Celebration particles. */
