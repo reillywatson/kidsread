@@ -64,7 +64,8 @@ export class Zombies extends BaseGame {
         sign.fillStyle(0xfff8e1).fillRoundedRect(-62, -225, 124, 90, 14);
         sign.lineStyle(5, 0x8d6e3f).strokeRoundedRect(-62, -225, 124, 90, 14);
         z.add([sign, text(this, 0, -180, this.shown(x), 64), sprite(this, 0, -60, Math.random() < 0.35 ? 'zombieCone' : 'zombie', 165)]);
-        tappable(z, 150, 260);
+        // The sign counts too: the box runs from the top of the sign down to the zombie's feet.
+        tappable(z, 130, 270, 0, -100);
         z.setData('g', x);
         this.walk(z, secs);
         this.tweens.add({ targets: z, angle: { from: -4, to: 4 }, duration: 500, yoyo: true, repeat: -1 });

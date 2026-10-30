@@ -21,9 +21,12 @@ export function tweenP(scene: Scene, cfg: Phaser.Types.Tweens.TweenBuilderConfig
 }
 
 /** Make a container respond to taps over a w×h box centered on it. */
-export function tappable<T extends Container>(c: T, w: number, h: number): T {
+/** Make a container tappable over a w×h box, centered on its origin or shifted by (dx, dy). */
+export function tappable<T extends Container>(c: T, w: number, h: number, dx = 0, dy = 0): T {
   c.setSize(w, h);
-  c.setInteractive({ useHandCursor: true });
+  if (!dx && !dy) c.setInteractive({ useHandCursor: true });
+  // Phaser tests hit areas from the container's top-left (its display origin is the box's center).
+  else c.setInteractive({ hitArea: new Phaser.Geom.Rectangle(dx, dy, w, h), hitAreaCallback: Phaser.Geom.Rectangle.Contains, useHandCursor: true });
   return c;
 }
 
