@@ -1,9 +1,11 @@
 // Plants vs. Zombies — vowel focus: read a word on a seed packet and plant it in the pot
-// with its vowel (cat → a, pig → i). A plant pops up when it's right.
+// with its vowel (cat → a, pig → i). A plant pops up when it's right, then moves to the garden
+// bed by the fence with its word on a stake. At the end it's harvest time: each plant bounces as
+// its word is read back, and the sunflowers send up suns.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { PIC } from '../data/curriculum';
-import { shuffle, pickOne } from '../learner';
+import { shuffle } from '../learner';
 import { LINES } from '../lines';
 import { shortVowel, vowelsAt } from '../choices';
 import { WordView, burst, emoji, sprite, tappable, text } from '../widgets';
@@ -19,8 +21,12 @@ export const meta: GameMeta = {
 };
 
 const PLANTS = ['sunflower', 'peashooter', 'wallnut'];
+/** Garden bed spots along the fence, kept clear of the seed packet in the middle. */
+const BED = [[250, 345], [1030, 345], [355, 345], [925, 345], [145, 345], [1135, 345]];
 
 export class Garden extends BaseGame {
+  private bed: { plant: Phaser.GameObjects.Image; stake: Phaser.GameObjects.Container; word: string }[] = [];
+
   constructor() { super(meta); }
 
   protected setup() {
@@ -75,7 +81,7 @@ export class Garden extends BaseGame {
       packet.destroy();
       this.sfx.grow();
       // Above the background, tucked behind the pot's rim.
-      const plant = sprite(this, pot.x, pot.y - 150, pickOne(PLANTS), 170).setScale(0);
+      const plant = sprite(this, pot.x, pot.y - 150, PLANTS[r % PLANTS.length], 170).setScale(0);
       pot.setDepth(1);
       await this.tween({ targets: plant, scale: 170 / plant.height, duration: 450, ease: 'Back.Out' });
       burst(this, pot.x, pot.y - 160, ['🌱', '✨', '🌻']);
@@ -83,8 +89,41 @@ export class Garden extends BaseGame {
       await this.letterSound(v);
       await this.praise(res.firstTry);
       await this.wait(300);
-      [...pots, plant].forEach(o => o.destroy());
+      pots.forEach(o => o.destroy());
+      await this.toBed(plant, w);
       this.progress();
     }
+    await this.harvest();
+  }
+
+  /** The plant hops over to its spot in the garden bed, and a stake with its word goes in. */
+  private async toBed(plant: Phaser.GameObjects.Image, word: string) {
+    const [x, y] = BED[this.bed.length % BED.length];
+    this.sfx.hop();
+    await this.tween({ targets: plant, x, y, scale: 120 / plant.height, duration: 500, ease: 'Sine.InOut' });
+    const label = text(this, 0, 0, word, 28, '#5d3a1a');
+    const w = label.width + 20;
+    const g = this.add.graphics();
+    g.fillStyle(0x8d6e3f).fillRect(-3, 0, 6, 18);
+    g.fillStyle(0xfff8e1).fillRoundedRect(-w / 2, -22, w, 34, 8).lineStyle(3, 0x8d6e3f).strokeRoundedRect(-w / 2, -22, w, 34, 8);
+    const stake = this.add.container(x, y + 72, [g, label.setY(-5)]);
+    this.tweens.add({ targets: stake, scale: { from: 0, to: 1 }, duration: 250, ease: 'Back.Out' });
+    this.tickle(plant, () => void this.say(word).catch(() => {}));
+    this.bed.push({ plant, stake, word });
+  }
+
+  /** Harvest time: every plant bounces as its word is read back; sunflowers send up suns. */
+  private async harvest() {
+    for (const { plant, stake, word } of this.bed) {
+      this.sfx.pop();
+      this.tweens.add({ targets: [plant, stake], y: '-=30', duration: 180, yoyo: true, ease: 'Quad.Out' });
+      if (plant.texture.key.startsWith('sunflower')) {
+        const sun = sprite(this, plant.x, plant.y - 40, 'sun', 70);
+        this.sfx.twinkle();
+        this.tweens.add({ targets: sun, y: sun.y - 260, alpha: 0, duration: 1100, ease: 'Sine.Out', onComplete: () => sun.destroy() });
+      }
+      await this.say(word);
+    }
+    if (this.bed.length) burst(this, 640, 330, ['🌻', '🌱', '✨'], 18);
   }
 }

@@ -1,6 +1,7 @@
 // Plants vs. Zombies — cloze reading: a zombie ate one word of the sentence. Read the rest
 // (with the picture as a clue) and pick the word that fills the gap. Usually it's the noun;
 // in "on"/"in" sentences it's sometimes the little word that changes the whole meaning.
+// Every zombie beaten earns a new plant for the lawn, and every peashooter joins the volley.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { NOUNS, picConflict } from '../data/curriculum';
@@ -24,10 +25,18 @@ export const meta: GameMeta = {
 
 const ZOMBIE = { x: 1140, y: 470 };
 const CARD_Y = 610;
+/** Plants earned along the way, in the order they're planted (left of the sentence and cards). */
+const LAWN: { key: string; x: number; y: number }[] = [
+  { key: 'sunflower', x: 235, y: 618 },
+  { key: 'peashooter', x: 225, y: 330 },
+  { key: 'wallnut', x: 72, y: 628 },
+  { key: 'peashooter', x: 70, y: 310 },
+];
 
 export class MissingWord extends BaseGame {
   private shooter!: Phaser.GameObjects.Image;
   private zombie!: Phaser.GameObjects.Image;
+  private plants: Phaser.GameObjects.Image[] = [];
 
   constructor() { super(meta); }
 
@@ -57,6 +66,33 @@ export class MissingWord extends BaseGame {
     const c = this.add.container(0, 0, [g, v]);
     c.setData('word', word);
     return tappable(c, w, h);
+  }
+
+  /** All the peashooters fire; the sunflowers bob along. */
+  private async volley() {
+    const shooters = [this.shooter, ...this.plants.filter(p => p.texture.key.startsWith('peashooter'))];
+    const shots = shooters.map((sh, i) => {
+      const pea = sprite(this, sh.x + sh.displayWidth * 0.4, sh.y - sh.displayHeight * 0.18, 'pea', 34);
+      this.tweens.add({ targets: sh, x: sh.x - 10, duration: 80, yoyo: true, delay: i * 120 });
+      return this.tween({ targets: pea, x: this.zombie.x - 30, y: this.zombie.y - 60 + i * 12, duration: 450, delay: i * 120, ease: 'Linear',
+        onStart: () => this.sfx.pew() }).then(() => { pea.destroy(); this.sfx.splat(); });
+    });
+    this.plants.filter(p => p.texture.key.startsWith('sunflower'))
+      .forEach(p => this.tweens.add({ targets: p, angle: { from: -10, to: 10 }, duration: 160, yoyo: true, repeat: 2 }));
+    await Promise.all(shots);
+  }
+
+  /** A new plant pops up on the lawn. */
+  private async plantOne() {
+    const spot = LAWN[this.plants.length];
+    if (!spot) return;
+    const p = this.tickle(sprite(this, spot.x, spot.y, spot.key, 150));
+    const full = p.scale;
+    p.setScale(0);
+    this.plants.push(p);
+    this.sfx.grow();
+    await this.tween({ targets: p, scale: full, duration: 450, ease: 'Back.Out' });
+    burst(this, spot.x, spot.y - 40, ['🌱', '✨'], 8);
   }
 
   protected async run() {
@@ -119,18 +155,15 @@ export class MissingWord extends BaseGame {
       views[blank] = filled;
       items.push(filled);
       this.sfx.pop();
-      // ...and the peashooter sends the zombie packing.
-      const pea = sprite(this, this.shooter.x + 70, this.shooter.y - 30, 'pea', 34);
-      this.sfx.pew();
-      await this.tween({ targets: pea, x: this.zombie.x - 30, duration: 450, ease: 'Linear' });
-      pea.destroy();
-      this.sfx.splat();
+      // ...and every peashooter on the lawn sends the zombie packing.
+      await this.volley();
       burst(this, this.zombie.x, this.zombie.y - 60, ['💥', '✨', '🟢']);
       this.tweens.killTweensOf(this.zombie);
       const z = this.zombie;
       this.tweens.add({ targets: z, x: z.x + 260, y: z.y - 280, angle: 540, alpha: 0, duration: 700, ease: 'Quad.Out', onComplete: () => z.destroy() });
       await this.readAloud(views);
       filled.resetColor();
+      await this.plantOne();
       await this.praise(res.firstTry);
       [...items, pic, ...cards].forEach(o => o.destroy());
       this.progress();
