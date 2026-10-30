@@ -165,17 +165,36 @@ export function pawBadge(color = '#1e88e5') {
     <ellipse cx="58" cy="32" rx="7" ry="9" fill="#fff"/><ellipse cx="71" cy="44" rx="7" ry="9" fill="#fff"/>`);
 }
 
-export function pupTruck(color: string, dark: string) {
-  return svg('0 0 220 130', `
+/** A pup's open-top rescue vehicle with the pup at the wheel: Chase's police truck has a light
+ *  bar, Marshall's fire truck carries a ladder. */
+export function pupTruck(id: PupId) {
+  const L = LOOK[id];
+  const [color, dark] = id === 'marshall' ? ['#ef4b3f', '#a51b12'] : ['#2f6fe0', '#173e96'];
+  const gear = id === 'marshall'
+    ? `<g transform="rotate(-8 20 78)">
+        <path d="M18 68 L104 68 M18 82 L104 82" stroke="${INK}" stroke-width="9" stroke-linecap="round"/>
+        <path d="M18 68 L104 68 M18 82 L104 82" stroke="#e0e4e8" stroke-width="4" stroke-linecap="round"/>
+        ${[30, 46, 62, 78, 94].map(x => `<path d="M${x} 68 L${x} 82" stroke="${INK}" stroke-width="5"/><path d="M${x} 69 L${x} 81" stroke="#e0e4e8" stroke-width="2"/>`).join('')}</g>`
+    : `${cel('M32 66 Q32 60 38 60 L62 60 L62 80 L32 80Z', '#e53935', '#a51b12', { off: [-1, -2], stroke: 2.5, hl: [42, 65, 5, 2] })}
+       ${cel('M62 60 L86 60 Q92 60 92 66 L92 80 L62 80Z', '#1e88e5', '#0d47a1', { off: [-1, -2], stroke: 2.5, hl: [70, 65, 5, 2] })}`;
+  const wheel = (x: number) => `${cel(ell(x, 124, 21, 21), '#3a3a3a', '#1c1c1c', { off: [-3, -3] })}
+    ${cel(ell(x, 124, 10, 10), '#e3e8eb', '#aab4ba', { off: [-1, -2], stroke: 2.5 })}<circle cx="${x}" cy="124" r="3" fill="#78909c"/>`;
+  return svg('0 0 240 150', `
     <defs>${vgrad('g', '#e3f6ff', '#9fd4f0')}</defs>
-    ${shadow(110, 118, 98, 8)}
-    ${cel('M14 64 Q14 44 34 44 L120 44 L140 16 L184 16 Q196 16 200 30 L208 64 L208 92 L14 92Z', color, dark, { off: [-6, -8], hl: [70, 52, 40, 4] })}
-    <path d="M146 24 L180 24 Q188 24 190 32 L196 58 L136 58Z" fill="url(#g)" ${line(3)}/>
-    <path d="M152 28 L160 28 L150 54 L144 54Z" fill="#fff" opacity=".6"/>
-    ${cel('M40 30 L74 30 L74 44 L40 44Z', '#e53935', '#a51b12', { off: [-1, -2], stroke: 2.5 })}
-    ${cel('M74 30 L98 30 L98 44 L74 44Z', '#1e88e5', '#0d47a1', { off: [-1, -2], stroke: 2.5 })}
-    <rect x="196" y="70" width="14" height="10" rx="3" fill="#ffe082" ${line(2)}/>
-    ${[56, 166].map(x => `${cel(ell(x, 94, 21, 21), '#3a3a3a', '#1c1c1c', { off: [-3, -3] })}<circle cx="${x}" cy="94" r="9" fill="#cfd8dc"/>`).join('')}`);
+    ${shadow(122, 142, 106, 7)}
+    ${gear}
+    <g transform="translate(74 6) scale(.46)">${head(id)}</g>
+    ${cel('M12 94 Q12 80 26 80 L98 80 L106 96 L188 96 Q222 98 228 116 L230 132 L12 132Z', color, dark, {
+      off: [-6, -8], hl: [60, 88, 34, 3],
+      inner: `<path d="M12 108 L230 108" stroke="#fff" stroke-width="5" opacity=".45"/>
+        <path d="M106 96 L106 132" stroke="${dark}" stroke-width="3"/><path d="M164 100 L164 132" stroke="${dark}" stroke-width="3"/>` })}
+    <path d="M154 96 L166 62 L174 62 L164 96Z" fill="url(#g)" opacity=".85" ${line(3)}/>
+    ${cel(ell(135, 116, 14, 14), L.tag, L.tagS, { off: [-2, -2], stroke: 2.5 })}
+    <g transform="translate(135 116) scale(.75) translate(-135 -116)">${TAG_SYMBOL[id](135, 116)}</g>
+    <path d="${ell(225, 106, 6, 8)}" fill="#ffe082" ${line(2.5)}/>
+    <rect x="222" y="124" width="16" height="10" rx="4" fill="#cfd8dc" ${line(2.5)}/>
+    <rect x="4" y="122" width="14" height="10" rx="4" fill="#cfd8dc" ${line(2.5)}/>
+    ${wheel(56)}${wheel(188)}`);
 }
 
 export function bone() {

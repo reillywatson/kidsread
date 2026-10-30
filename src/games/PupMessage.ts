@@ -63,7 +63,7 @@ export class PupMessage extends BaseGame {
       burst(this, res.obj.x, res.obj.y, ['🐾', '⭐', '✨']);
       await this.readAloud(views);
       // Pup to the rescue!
-      const truck = sprite(this, -200, 650, 'truck', 110);
+      const truck = sprite(this, -200, 650, 'truck', 120);
       this.sfx.siren();
       this.tweens.add({ targets: this.pup, y: this.pup.y - 40, duration: 200, yoyo: true, repeat: 1 });
       await this.tween({ targets: truck, x: 1500, duration: 1400, ease: 'Sine.InOut' });

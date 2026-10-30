@@ -89,13 +89,23 @@ export const bgLawn = () => {
     <rect x="76" y="170" width="8" height="550" fill="#8d6e3f"/>`);
 };
 
+const birds = (pts: number[][]) => pts.map(([x, y, k]) =>
+  `<path d="M${x - 12 * k} ${y - 4 * k} Q${x - 6 * k} ${y - 10 * k} ${x} ${y} Q${x + 6 * k} ${y - 10 * k} ${x + 12 * k} ${y - 4 * k}" fill="none" stroke="#3c5a78" stroke-width="${3 * k}" stroke-linecap="round" opacity=".7"/>`).join('');
+
 export const bgSky = () => bg(`
-  ${sky('#58bdfb', '#c6edff')}
-  ${sun(1150, 110)}${cloud(220, 160, 1)}${cloud(700, 110, 0.8)}${cloud(1020, 260, 0.7)}
-  ${hill('M0 560 Q300 500 640 540 T1280 520 L1280 720 L0 720Z', '#86d65e', '#62bd45')}
-  ${tree(1180, 560, 0.8)}${bush(1050, 570, 0.7)}
+  ${sky('#4fb6fa', '#d4f2ff')}
+  ${sun(1150, 110)}
+  ${cloud(480, 300, 0.4)}
+  ${cloud(220, 160, 1)}${cloud(700, 110, 0.8)}${cloud(1000, 250, 0.7)}
+  ${birds([[420, 200, 1], [455, 222, 0.8], [880, 300, 0.9], [910, 286, 0.7]])}
+  ${mountains(540, '#b9dcf2', '#9ac8e6', false)}
+  ${hill('M0 540 Q200 470 420 520 Q620 480 800 525 Q1040 470 1280 515 L1280 720 L0 720Z', '#a6dd86', '#86c96a')}
+  ${Array.from({ length: 9 }, (_, i) => tree(80 + i * 140 + (i % 2) * 30, 548 + (i % 3) * 6, 0.32 + (i % 2) * 0.06, '#6cc457', '#3f9a3f')).join('')}
+  ${hill('M0 580 Q300 530 640 560 T1280 545 L1280 720 L0 720Z', '#86d65e', '#62bd45')}
+  ${tree(1180, 580, 0.8)}${pine(90, 590, 0.6)}${bush(1050, 590, 0.7)}${bush(260, 600, 0.5, '#7bd86b', '#43a047')}
   <rect y="600" width="${W}" height="120" fill="#7cc242"/>
   ${Array.from({ length: 13 }, (_, i) => `<rect x="${i * 100}" y="600" width="50" height="120" fill="#8fd14f"/>`).join('')}
+  <rect y="600" width="${W}" height="6" fill="#5a9e34" opacity=".35"/>
   ${tufts(612, 30, '#5a9e34', 2)}${flowers(640, 10, 4)}`);
 
 export const bgField = () => bg(`
@@ -135,19 +145,31 @@ export const bgBay = () => bg(`
   <rect y="640" width="${W}" height="80" fill="#8f8f8f"/><rect y="640" width="${W}" height="8" fill="#bdbdbd"/>
   ${Array.from({ length: 14 }, (_, i) => `<rect x="${i * 100 + 20}" y="676" width="50" height="8" rx="3" fill="#fff"/>`).join('')}`);
 
-export const bgPond = () => bg(`
-  ${sky('#8fd8ff', '#e0f6ff', 220)}
-  ${cloud(300, 70, 0.7)}${cloud(980, 60, 0.6)}
+export const bgPond = () => {
+  const reeds = (x: number, k: number) => `<g transform="translate(${x} 720)">${Array.from({ length: 6 }, (_, i) =>
+    `<path d="M${i * 10 - 25} 0 Q${i * 10 - 27} -100 ${i * 10 - 23 + (i % 2) * 8} -${140 + ((i * 7) % 4) * 14 + k * 10}" stroke="${i % 2 ? '#3f7a22' : '#5a9e34'}" stroke-width="5" fill="none" stroke-linecap="round"/>`).join('')}
+    <path d="M-30 -40 Q-60 -70 -64 -110" stroke="#5a9e34" stroke-width="6" fill="none" stroke-linecap="round"/>
+    ${cel(ell(-6, -150 - k * 10, 7, 26), '#8a5530', '#5d3518', { off: [-2, -3], stroke: 2.5 })}${cel(ell(14, -172 - k * 10, 7, 24), '#8a5530', '#5d3518', { off: [-2, -3], stroke: 2.5 })}</g>`;
+  const pad = (x: number, y: number, s: number, bloom = false) => `<g transform="translate(${x} ${y}) scale(${s} ${s * 0.45})">
+    ${cel('M0 0 L30 -10 A36 36 0 1 0 34 8Z', '#6cc457', '#3f9a3f', { off: [-3, -4], stroke: 4 })}</g>
+    ${bloom ? `<g transform="translate(${x - 4} ${y - 6})">${[-30, 0, 30].map(a => `<path d="M0 0 Q-7 -14 0 -24 Q7 -14 0 0Z" fill="#ffc1d9" ${line(2)} transform="rotate(${a})"/>`).join('')}<circle r="4" fill="#ffd54f"/></g>` : ''}`;
+  return bg(`
+  ${sky('#8fd8ff', '#e9f8ff', 230)}
+  ${cloud(300, 70, 0.7)}${cloud(980, 60, 0.6)}${cloud(660, 120, 0.4)}
+  ${mountains(200, '#b4d9ee', '#94c3e0', false)}
   ${Array.from({ length: 11 }, (_, i) => tree(i * 125 + 30, 210 + (i % 2) * 6, 0.6 + (i % 3) * 0.08, i % 2 ? '#4caf50' : '#66bb6a', '#2e7d32')).join('')}
   <rect y="190" width="${W}" height="40" fill="#7cc242"/>
   <defs><linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3cb0dc"/><stop offset="1" stop-color="#1a78b0"/></linearGradient></defs>
   <path d="M0 220 Q640 180 1280 220 L1280 720 L0 720Z" fill="url(#w)"/>
-  ${Array.from({ length: 16 }, (_, i) => `<path d="${ell((i * 233) % W, 260 + (i * 97) % 440, 60, 9)}" fill="none" stroke="#fff" stroke-width="3" opacity=".3"/>`).join('')}
-  ${[[60, 720], [1220, 720], [180, 720]].map(([x, y], k) => `<g transform="translate(${x} ${y})">${Array.from({ length: 5 }, (_, i) =>
-    `<path d="M${i * 10 - 20} 0 Q${i * 10 - 22} -100 ${i * 10 - 18 + (i % 2) * 8} -${150 + i * 12 + k * 10}" stroke="#4e8a2c" stroke-width="5" fill="none"/>`).join('')}
-    <path d="${ell(-6, -150 - k * 10, 7, 26)}" fill="#7b4a26" ${line(2.5)}/><path d="${ell(14, -170 - k * 10, 7, 24)}" fill="#7b4a26" ${line(2.5)}/></g>`).join('')}
+  <path d="M0 220 Q640 180 1280 220 L1280 250 Q640 214 0 252Z" fill="#2e7d4f" opacity=".35"/>
+  <path d="M0 221 Q640 181 1280 221" fill="none" stroke="#e8f5c8" stroke-width="4" opacity=".7"/>
+  ${Array.from({ length: 16 }, (_, i) => `<path d="M${(i * 233) % W - 40} ${262 + (i * 97) % 440} q20 -7 40 0 q20 7 40 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".35"/>`).join('')}
+  ${Array.from({ length: 10 }, (_, i) => `<path d="M${(i * 311 + 90) % W} ${300 + (i * 131) % 380} l4 -10 l4 10 l-4 10Z" fill="#fff" opacity=".55"/>`).join('')}
+  ${pad(960, 692, 1.7, true)}${pad(170, 300, 1.3)}${pad(1140, 292, 1.5, true)}
+  ${reeds(60, 0)}${reeds(1220, 1)}${reeds(180, 2)}
   ${cel('M1060 720 Q1080 660 1140 650 Q1200 650 1220 720Z', '#9e9e9e', '#6d6d6d', { off: [-8, -6] })}
   ${cel('M300 720 Q312 680 350 676 Q390 680 396 720Z', '#a9a9a9', '#757575', { off: [-6, -4] })}`);
+};
 
 export const bgKitchen = () => bg(`
   <rect width="${W}" height="${HT}" fill="#ffe9f3"/>

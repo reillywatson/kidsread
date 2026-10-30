@@ -68,22 +68,23 @@ export function zombie(cone = false) {
     : `<circle cx="94" cy="74" r="16" fill="#fff" ${line(3)}/><circle cx="88" cy="76" r="5" fill="#111"/>
        <circle cx="130" cy="76" r="10" fill="#fff" ${line(3)}/><circle cx="126" cy="78" r="3.5" fill="#111"/>
        <path d="M119 70 Q130 63 141 72" fill="${SK}" ${line(3)}/>`;
-  return svg('0 0 200 300', `
+  return svg('-10 -40 210 340', `
     ${shadow(112, 292, 62, 9)}
     ${cel('M92 222 L86 284 L104 284 L108 230Z', PT, PTS, { off: [-3, -3] })}
     ${cel('M118 226 L126 280 L144 278 L136 222Z', PT, PTS, { off: [-3, -3] })}
     ${cel('M70 286 Q86 274 106 284 L106 293 L70 293Z', '#3a3a3a', '#1f1f1f', { off: [-2, -2], stroke: 3 })}
     ${cel('M122 282 Q140 270 158 280 L158 289 L122 289Z', '#3a3a3a', '#1f1f1f', { off: [-2, -2], stroke: 3 })}
-    ${cel('M78 128 Q110 116 142 128 L150 232 L136 228 L130 238 L118 230 L104 240 L92 230 L76 234Z', CT, CTS, { off: [-8, -6] })}
+    ${cel('M70 134 Q76 120 110 116 Q144 120 152 134 L156 232 L140 228 L132 240 L118 230 L104 242 L90 230 L72 236Z', CT, CTS, { off: [-8, -6], inner: '<path d="M88 196 L104 196 M126 200 L142 198" stroke="#3d2a1a" stroke-width="3" opacity=".6"/>' })}
     ${cel('M100 128 L112 170 L124 128Z', '#f4f4f4', '#cfcfcf', { off: [-2, -2], stroke: 3 })}
     ${cel('M110 138 L104 178 L112 190 L120 178 L114 138Z', '#d32f2f', '#9a1b1b', { off: [-2, -2], stroke: 2.5 })}
     ${cel('M100 128 L94 180 L110 170Z M124 128 L132 180 L114 170Z', '#6e4f36', '#4d3523', { off: [-2, -2], stroke: 3 })}
     <rect x="132" y="190" width="12" height="10" fill="#c7a26b" ${line(2)} transform="rotate(8 138 195)"/>
-    ${cel('M84 142 L22 136 L18 152 L84 160Z', CT, CTS, { off: [-3, -4] })}
-    ${cel('M86 168 L28 166 L26 182 L86 186Z', CT, CTS, { off: [-3, -4] })}
-    <path d="M22 136 L16 140 L20 146 L16 152 L22 152Z M28 166 L22 170 L26 175 L22 182 L28 182Z" fill="#eee" ${line(2)}/>
-    ${cel(ell(10, 144, 12, 9), SK, SKS, { off: [-2, -2], stroke: 3.5 })}
-    ${cel(ell(16, 174, 12, 9), SK, SKS, { off: [-2, -2], stroke: 3.5 })}
+    ${cel('M82 138 L22 132 L18 154 L82 164Z', CT, CTS, { off: [-3, -4] })}
+    ${cel('M84 168 L28 164 L26 186 L84 190Z', CT, CTS, { off: [-3, -4] })}
+    <path d="M22 132 L15 137 L20 143 L15 149 L20 154 L22 154Z M28 164 L21 169 L26 175 L21 181 L26 186 L28 186Z" fill="#eee" ${line(2)}/>
+    ${cel(ell(10, 143, 13, 10), SK, SKS, { off: [-2, -2], stroke: 3.5, inner: '<path d="M2 147 L12 147" stroke="#5b6b50" stroke-width="2"/>' })}
+    ${cel(ell(16, 175, 13, 10), SK, SKS, { off: [-2, -2], stroke: 3.5, inner: '<path d="M8 179 L18 179" stroke="#5b6b50" stroke-width="2"/>' })}
+    <g transform="translate(110 128) scale(1.18) translate(-110 -128)">
     ${cel('M110 22 C148 22 160 52 158 82 C156 112 138 130 110 130 C82 130 64 112 62 82 C60 52 72 22 110 22Z', SK, SKS, { off: [-8, -8], hl: [88, 48, 14, 7] })}
     ${cone
       ? `<g transform="rotate(-8 112 30)">
@@ -94,7 +95,7 @@ export function zombie(cone = false) {
     ${eyes}
     <path d="M84 108 L92 102 L98 110 L106 102 L114 110 L122 102 L130 108 Q108 124 84 108Z" fill="#4a2a2a" ${line(3)}/>
     <rect x="99" y="104" width="7" height="7" fill="#f6f0d0" stroke="${INK}" stroke-width="1.5"/>
-    <circle cx="80" cy="96" r="1.6" fill="#5b6b50"/><circle cx="140" cy="98" r="1.6" fill="#5b6b50"/><circle cx="136" cy="104" r="1.6" fill="#5b6b50"/>`);
+    <circle cx="80" cy="96" r="1.6" fill="#5b6b50"/><circle cx="140" cy="98" r="1.6" fill="#5b6b50"/><circle cx="136" cy="104" r="1.6" fill="#5b6b50"/></g>`);
 }
 
 export function pea() {

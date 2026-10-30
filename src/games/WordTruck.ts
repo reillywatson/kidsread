@@ -39,7 +39,7 @@ export class WordTruck extends BaseGame {
     road.fillStyle(0x546e7a).fillRect(0, ROAD_Y + 30, W, 56);
     road.fillStyle(0xffffff, 0.8);
     for (let x = 20; x < W; x += 90) road.fillRect(x, ROAD_Y + 55, 46, 6);
-    this.truck = sprite(this, TRUCK_X, ROAD_Y - 6, 'fireTruck', 130);
+    this.truck = sprite(this, TRUCK_X, ROAD_Y - 6, 'fireTruck', 140);
     this.tickle(sprite(this, 95, 610, 'pup-marshall', 190), () => void audio.say(LINES.ruff, { style: 'pup' }));
   }
 

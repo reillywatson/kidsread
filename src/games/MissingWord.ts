@@ -42,7 +42,7 @@ export class MissingWord extends BaseGame {
 
   /** A zombie shuffles in, ready to munch. */
   private async zombieIn() {
-    this.zombie = sprite(this, W + 150, ZOMBIE.y, Math.random() < 0.35 ? 'zombieCone' : 'zombie', 240);
+    this.zombie = sprite(this, W + 150, ZOMBIE.y, Math.random() < 0.35 ? 'zombieCone' : 'zombie', 260);
     this.tweens.add({ targets: this.zombie, angle: { from: -4, to: 4 }, duration: 500, yoyo: true, repeat: -1 });
     await this.tween({ targets: this.zombie, x: ZOMBIE.x, duration: 900, ease: 'Sine.Out' });
   }

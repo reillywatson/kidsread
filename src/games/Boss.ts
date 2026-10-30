@@ -36,7 +36,7 @@ export class Boss extends BaseGame {
     this.add.image(640, 360, 'bgLawn');
     this.shooter = this.tickle(sprite(this, 150, LANE_Y + 10, 'peashooter', 170));
     // A giant zombie with a crown.
-    this.boss = this.add.container(HOME_X, LANE_Y - 30, [sprite(this, 0, 0, 'zombieCone', 340), emoji(this, 12, -178, '👑', 72)]);
+    this.boss = this.add.container(HOME_X, LANE_Y - 30, [sprite(this, 0, 0, 'zombieCone', 368), emoji(this, 14, -196, '👑', 72)]);
     this.tweens.add({ targets: this.boss, angle: { from: -3, to: 3 }, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
     this.bar = this.add.graphics().setDepth(50);
   }

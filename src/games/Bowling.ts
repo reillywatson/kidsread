@@ -41,7 +41,7 @@ export class Bowling extends BaseGame {
 
   private spawn() {
     const lane = Math.floor(Math.random() * 3);
-    const z = sprite(this, START_X, LANES[lane] - 30, Math.random() < 0.35 ? 'zombieCone' : 'zombie', 150);
+    const z = sprite(this, START_X, LANES[lane] - 30, Math.random() < 0.35 ? 'zombieCone' : 'zombie', 165);
     z.setData('lane', lane);
     this.zombies.push(z);
     this.tweens.add({
