@@ -1,5 +1,6 @@
 import { test, expect } from 'vitest';
 import { Learner, INTERVALS, type LearnerState } from '../src/learner';
+import { LAST_LESSON, lessonInfo } from '../src/data/curriculum';
 
 function make(start = 0) {
   let saved: LearnerState | null = null;
@@ -97,4 +98,16 @@ test('progress persists through storage', () => {
   const l2 = new Learner({ get: () => saved(), set: () => {} });
   expect(l2.s.items['w:cat'].right).toBe(1);
   expect(l2.s.stars).toBe(3);
+});
+
+test('mastering the last lesson finishes the course (it has no next lesson)', () => {
+  const { l } = make();
+  l.setLesson(LAST_LESSON);
+  const info = lessonInfo(LAST_LESSON)!;
+  for (const g of info.g) l.s.items['g:' + g] = { box: 3, due: 0, right: 3, wrong: 0, help: 0, seen: 3, last: 0 };
+  for (const w of info.w) l.s.items['w:' + w] = { box: 3, due: 0, right: 3, wrong: 0, help: 0, seen: 3, last: 0 };
+  for (const h of info.h ?? []) l.s.items['h:' + h.w] = { box: 3, due: 0, right: 3, wrong: 0, help: 0, seen: 3, last: 0 };
+  expect(l.checkLessonUp()).toBeNull();
+  expect(l.s.courseDone).toBe(true);
+  expect(l.lesson).toBe(LAST_LESSON);
 });

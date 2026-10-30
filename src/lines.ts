@@ -100,6 +100,23 @@ export const LINES = {
   pickBook: 'Pick a book to read!', yourTurnRead: 'Your turn to read! Tap a word if you need help.',
   readBook: 'You read a whole book!', theEnd: 'The end!', whichInBook: 'Which one was in the book?',
   whichBaby: ['Which baby goes with this mama?', 'Find the little letter!', 'Where is the baby?'], foundMama: 'You found the mama!',
+  // Adventure map.
+  mapHello: ['Where to next, explorer?', "Let's go on an adventure!", 'Ready to explore?'],
+  tapGlow: 'Tap the glowing spot to play!', notYet: 'Not yet! Keep playing to get there.',
+  newFriend: 'A new friend is joining your adventure!', newLand: 'A new land to explore!',
+  treasure: 'Treasure!', needStars: 'Collect more stars to open this treasure!',
+  mapDone: "You explored the whole island! You're a super reader!",
+  gates: {
+    rocket: 'Build a rocket to fly to the next land!',
+    boss: 'A Zombie Boss is blocking the gate! Beat it to open the way!',
+    ladder: 'Rescue the kitten to climb on to the next land!',
+    river: 'Help Pikachu cross the river to the next land!',
+  },
+  lands: {
+    meadow: 'Welcome to Sunny Meadow!', backyard: 'Welcome to the Zombie Backyard!', bay: 'Welcome to Adventure Bay!',
+    forest: 'Welcome to the Pokémon Forest!', peaks: 'Welcome to Lookout Peaks!', volcano: 'Welcome to Magic-E Volcano!',
+    castle: 'Welcome to Star Castle!', moon: 'Welcome to the Moon Islands!',
+  },
   watchMe: 'Watch me!', yourTurn: 'Your turn! Start at the green dot.', touchStars: 'Touch the stars in order!',
 
   // Words said in parts, for the drum game. One-part words aren't listed (they're just the word).

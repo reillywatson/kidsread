@@ -92,10 +92,12 @@ export class Home extends Phaser.Scene {
     this.time.delayedCall(2500, send);
   }
 
+  /** The big play button opens the adventure map; the world buttons start a session in that world. */
   start(theme?: Theme) {
     if (this.starting) return;
     this.starting = true;
-    new Session(theme).start(this);
+    if (theme) new Session(theme).start(this);
+    else this.scene.start('Map');
   }
 
   /** Press and hold for 2 seconds to open the grown-up area (keeps little hands out). */

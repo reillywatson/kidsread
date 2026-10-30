@@ -47,12 +47,22 @@ function withBonus(games: GameMeta[], theme?: Theme): GameMeta[] {
   return [...games.slice(0, at), bonus, ...games.slice(at)];
 }
 
+export interface SessionOptions {
+  /** The scene to go back to afterwards ('Home', or 'Map' from the adventure map). */
+  returnTo?: string;
+  /** A map gate: play just this goal game, and win the gate of this land when it's finished. */
+  gate?: { land: string; game: string };
+}
+
 export class Session {
   games: GameMeta[];
   i = 0;
+  returnTo: string;
 
-  constructor(public theme?: Theme) {
-    this.games = withBonus(chooseGames(learner.s.settings.gamesPerSession, theme), theme);
+  constructor(public theme?: Theme, public opts: SessionOptions = {}) {
+    this.returnTo = opts.returnTo ?? 'Home';
+    const gameMeta = opts.gate && GAMES.find(g => g.meta.id === opts.gate!.game)?.meta;
+    this.games = gameMeta ? [gameMeta] : withBonus(chooseGames(learner.s.settings.gamesPerSession, theme), theme);
     learner.startSession();
   }
 
@@ -63,6 +73,13 @@ export class Session {
 
   gameDone(scene: Phaser.Scene, stars: number) {
     learner.addStars(stars);
+    // A gate game finished: that land's gate is won (the map celebrates it next time it opens).
+    const land = this.opts.gate?.land;
+    if (land) {
+      const map = (learner.s.map ??= { cleared: [], celebrated: [], chests: [] });
+      if (!map.cleared.includes(land)) map.cleared.push(land);
+      learner.save();
+    }
     scene.scene.start('Reward', { session: this, stars });
   }
 
@@ -75,12 +92,12 @@ export class Session {
   quit(scene: Phaser.Scene) {
     learner.noteGames(this.games.slice(0, this.i + 1).map(g => g.id));
     if (import.meta.env.PROD) void backupNow();
-    scene.scene.start('Home');
+    scene.scene.start(this.returnTo);
   }
 
-  /** Play another session in the same world. */
+  /** Play another session in the same world (an ordinary one, even after a gate). */
   again(scene: Phaser.Scene) {
     learner.noteGames(this.games.map(g => g.id));
-    new Session(this.theme).start(scene);
+    new Session(this.theme, { returnTo: this.returnTo }).start(scene);
   }
 }

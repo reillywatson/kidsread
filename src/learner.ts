@@ -1,6 +1,7 @@
 // Learner model: Leitner-style spaced repetition per item, rolling accuracy per skill
 // (drives difficulty tiers), and UFLI lesson advancement based on mastery.
 import { FIRST_LESSON, LAST_LESSON, lessonInfo, nextLesson, itemsUpTo, parseId, WORD_LESSON, type ItemKind } from './data/curriculum';
+import type { MapState } from './data/map';
 
 const MIN = 60e3, DAY = 864e5;
 // Box n is due INTERVALS[n] after it was last promoted. The short early steps give
@@ -37,6 +38,10 @@ export interface LearnerState {
   plays?: Play[];
   /** Storybooks read to the end: book id -> times. */
   books?: Record<string, number>;
+  /** The adventure map: where the explorer was last shown, gates won, chests opened. */
+  map?: MapState;
+  /** Every lesson mastered, including the last. */
+  courseDone?: boolean;
 }
 
 /** One game (or sticker playground visit), for the grown-ups' "What got played". */
@@ -171,7 +176,7 @@ export class Learner {
   checkLessonUp(): number | null {
     const l = lessonInfo(this.s.lesson);
     const next = nextLesson(this.s.lesson);
-    if (!l || next === this.s.lesson) return null;
+    if (!l || this.s.courseDone) return null;
     const fast = this.tier('grapheme') === 2 && (l.w.length === 0 || this.tier('word') === 2);
     const need = fast ? 1 : MASTERED_BOX;
     const box = (id: string) => this.s.items[id]?.box ?? 0;
@@ -181,6 +186,8 @@ export class Learner {
     const wOk = words.filter(w => box('w:' + w) >= need).length >= wNeed;
     const hOk = (l.h || []).every(h => box('h:' + h.w) >= 1);
     if (gOk && wOk && hOk) {
+      // The very last lesson has nowhere to go: the whole course is done (the map's last gate opens).
+      if (next === this.s.lesson) { this.s.courseDone = true; this.save(); return null; }
       this.s.lesson = next;
       this.s.pendingLevelUp = next;
       this.save();
