@@ -71,7 +71,7 @@ export class WordTruck extends BaseGame {
       const s = makeSentence(nouns[r], this.lesson, kinds);
       // Capital letter on the first word, period on the last: real sentence clues.
       const shown = s.words.map((w, i) => (i === 0 ? w[0].toUpperCase() + w.slice(1) : w) + (i === s.words.length - 1 ? '.' : ''));
-      const pic = drawPic(this, 640, 190, s.answer, 80);
+      const pic = drawPic(this, 640, 205, s.answer, 102);
 
       // Size the words so the whole train fits between the left edge and the truck.
       let size = 50;

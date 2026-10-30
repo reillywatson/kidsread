@@ -30,9 +30,9 @@ export class TrueSilly extends BaseGame {
     this.add.image(640, 360, 'bgField');
     this.pika = this.tickle(sprite(this, 150, 470, 'pikachu', 280), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
     const g = this.add.graphics();
-    g.fillStyle(0x000000, 0.15).fillRoundedRect(202, 92, 900, 150, 30);
-    g.fillStyle(0xffffff).fillRoundedRect(190, 80, 900, 150, 30);
-    g.lineStyle(8, 0xffc94d).strokeRoundedRect(190, 80, 900, 150, 30);
+    g.fillStyle(0x000000, 0.15).fillRoundedRect(202, 108, 900, 150, 30);
+    g.fillStyle(0xffffff).fillRoundedRect(190, 96, 900, 150, 30);
+    g.lineStyle(8, 0xffc94d).strokeRoundedRect(190, 96, 900, 150, 30);
   }
 
   protected async run() {
@@ -47,7 +47,7 @@ export class TrueSilly extends BaseGame {
       const truth = !s.alts.length || (silly >= 2 ? true : silly <= -2 ? false : Math.random() < 0.5);
       silly = truth ? Math.min(0, silly) - 1 : Math.max(0, silly) + 1;
       const shown = truth ? s.answer : (Math.random() < 0.65 ? s.alts[0] : pickOne(s.alts));
-      const { views, items } = layoutSentence(this, s.words, 640, 155, { size: 64, maxWidth: 840 });
+      const { views, items } = layoutSentence(this, s.words, 640, 171, { size: 64, maxWidth: 840 });
       let card = drawPic(this, 640, 390, shown, 120);
       card.setScale(0);
       this.tweens.add({ targets: card, scale: 1, duration: 350, ease: 'Back.Out' });

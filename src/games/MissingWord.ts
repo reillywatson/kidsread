@@ -35,9 +35,9 @@ export class MissingWord extends BaseGame {
     this.add.image(640, 360, 'bgGarden');
     this.shooter = this.tickle(sprite(this, 120, 470, 'peashooter', 170));
     const g = this.add.graphics();
-    g.fillStyle(0x000000, 0.15).fillRoundedRect(172, 92, 940, 150, 26);
-    g.fillStyle(0xfff8e1).fillRoundedRect(160, 80, 940, 150, 26);
-    g.lineStyle(7, 0x8d6e3f).strokeRoundedRect(160, 80, 940, 150, 26);
+    g.fillStyle(0x000000, 0.15).fillRoundedRect(172, 108, 940, 150, 26);
+    g.fillStyle(0xfff8e1).fillRoundedRect(160, 96, 940, 150, 26);
+    g.lineStyle(7, 0x8d6e3f).strokeRoundedRect(160, 96, 940, 150, 26);
   }
 
   /** A zombie shuffles in, ready to munch. */
@@ -81,7 +81,7 @@ export class MissingWord extends BaseGame {
       options = shuffle(options);
 
       await this.zombieIn();
-      const { views, items, slot, scale } = layoutSentence(this, s.words, 630, 155, { size: 64, maxWidth: 880, blank });
+      const { views, items, slot, scale } = layoutSentence(this, s.words, 630, 171, { size: 64, maxWidth: 880, blank });
       // Chomp: a crumb of the eaten word flies into the zombie.
       const crumb = this.add.rectangle(slot.x, slot.y, slot.w, 70, 0xffe082).setStrokeStyle(4, 0xf4a100);
       this.sfx.chomp();

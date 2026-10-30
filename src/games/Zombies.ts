@@ -18,7 +18,7 @@ export const meta: GameMeta = {
   eligible: () => true,
 };
 
-const LANES = [260, 440, 620];
+const LANES = [295, 465, 635];
 const HOUSE_X = 230;
 const START_X = 1380;
 

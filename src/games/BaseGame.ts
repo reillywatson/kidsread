@@ -102,7 +102,7 @@ export abstract class BaseGame extends Phaser.Scene {
     this.t0 = performance.now();
     (async () => {
       if (this.meta.bonus) await this.bonusBanner();
-      await this.say(this.meta.intro);
+      await this.intro();
       await this.run();
       if (!this.meta.bonus) await this.finale();
       this.finish();
@@ -125,6 +125,18 @@ export abstract class BaseGame extends Phaser.Scene {
     await this.say(LINES.bonus);
     await this.tween({ targets: c, scale: 0, alpha: 0, duration: 300, ease: 'Back.In' });
     c.destroy();
+  }
+
+  /**
+   * The spoken how-to-play. Any tap skips it, and once a child has finished this game a few
+   * times it's skipped altogether (each round's own prompt still says what to do).
+   */
+  private async intro() {
+    const finished = (this.learner.s.plays ?? []).filter(p => p.game === this.meta.id && p.done).length;
+    if (finished >= 3) { this.sfx.sparkle(); await this.wait(350); return; }
+    const skip = () => audio.stop();
+    this.input.once('pointerdown', skip);
+    try { await this.say(this.meta.intro); } finally { this.input.off('pointerdown', skip); }
   }
 
   /** For bonus games: a shrinking timer bar across the top; resolves when time runs out. */
@@ -162,6 +174,7 @@ export abstract class BaseGame extends Phaser.Scene {
       this.add.circle(x0 + i * gap, TRACK_Y, 11, 0xffffff, 0.6).setStrokeStyle(3, 0x2b2b2b, 0.4).setDepth(900));
     this.trophy = emoji(this, x0 + n * gap + 8, TRACK_Y, '🏆', 38).setDepth(900);
     this.runner = sprite(this, x0 - gap, TRACK_Y - 8, this.meta.icon, 46).setDepth(901);
+    if (this.runner.displayWidth > 54) this.runner.setScale(54 / this.runner.width); // wide icons (bone, truck)
     return n;
   }
 
