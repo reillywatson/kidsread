@@ -27,7 +27,7 @@ import { tmpdir } from 'node:os';
 import { GRAPHEMES } from '../src/data/curriculum.ts';
 import { slug } from '../src/lines.ts';
 import { LABEL, EL_VOICE, EL_MODEL, cachePath } from './voice-cache.mjs';
-import { uniqueTexts, spoken, SOUND_OPTIONS, pickedSounds, soundSources, describe } from './voice-plan.mjs';
+import { uniqueTexts, spoken, SAID_AS_SOUND, SOUND_OPTIONS, pickedSounds, soundSources, describe } from './voice-plan.mjs';
 
 const run = promisify(execFile);
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -231,15 +231,20 @@ const old = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, 'utf8')) : 
 const cacheKey = text => `${LABEL}|${text}`;
 const fresh = (prev, key, file) => !FORCE && prev === key && existsSync(file);
 
-const jobs = uniqueTexts().map(t => ({ t, key: slug(t), send: spoken(t) }))
-  .map(j => ({ ...j, file: join(OUT, j.key + '.m4a'), cache: cacheKey(j.send) }));
+// A word said as a letter sound is made by that sound's recipe (following any `same`), and is
+// re-made whenever the recipe changes.
+const soundSpec = id => (SOUNDS[id]?.same ? SOUNDS[SOUNDS[id].same] : SOUNDS[id]);
+const jobs = uniqueTexts().map(t => ({ t, key: slug(t), file: join(OUT, slug(t) + '.m4a') })).map(j => {
+  const spec = SAID_AS_SOUND[j.t] && soundSpec(SAID_AS_SOUND[j.t]);
+  return spec ? { ...j, spec, cache: cacheKey(JSON.stringify(spec)) } : { ...j, send: spoken(j.t), cache: cacheKey(spoken(j.t)) };
+});
 const todo = jobs.filter(j => !fresh(old?.clips?.[j.key], j.cache, j.file));
 const soundIds = Object.keys(GRAPHEMES).filter(id => SOUNDS[id] && !SOUNDS[id].same);
 const soundTodo = soundIds.filter(id => !fresh(old?.sounds?.[id]?.cache, cacheKey(JSON.stringify(SOUNDS[id])), join(OUT, `snd-${id}.m4a`)));
 
 const optionLists = Object.entries(SOUND_OPTIONS).filter(([, o]) => Array.isArray(o) && o.length > 1);
 const auditionSources = AUDITION ? optionLists.flatMap(([, o]) => o.flatMap(soundSources)) : [];
-const uncached = [...todo.map(j => j.send), ...soundTodo.flatMap(id => soundSources(SOUNDS[id])), ...auditionSources]
+const uncached = [...todo.flatMap(j => (j.spec ? soundSources(j.spec) : [j.send])), ...soundTodo.flatMap(id => soundSources(SOUNDS[id])), ...auditionSources]
   .filter(t => !existsSync(cachePath(t)));
 const estimate = [...new Set(uncached)].reduce((n, t) => n + t.length, 0);
 console.log(`${todo.length} of ${jobs.length} phrases and ${soundTodo.length} of ${soundIds.length} letter sounds need (re)making; ` +
@@ -283,7 +288,9 @@ async function pool(items, n, fn) {
 // ElevenLabs' free tier allows 2 requests at once.
 console.log(`Making ${todo.length} phrases…`);
 await pool(todo, 2, async j => {
-  const x = normalize(trim(await synth(j.send)), 0.85);
+  const made = j.spec && await makeSound(j.t, j.spec);
+  if (j.spec && !made) throw new Error('its letter-sound recipe failed');
+  const x = normalize(made ? made.audio : trim(await synth(j.send)), 0.85);
   await encode(x, j.file);
   manifest.clips[j.key] = j.cache;
 });

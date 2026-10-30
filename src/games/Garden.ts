@@ -69,7 +69,8 @@ export class Garden extends BaseGame {
       });
       const res = await this.choose(pots, potVowels.indexOf(v), {
         scaffoldAfter: 1,
-        onScaffold: () => { void this.say(w).then(() => this.letterSound(v)).catch(() => {}); },
+        // The hint is the vowel's sound on its own (the word straight into its vowel sounded odd: "junk... uh").
+        onScaffold: () => { void this.letterSound(v).catch(() => {}); },
       });
       this.record('w:' + w, res.firstTry ? 'correct' : 'wrong');
       this.score(res.firstTry);
@@ -86,7 +87,6 @@ export class Garden extends BaseGame {
       await this.tween({ targets: plant, scale: 170 / plant.height, duration: 450, ease: 'Back.Out' });
       burst(this, pot.x, pot.y - 160, ['🌱', '✨', '🌻']);
       await this.say(w);
-      await this.letterSound(v);
       await this.praise(res.firstTry);
       await this.wait(300);
       pots.forEach(o => o.destroy());

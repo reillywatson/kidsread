@@ -93,7 +93,12 @@ export class Suns extends BaseGame {
       const xs = shuffle(opts.map((_, i) => 440 + i * (700 / Math.max(1, opts.length - 1))));
       const suns = opts.map((word, i) => {
         const c = this.add.container(xs[i], 170 - i * 130);
-        c.add([sprite(this, 0, 0, 'sun', 200), new WordView(this, 0, 0, word, { size: 50, dots: false, tapSounds: false })]);
+        // The word sits on a label so the sun's rays and outline never run through the letters.
+        const v = new WordView(this, 0, 0, word, { size: 50, dots: false, tapSounds: false });
+        const lw = v.width + 28, lh = 70;
+        const label = this.add.graphics();
+        label.fillStyle(0xfffbe6, 0.95).fillRoundedRect(-lw / 2, -lh / 2, lw, lh, 20).lineStyle(4, 0xf2a600).strokeRoundedRect(-lw / 2, -lh / 2, lw, lh, 20);
+        c.add([sprite(this, 0, 0, 'sun', 200), label, v]);
         tappable(c, 200, 200);
         const drop = () => this.tweens.add({ targets: c, y: 640, duration: fall * 1000 * ((640 - c.y) / 760), ease: 'Linear', onComplete: () => { c.y = -120; drop(); } });
         drop();

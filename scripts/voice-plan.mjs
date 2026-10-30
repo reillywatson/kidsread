@@ -4,8 +4,9 @@ import { LESSONS, GRAPHEMES, PIC, BANK, HEART } from '../src/data/curriculum.ts'
 import { STICKERS } from '../src/data/stickers.ts';
 import { LINES, allLines, slug } from '../src/lines.ts';
 
-// Spoken form when the written form would be read oddly in isolation.
-const PRONOUNCE = { a: 'uh' };
+// Words recorded with a letter sound's recipe instead of being said on their own: every way of
+// sending "a" by itself came out as a breathy "uhh", so it's made like the short a in "at".
+export const SAID_AS_SOUND = { a: 'a' };
 
 // Delivery for each kind of line (v4 audio tags). Single words get none: clarity first.
 const TAGS = new Map();
@@ -28,9 +29,8 @@ const phraseSet = new Set(allLines());
 const PLAIN = new Set([LINES.like]);
 
 export function spoken(t) {
-  const base = PRONOUNCE[t] ?? t;
-  if (!phraseSet.has(t) || PLAIN.has(t)) return base;
-  return `${TAGS.get(t) ?? '[warmly]'} ${base}`;
+  if (!phraseSet.has(t) || PLAIN.has(t)) return t;
+  return `${TAGS.get(t) ?? '[warmly]'} ${t}`;
 }
 
 export const texts = new Set(allLines());
@@ -133,6 +133,6 @@ export function uniqueTexts() {
 }
 
 /** Every exact text the narrator may be asked to say (phrases, words, letter-sound sources). */
-export const allSends = () => [...new Set([...uniqueTexts().map(spoken),
+export const allSends = () => [...new Set([...uniqueTexts().filter(t => !SAID_AS_SOUND[t]).map(spoken),
   ...Object.values(SOUND_OPTIONS).flatMap(o => (Array.isArray(o) ? o : [o])).flatMap(soundSources)])];
 

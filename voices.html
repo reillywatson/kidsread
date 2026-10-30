@@ -51,7 +51,7 @@
     import manifest from '/src/voice/manifest.json';
     import { LINES, slug } from '/src/lines.ts';
     import { GRAPHEMES } from '/src/data/curriculum.ts';
-    import { uniqueTexts, spoken, pickedSounds, describe } from '/scripts/voice-plan.mjs';
+    import { uniqueTexts, spoken, SAID_AS_SOUND, pickedSounds, describe } from '/scripts/voice-plan.mjs';
     const picks = await fetch('/__sound-picks').then(r => r.json()).catch(() => ({}));
     const SOUNDS = pickedSounds(picks);
 
@@ -172,7 +172,7 @@
 
     // Every other word: decodable words, heart words, picture names, keywords, sticker names.
     const words = uniqueTexts().filter(t => !phraseSlugs.has(slug(t))).sort((a, b) => a.localeCompare(b));
-    section('Words', [[null, words.map(t => item({ label: t, sub: spoken(t) !== t ? `sent as “${spoken(t)}”` : '', file: clips[slug(t)] ? slug(t) : null }))]], 'grid');
+    section('Words', [[null, words.map(t => item({ label: t, sub: SAID_AS_SOUND[t] ? `made like the letter sound “${SAID_AS_SOUND[t]}”` : '', file: clips[slug(t)] ? slug(t) : null }))]], 'grid');
 
     const all = [...document.querySelectorAll('.item, .choice-row')];
     const missing = all.filter(e => e.classList.contains('item') && !e.file).length;

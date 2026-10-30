@@ -109,10 +109,11 @@ export class Zombies extends BaseGame {
       burst(this, z.x, z.y - 80, ['💥', '✨', '🟢']);
       zs.filter(o => o !== z).forEach(o => { this.tweens.killTweensOf(o); this.tweens.add({ targets: o, x: 1500, duration: 900 }); });
       this.bubble.setVisible(false);
-      // Bonk! The zombie goes spinning off the lawn.
+      // Bonk! The zombie goes spinning off the lawn, and the letter's sound plays as it's hit.
       this.sfx.boing();
+      const sound = this.letterSound(g);
       await this.tween({ targets: z, x: z.x + 240, y: z.y - 260, angle: 540, alpha: 0, scale: 0.6, duration: 650, ease: 'Quad.Out' });
-      await this.letterSound(g);
+      await sound;
       await this.praise(res.firstTry);
       zs.forEach(o => o.destroy());
       this.progress();

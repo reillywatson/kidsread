@@ -12,7 +12,7 @@ effects are synthesized live.
 
 ```sh
 npm install
-npm run dev        # http://localhost:5173, also on your LAN (open it on a phone/tablet)
+npm run dev        # http://localhost:5317, also on your LAN (open it on a phone/tablet)
 npm test           # curriculum, learner model, game logic, voice coverage
 npm run build      # typecheck + production build in dist/
 npm run voice      # re-record speech (macOS only; see below)

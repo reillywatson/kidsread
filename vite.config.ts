@@ -58,4 +58,10 @@ function serviceWorker(): Plugin {
   };
 }
 
-export default defineConfig({ plugins: [soundPicks(), serviceWorker()] });
+// Its own port, so it never ends up sharing 5173 with another project's dev server (one on IPv4,
+// one on IPv6, each answering "localhost" depending on the browser). strictPort fails loudly instead.
+export default defineConfig({
+  plugins: [soundPicks(), serviceWorker()],
+  server: { port: 5317, strictPort: true },
+  preview: { port: 5318, strictPort: true },
+});
