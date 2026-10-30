@@ -55,6 +55,9 @@ export const LINES = {
     drum: "Let's play the drum! Tap the drum once for each part of the word.",
     dash: 'Help Pikachu run! Listen for the word, then tap a lane to run through the right sign.',
     sort: 'Plant the seeds! Drag each picture to the pot with the letter it starts with.',
+    rainbow: "Let's paint rainbow letters! Watch me, then trace the letter with your finger.",
+    road: 'Help Chase drive on the letter road! Start at the green light and follow the road.',
+    stars: 'Connect the stars to make a letter! Touch the glowing stars in order.',
     bowling: 'Tap a lane to roll a Wall-nut and knock down the zombies!',
     whack: 'Pokémon are popping out of the grass! Tap them to catch them!',
     treats: 'Move the pup to catch the yummy treats!',
@@ -93,6 +96,7 @@ export const LINES = {
   iSpy: 'I spy something that starts with', findAnother: 'Find another one!', foundAll2: 'You found them all!',
   tapDrum: 'Tap the drum for each part.', listenDrum: 'Listen, and tap along!', tryAgain: "Let's try again!",
   runTo: 'Run to', whichPotPic: 'Which pot does it go in?',
+  watchMe: 'Watch me!', yourTurn: 'Your turn! Start at the green dot.', touchStars: 'Touch the stars in order!',
 
   // Words said in parts, for the drum game. One-part words aren't listed (they're just the word).
   syllables: {

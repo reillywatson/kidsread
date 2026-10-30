@@ -19,6 +19,9 @@ import * as ispy from './ISpy';
 import * as drum from './Drum';
 import * as dash from './Dash';
 import * as sort from './Sort';
+import * as rainbow from './Rainbow';
+import * as road from './Road';
+import * as starletters from './StarLetters';
 import * as evolve from './Evolve';
 import * as bones from './Bones';
 import * as garden from './Garden';
@@ -52,6 +55,10 @@ export const GAMES = [
   { meta: drum.meta, scene: drum.Drum },
   { meta: dash.meta, scene: dash.Dash },
   { meta: sort.meta, scene: sort.Sort },
+  // Letter tracing (letter formation).
+  { meta: rainbow.meta, scene: rainbow.Rainbow },
+  { meta: road.meta, scene: road.Road },
+  { meta: starletters.meta, scene: starletters.StarLetters },
   // Bonus games: just for fun, never chosen directly (see session.ts).
   { meta: bowling.meta, scene: bowling.Bowling },
   { meta: whack.meta, scene: whack.Whack },

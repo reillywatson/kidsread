@@ -31,6 +31,20 @@ async function start() {
   });
   turnWithStage(game);
   if (import.meta.env.DEV) Object.assign(window, { game });
+  else keepOffline();
+}
+
+/**
+ * Production only: register the service worker (see src/sw/sw.js), ask the browser to keep our
+ * storage, and once things are quiet, download every voice clip so the whole game works offline.
+ */
+function keepOffline() {
+  if (!('serviceWorker' in navigator)) return;
+  void navigator.serviceWorker.register('/sw.js').then(async () => {
+    const sw = await navigator.serviceWorker.ready;
+    void navigator.storage?.persist?.().catch(() => {});
+    setTimeout(() => sw.active?.postMessage({ type: 'warm', urls: audio.allClipUrls() }), 5000);
+  }).catch(() => { /* no offline support; the game still works online */ });
 }
 
 // Matches the media query in style.css that turns the stage sideways. In development, `?turn`

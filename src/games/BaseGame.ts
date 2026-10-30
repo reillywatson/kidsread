@@ -298,7 +298,9 @@ export abstract class BaseGame extends Phaser.Scene {
   idleNudge(objs: Tappable[]) {
     let lastTap = performance.now(), nudges = 0;
     const tapped = () => { lastTap = performance.now(); };
+    const dragged = (p: Phaser.Input.Pointer) => { if (p.isDown) tapped(); };
     this.input.on('pointerdown', tapped);
+    this.input.on('pointermove', dragged);
     const timer = this.time.addEvent({
       delay: 1000, loop: true, callback: () => {
         if (nudges >= 3 || audio.isSpeaking() || performance.now() - lastTap < IDLE * 1000) return;
@@ -309,7 +311,7 @@ export abstract class BaseGame extends Phaser.Scene {
           this.tweens.add({ targets: o, scale: { from: 1, to: 1.12 }, duration: 160, yoyo: true, delay: i * 140 }));
       },
     });
-    const stop = () => { timer.remove(); this.input.off('pointerdown', tapped); };
+    const stop = () => { timer.remove(); this.input.off('pointerdown', tapped); this.input.off('pointermove', dragged); };
     this.signal.addEventListener('abort', stop, { once: true });
     return stop;
   }

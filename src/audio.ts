@@ -12,6 +12,21 @@ const SOUNDS = manifest.sounds as unknown as Record<string, string | { file: str
 const soundFile = (g: string) => { const s = SOUNDS[g]; return typeof s === 'string' ? s : s?.file; };
 const BASE = `${import.meta.env.BASE_URL}voice/`;
 
+/** Short hash of what a clip was made from: re-recording a clip changes its URL, so it can be cached forever. */
+function version(s: string) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193);
+  return (h >>> 0).toString(36);
+}
+const VERSIONS = new Map<string, string>([
+  ...Object.entries(CLIPS).map(([k, v]) => [k, version(String(v))] as [string, string]),
+  ...Object.values(SOUNDS).map(s => (typeof s === 'string' ? [s, version(s)] : [s.file, version((s as { cache?: string }).cache ?? s.file)]) as [string, string]),
+]);
+const clipUrl = (key: string) => `${BASE}${key}.m4a?v=${VERSIONS.get(key) ?? '0'}`;
+
+/** Every voice clip's URL, for downloading them all to use offline. */
+export const allClipUrls = () => [...VERSIONS.keys()].map(clipUrl);
+
 // ---------- WebAudio graph ----------
 let actx: AudioContext | undefined;
 let busVoice: GainNode, busSfx: GainNode, busMusic: GainNode;
@@ -50,7 +65,7 @@ const buffers = new Map<string, Promise<AudioBuffer | null>>();
 function load(key: string): Promise<AudioBuffer | null> {
   let p = buffers.get(key);
   if (!p) {
-    p = fetch(BASE + key + '.m4a')
+    p = fetch(clipUrl(key))
       .then(r => (r.ok ? r.arrayBuffer() : Promise.reject(r.status)))
       .then(b => ac().decodeAudioData(b))
       .catch(() => null);

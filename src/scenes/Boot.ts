@@ -4,7 +4,7 @@ import { Session } from '../session';
 import { GAMES } from '../games';
 import { profiles, selectProfile, createProfile } from '../state';
 import { preload } from '../audio';
-import { allLines } from '../lines';
+import { LINES } from '../lines';
 
 /** Rasterizes the SVG art into textures. */
 export class Boot extends Phaser.Scene {
@@ -18,7 +18,8 @@ export class Boot extends Phaser.Scene {
   }
 
   create() {
-    preload(allLines());
+    // Just what the first screens say; each game loads its own lines as it starts.
+    preload([LINES.whoIsPlaying, LINES.pickPicture, LINES.hiNew, LINES.welcomeBack, ...Object.values(LINES.worldHello)]);
     // Dev shortcut: ?game=zombies plays just that minigame (as the first player).
     const only = new URLSearchParams(location.search).get('game');
     const meta = GAMES.find(g => g.meta.id === only)?.meta;

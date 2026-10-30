@@ -9,7 +9,7 @@ export const INTERVALS = [0, 2 * MIN, 20 * MIN, DAY, 3 * DAY, 7 * DAY, 21 * DAY,
 export const MASTERED_BOX = 2;
 const RECENT = 12;
 
-export type Skill = 'grapheme' | 'word' | 'sentence' | 'heart' | 'phonemic' | 'rhyme' | 'syllable' | 'spelling' | 'fun';
+export type Skill = 'grapheme' | 'word' | 'sentence' | 'heart' | 'phonemic' | 'rhyme' | 'syllable' | 'spelling' | 'writing' | 'fun';
 export type Tier = 0 | 1 | 2;
 /** correct = first try; help = needed a model or hint; seen = exposure only. */
 export type Result = 'correct' | 'wrong' | 'help' | 'seen';

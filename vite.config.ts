@@ -1,5 +1,6 @@
 import { defineConfig, type Plugin } from 'vite';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
 const PICKS = 'scripts/sound-picks.json';
 
@@ -39,4 +40,22 @@ function soundPicks(): Plugin {
   };
 }
 
-export default defineConfig({ plugins: [soundPicks()] });
+/**
+ * Build-only: writes sw.js (from src/sw/sw.js) with this build's files to keep offline: the page,
+ * the script and styles, the Latin fonts, the icon and the web manifest.
+ */
+function serviceWorker(): Plugin {
+  return {
+    name: 'service-worker',
+    apply: 'build',
+    generateBundle(_, bundle) {
+      const files = Object.keys(bundle).filter(f => /\.(js|css)$/.test(f) || /andika-latin-(400|700)-normal-.*\.woff2$/.test(f));
+      const shell = ['/', '/manifest.webmanifest', '/icon.svg', ...files.map(f => '/' + f)];
+      const version = createHash('sha1').update(Object.keys(bundle).sort().join()).digest('hex').slice(0, 10);
+      const source = readFileSync('src/sw/sw.js', 'utf8').replace('__VERSION__', version).replace('__SHELL__', JSON.stringify(shell));
+      this.emitFile({ type: 'asset', fileName: 'sw.js', source });
+    },
+  };
+}
+
+export default defineConfig({ plugins: [soundPicks(), serviceWorker()] });
