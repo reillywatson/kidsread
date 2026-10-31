@@ -10,6 +10,7 @@ import { GAMES } from './games';
 import { summarize, duration, ago } from './usage';
 import { applyBackup, backupNow, fetchBackup, lastBackup, normalizeCode, onBackup, restoreCode, CODE } from './sync';
 import type { Theme } from './games/BaseGame';
+import { startButtons } from './start';
 
 const WORLD: Record<Theme, string> = { pvz: '🌻', pokemon: '⚡', paw: '🐾', friends: '💜' };
 const gameName = (id: string) => {
@@ -116,8 +117,12 @@ export function openParentArea(onClose: () => void, onPlaytest?: () => void) {
             <button data-lesson="1">▶</button>
           </p>
           <p class="muted">Lessons follow the UFLI Foundations order. The game moves up on its own once the
-          lesson's new sounds and most of its words are answered correctly on separate tries. Skip ahead
-          if your child already knows the early sounds.</p>
+          lesson's new sounds and most of its words are answered correctly on separate tries, and skips
+          ahead to the next land when the sounds and words before it all come back right.</p>
+          <h3>Or jump to a starting point</h3>
+          <div class="starts">${startButtons(s.lesson)}</div>
+          <p class="muted">Jumping ahead counts everything before it as seen once (it comes up for review
+          soon, so any gaps show) and opens the map's lands on the way.</p>
           <details><summary>All lessons</summary><ol class="lessons">${LESSONS.map(x =>
             `<li class="${x.n === l.n ? 'cur' : ''}">${x.n}. ${esc(x.title)} — ${x.w.slice(0, 6).join(', ')}</li>`).join('')}</ol></details>
         </section>
@@ -211,7 +216,10 @@ export function openParentArea(onClose: () => void, onPlaytest?: () => void) {
       location.reload();
       return;
     }
-    if (d.lesson) {
+    if (d.start) {
+      const n = Number(d.start);
+      if (n > learner.lesson) learner.place(n, { quiet: true }); else learner.setLesson(n);
+    } else if (d.lesson) {
       learner.setLesson(d.lesson === '1' ? nextLesson(learner.lesson) : prevLesson(learner.lesson));
     } else if ('test' in d) {
       void audio.say(LINES.testVoice);

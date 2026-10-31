@@ -74,6 +74,7 @@ export function sandbox(lesson: number, tier: Tier) {
   profile = null;
   learner = new Learner(memoryStorage());
   learner.setLesson(lesson);
+  learner.skipAhead = false;
   for (const k of SKILLS) learner.s.tiers[k] = tier;
 }
 

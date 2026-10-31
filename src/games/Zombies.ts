@@ -49,7 +49,7 @@ export class Zombies extends BaseGame {
 
   protected async run() {
     const n = this.rounds(6);
-    const targets = this.learner.pick(['g'], n);
+    const targets = this.learner.pick(['g'], n, { probe: true });
     const nChoices = [2, 3, 3][this.tier];
     const secs = [18, 13, 10][this.tier];
 

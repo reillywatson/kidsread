@@ -83,7 +83,7 @@ export class Suns extends BaseGame {
 
   protected async run() {
     const n = this.rounds(6);
-    const words = this.learner.pick(['w', 'h'], n);
+    const words = this.learner.pick(['w', 'h'], n, { probe: true });
     const nChoices = [2, 3, 4][this.tier];
     const fall = [16, 13, 10][this.tier];
 

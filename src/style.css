@@ -101,3 +101,8 @@ html.turn #stage {
 #parent .game .muted { flex-basis: 100%; font-size: 13px; }
 #parent .game .tag { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #1e4fd8; background: #e8eefc; border-radius: 6px; padding: 1px 6px; }
 #parent .game:disabled { opacity: .45; cursor: default; }
+#parent .starts { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin: 12px 0; }
+#parent .start { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: center; text-align: left; padding: 14px 16px; }
+#parent .start .icon { grid-row: span 2; font-size: 34px; }
+#parent .start.first { background: #e7f6ea; border-color: #43c35e; }
+#parent .start.on { border-color: #1e4fd8; box-shadow: 0 0 0 2px #1e4fd8 inset; }

@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest';
 import { Learner, INTERVALS, type LearnerState } from '../src/learner';
-import { LAST_LESSON, lessonInfo } from '../src/data/curriculum';
+import { LAST_LESSON, itemsUpTo, lessonInfo } from '../src/data/curriculum';
 
 function make(start = 0) {
   let saved: LearnerState | null = null;
@@ -110,4 +110,70 @@ test('mastering the last lesson finishes the course (it has no next lesson)', ()
   expect(l.checkLessonUp()).toBeNull();
   expect(l.s.courseDone).toBe(true);
   expect(l.lesson).toBe(LAST_LESSON);
+});
+
+const cruise = (l: Learner) => { l.s.tiers.grapheme = 2; l.s.tiers.word = 2; };
+const lessonOf = (id: string) => itemsUpTo(LAST_LESSON).find(it => it.id === id)!.lesson;
+
+test('starting further on credits what came before as seen once and opens the lands passed', () => {
+  const { l, now } = make();
+  l.place(18, { quiet: true });
+  expect(l.lesson).toBe(18);
+  expect(l.isNew('g:m')).toBe(false);
+  expect(l.s.items['g:m']).toMatchObject({ box: 1, skipped: true, right: 0 });
+  expect(l.s.items['g:m'].due).toBeLessThanOrEqual(now() + 2 * 864e5);
+  expect(l.isNew('g:e')).toBe(true); // lesson 18's own sound is still new
+  expect(l.s.map!.cleared).toEqual(['meadow', 'backyard']);
+  expect(l.s.map!.celebrated).toEqual(['meadow', 'backyard']);
+  expect(l.s.stickers).toEqual(['monster', 'peashooter']);
+});
+
+test('skipping ahead leaves the gates for the map to celebrate', () => {
+  const { l } = make();
+  l.place(12);
+  expect(l.s.map!.cleared).toEqual(['meadow']);
+  expect(l.s.map!.celebrated).toEqual([]);
+});
+
+test('a cruising child is tested on items before the next land, and skips there when they come back right', () => {
+  const { l } = make();
+  l.place(12);
+  expect(l.pick(['g'], 6).every(g => lessonOf('g:' + g) <= 12)).toBe(true); // only games that ask for it
+  expect(l.pick(['g'], 6, { probe: true }).every(g => lessonOf('g:' + g) <= 12)).toBe(true); // not cruising yet
+  cruise(l);
+  const ahead = l.pick(['g'], 6, { probe: true }).filter(g => lessonOf('g:' + g) > 12);
+  expect(ahead.length).toBe(2);
+  expect(ahead.every(g => lessonOf('g:' + g) < 18)).toBe(true);
+  for (const g of ['d', 'c', 'u', 'g']) l.record('g:' + g, 'correct', 'grapheme');
+  expect(l.checkSkipAhead()).toBe(null); // the words between need checking too
+  l.record('w:hot', 'correct', 'word'); // lesson 21: past the next land, so it doesn't count
+  l.record('w:dad', 'correct', 'word');
+  expect(l.checkSkipAhead()).toBe(null);
+  l.record('w:cat', 'correct', 'word');
+  expect(l.checkSkipAhead()).toBe(18);
+  expect(l.lesson).toBe(18);
+  expect(l.takeLevelUp()).toBe(18);
+  expect(l.s.map!.cleared).toEqual(['meadow', 'backyard']);
+  expect(l.s.items['w:dad'].skipped).toBeUndefined(); // answered, so not just credited
+});
+
+test('two misses stop the testing ahead for a few sessions', () => {
+  const { l } = make();
+  l.place(12);
+  cruise(l);
+  l.record('g:d', 'wrong', 'grapheme');
+  l.record('g:c', 'help', 'grapheme');
+  expect(l.s.probe).toBeUndefined();
+  cruise(l);
+  expect(l.pick(['g'], 6, { probe: true }).every(g => lessonOf('g:' + g) <= 12)).toBe(true);
+  for (let i = 0; i < 3; i++) l.noteGames([]);
+  expect(l.pick(['g'], 6, { probe: true }).some(g => lessonOf('g:' + g) > 12)).toBe(true);
+});
+
+test('no testing ahead when skipping is off (playtesting)', () => {
+  const { l } = make();
+  l.place(12);
+  cruise(l);
+  l.skipAhead = false;
+  expect(l.pick(['g'], 6, { probe: true }).every(g => lessonOf('g:' + g) <= 12)).toBe(true);
 });

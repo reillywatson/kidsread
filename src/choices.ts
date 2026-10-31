@@ -17,7 +17,10 @@ function prefer<T>(preferred: T[], rest: T[], n: number): T[] {
 /** Item id for a readable word: heart words and decodable words are tracked separately. */
 export const wordItem = (w: string) => (HEART[w] ? 'h:' : 'w:') + w;
 
+// A target from a later lesson (a preview, or a skip-ahead test) draws its distractors from up to
+// its own lesson, so it can't be found just by being the one that isn't familiar.
 export function graphemeDistractors(g: string, n: number, tier: Tier, lesson: number): string[] {
+  lesson = Math.max(lesson, GRAPHEMES[g].lesson);
   // Taught graphemes first; a few upcoming ones fill in when very few are known yet.
   const all = Object.values(GRAPHEMES).filter(x =>
     x.id !== g && x.label !== GRAPHEMES[g].label && soundClass(x.id) !== soundClass(g) && x.lesson <= lesson + 12);
@@ -37,6 +40,7 @@ export function readableWords(lesson: number, { pic = false, heart = true } = {}
 }
 
 export function wordDistractors(word: string, n: number, tier: Tier, lesson: number, { pic = false } = {}): string[] {
+  lesson = Math.max(lesson, WORD_LESSON[word] ?? 0);
   const pool = readableWords(lesson, { pic }).filter(w =>
     w.toLowerCase() !== word.toLowerCase() && (!pic || !picConflict(w, word)));
   const d = (w: string) => editDistance(w.toLowerCase(), word.toLowerCase());

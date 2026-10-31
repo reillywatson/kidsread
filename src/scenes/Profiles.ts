@@ -6,6 +6,7 @@ import { AVATARS } from '../art';
 import { LINES } from '../lines';
 import * as audio from '../audio';
 import { playMusic } from '../music';
+import { askStart } from '../start';
 import { W, H, burst, onTap, roundButton, sprite, tappable, text } from '../widgets';
 
 function avatarButton(scene: Phaser.Scene, x: number, y: number, r: number, texture: string, color = 0xffffff) {
@@ -89,6 +90,7 @@ export class AvatarPicker extends Phaser.Scene {
         burst(this, x, y, ['⭐', '🎉', '✨'], 18);
         const p = createProfile(a);
         selectProfile(p.id);
+        await askStart();
         await audio.say(LINES.hiNew);
         this.scene.start('Home');
       });

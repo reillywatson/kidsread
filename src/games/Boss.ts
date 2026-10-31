@@ -86,7 +86,7 @@ export class Boss extends BaseGame {
 
   protected async run() {
     const n = this.rounds(5);
-    const gs = this.learner.pick(['g'], n);
+    const gs = this.learner.pick(['g'], n, { probe: true });
     const nChoices = [2, 3, 3][this.tier];
     let hp = gs.length;
     this.drawBar(hp, gs.length);

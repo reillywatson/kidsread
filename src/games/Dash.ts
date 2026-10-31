@@ -70,7 +70,7 @@ export class Dash extends BaseGame {
 
   protected async run() {
     const n = this.rounds(5);
-    const words = this.learner.pick(['w', 'h'], n);
+    const words = this.learner.pick(['w', 'h'], n, { probe: true });
     const nGates = [2, 3, 3][this.tier];
     const secs = [7, 6, 4.5][this.tier];
 

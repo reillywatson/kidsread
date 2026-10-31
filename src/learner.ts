@@ -1,7 +1,7 @@
 // Learner model: Leitner-style spaced repetition per item, rolling accuracy per skill
 // (drives difficulty tiers), and UFLI lesson advancement based on mastery.
 import { FIRST_LESSON, LAST_LESSON, lessonInfo, nextLesson, itemsUpTo, parseId, WORD_LESSON, type ItemKind } from './data/curriculum';
-import type { MapState } from './data/map';
+import { REGIONS, type MapState } from './data/map';
 
 const MIN = 60e3, DAY = 864e5;
 // Box n is due INTERVALS[n] after it was last promoted. The short early steps give
@@ -15,7 +15,21 @@ export type Tier = 0 | 1 | 2;
 /** correct = first try; help = needed a model or hint; seen = exposure only. */
 export type Result = 'correct' | 'wrong' | 'help' | 'seen';
 
-export interface ItemState { box: number; due: number; right: number; wrong: number; help: number; seen: number; last: number }
+export interface ItemState {
+  box: number; due: number; right: number; wrong: number; help: number; seen: number; last: number;
+  /** Credited when the child started or skipped ahead past it: not new, but due for a check. */
+  skipped?: boolean;
+}
+
+/** Answers to items from the lessons ahead (see Learner.pick's `probe`), toward skipping ahead. */
+export interface Probe { at: number; g: number; w: number; wrong: number }
+
+// Skipping ahead: a child cruising at the top level is tested on a few items from the lessons
+// between theirs and the next land. PROBE_RIGHT right first try (at least PROBE_EACH of each kind
+// those lessons teach) skips them to that land; a second miss stops it for PROBE_REST sessions.
+const PROBE_RIGHT = 6, PROBE_EACH = 2, PROBE_REST = 3;
+/** Where a child can start or skip ahead to: the first lesson of each land on the map. */
+export const CHECKPOINTS = REGIONS.map(r => r.first);
 
 export interface Settings { gamesPerSession: number }
 
@@ -42,6 +56,9 @@ export interface LearnerState {
   map?: MapState;
   /** Every lesson mastered, including the last. */
   courseDone?: boolean;
+  probe?: Probe;
+  /** No skip-ahead tests until this many sessions have been played. */
+  probeRest?: number;
 }
 
 /** One game (or sticker playground visit), for the grown-ups' "What got played". */
@@ -87,6 +104,8 @@ export class Learner {
   s: LearnerState;
   /** id -> times used this session, to spread items out. */
   private sessionUse = new Map<string, number>();
+  /** Off for playtesting, where the lesson should stay where it was put. */
+  skipAhead = true;
 
   constructor(private storage: Storage, private now: () => number = () => Date.now()) {
     const saved = storage.get();
@@ -102,7 +121,7 @@ export class Learner {
 
   isNew(id: string) {
     const it = this.s.items[id];
-    return !it || it.right + it.wrong + it.help === 0;
+    return !it || (!it.skipped && it.right + it.wrong + it.help === 0);
   }
 
   record(id: string, result: Result, skill?: Skill) {
@@ -129,7 +148,68 @@ export class Learner {
       it.due = t + INTERVALS[it.box];
     }
     if (skill && result !== 'seen') this.pushRecent(skill, result === 'correct');
+    if (result !== 'seen') this.noteProbe(id, result === 'correct');
     this.save();
+  }
+
+  /**
+   * Start at (or jump to) a lesson. Everything before it that hasn't been practiced is credited as
+   * seen once, so reviews soon check it (spread over the next couple of days), and the map's
+   * gates before it open. `quiet` (a grown-up's pick) also welcomes those lands' friends at once;
+   * otherwise the map celebrates each gate the next time it opens.
+   */
+  place(lesson: number, { quiet = false } = {}) {
+    if (!lessonInfo(lesson)) return;
+    const t = this.now();
+    for (const it of itemsUpTo(lesson)) {
+      if (it.lesson >= lesson || this.s.items[it.id]) continue;
+      this.s.items[it.id] = { box: 1, due: t + Math.random() * 2 * DAY, right: 0, wrong: 0, help: 0, seen: 0, last: 0, skipped: true };
+    }
+    const map = (this.s.map ??= { cleared: [], celebrated: [], chests: [] });
+    for (const r of REGIONS.filter(r => r.last < lesson)) {
+      if (!map.cleared.includes(r.id)) map.cleared.push(r.id);
+      if (quiet && !map.celebrated.includes(r.id)) { map.celebrated.push(r.id); this.addSticker(r.sticker); }
+    }
+    this.s.lesson = lesson;
+    this.s.probe = undefined;
+    this.save();
+  }
+
+  /** The next land's first lesson, and the untaught items between here and there. */
+  private probeRange() {
+    const target = CHECKPOINTS.find(n => n > this.s.lesson);
+    if (!target) return null;
+    const items = itemsUpTo(target).filter(it => it.lesson > this.s.lesson && it.lesson < target && !it.id.startsWith('h:'));
+    return items.length >= 3 ? { target, items } : null;
+  }
+
+  /** Testing ahead right now for this kind of item: cruising at the top level, and not resting. */
+  private probing(kind: ItemKind) {
+    return this.skipAhead && !this.s.courseDone && this.s.sessions >= (this.s.probeRest ?? 0) &&
+      (kind === 'g' ? this.tier('grapheme') : kind === 'w' ? this.tier('word') : 0) === 2;
+  }
+
+  private noteProbe(id: string, right: boolean) {
+    const { kind } = parseId(id);
+    const range = this.probeRange();
+    if (!range?.items.some(it => it.id === id) || !this.probing(kind)) return;
+    let p = this.s.probe;
+    if (p?.at !== this.s.lesson) p = this.s.probe = { at: this.s.lesson, g: 0, w: 0, wrong: 0 };
+    if (right) p[kind as 'g' | 'w']++;
+    else if (++p.wrong >= 2) { this.s.probe = undefined; this.s.probeRest = this.s.sessions + PROBE_REST; }
+  }
+
+  /** After a game: skip ahead to the next land if the tests of what's between came back solid. */
+  checkSkipAhead(): number | null {
+    const p = this.s.probe, range = this.probeRange();
+    if (!p || p.at !== this.s.lesson || !range) return null;
+    const has = (k: string) => range.items.some(it => it.id.startsWith(k + ':'));
+    const ok = p.g + p.w >= PROBE_RIGHT && (!has('g') || p.g >= PROBE_EACH) && (!has('w') || p.w >= PROBE_EACH);
+    if (!ok) return null;
+    this.place(range.target);
+    this.s.pendingLevelUp = range.target;
+    this.save();
+    return range.target;
   }
 
   pushRecent(skill: Skill, ok: boolean) {
@@ -208,7 +288,8 @@ export class Learner {
    * Mix: a limited number of new items (current lesson first), then due reviews,
    * then known items favoring weaker ones. Repeats only when the pool is small.
    */
-  pick(kinds: ItemKind[], n: number, { filter = () => true, newRatio }: { filter?: (x: string) => boolean; newRatio?: number } = {}): string[] {
+  pick(kinds: ItemKind[], n: number, { filter = () => true, newRatio, probe = false }:
+    { filter?: (x: string) => boolean; newRatio?: number; probe?: boolean } = {}): string[] {
     const t = this.now();
     const wanted = (id: string) => { const { kind, x } = parseId(id); return kinds.includes(kind) && filter(x); };
     const pool = itemsUpTo(this.s.lesson).filter(it => wanted(it.id));
@@ -251,6 +332,13 @@ export class Learner {
       const c = base[Math.floor(Math.random() * base.length)];
       if (base.length === 1 || out[out.length - 1] !== c) out.push(c);
     }
+    // Testing ahead (only games where the answer is picked from 3 or more at the top level): a
+    // couple of items from the lessons before the next land, never in the first round.
+    const range = probe && n >= 3 ? this.probeRange() : null;
+    if (range) {
+      const ahead = shuffle(range.items.filter(it => wanted(it.id) && !this.s.items[it.id] && this.probing(parseId(it.id).kind)));
+      ahead.slice(0, n >= 5 ? 2 : 1).forEach((it, i) => { out[n - 1 - i * 2] = it.id; });
+    }
     return out.map(id => parseId(id).x);
   }
 
@@ -267,7 +355,8 @@ export class Learner {
 
   /** For the grown-up screen. */
   summary() {
-    const items = Object.entries(this.s.items);
+    // Items only credited by starting or skipping ahead haven't been practiced (yet).
+    const items = Object.entries(this.s.items).filter(([, v]) => !v.skipped || v.seen > 0);
     const mastered = items.filter(([, v]) => v.box >= MASTERED_BOX).length;
     const tricky = items
       .filter(([, v]) => v.wrong + v.help > 0)

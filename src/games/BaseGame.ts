@@ -467,7 +467,7 @@ export abstract class BaseGame extends Phaser.Scene {
     const stars = acc >= 0.9 ? 3 : acc >= 0.6 ? 2 : 1;
     this.logPlay(true, stars);
     this.learner.adjustTier(this.meta.skill);
-    this.learner.checkLessonUp();
+    if (!this.learner.checkSkipAhead()) this.learner.checkLessonUp();
     this.session.gameDone(this, stars);
   }
 }
