@@ -50,11 +50,7 @@ export class Rainbow extends BaseGame {
       t.draw();
 
       await this.prompt(async () => {
-        await this.say(LINES.thisIsLetter);
-        await this.letterName(g);
-        await this.say(LINES.itSays);
-        await this.letterSound(g);
-        await this.wait(500);
+        await this.introLetter(g);
         if (r === 0 || this.tier === 0) { await this.say(LINES.watchMe); await t.demo(); }
         await this.say(LINES.yourTurn);
       });
@@ -71,9 +67,7 @@ export class Rainbow extends BaseGame {
       const pic = emoji(this, 640, 350, GRAPHEMES[g].pic, 150).setScale(0).setDepth(5);
       this.sfx.pop();
       await this.tween({ targets: pic, scale: 1, duration: 400, ease: 'Back.Out' });
-      await this.say(LINES.youMadeLetter);
-      await this.letterName(g);
-      await this.say(GRAPHEMES[g].key);
+      await this.madeLetter(g);
       await this.praise(true);
       t.destroy();
       brush.destroy();

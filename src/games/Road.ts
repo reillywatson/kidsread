@@ -1,6 +1,6 @@
 // Rescue pups world — letter formation: the letter is a road. Drive Chase's truck along it from the
-// green light, stroke by stroke; the road lights up behind the truck. Then the siren plays and
-// the letter says its sound.
+// green light, stroke by stroke; the road lights up behind the truck. Like Rainbow Letters, the
+// letter is introduced by name and sound first, and named again with its keyword when it's done.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES } from '../data/curriculum';
@@ -49,7 +49,7 @@ export class Road extends BaseGame {
       t.draw();
 
       await this.prompt(async () => {
-        await this.letterSound(g);
+        await this.introLetter(g);
         if (r === 0 || this.tier === 0) { await this.say(LINES.watchMe); await t.demo(); }
         await this.say(LINES.yourTurn);
       });
@@ -63,8 +63,7 @@ export class Road extends BaseGame {
       this.sfx.bark();
       this.tweens.add({ targets: this.leader, y: this.leader.y - 50, duration: 200, yoyo: true, repeat: 1, ease: 'Quad.Out' });
       const card = picture(this, 1130, 230, GRAPHEMES[g].key, { size: 80 });
-      await this.letterSound(g);
-      await this.keyword(g);
+      await this.madeLetter(g);
       await this.praise(true);
       t.destroy();
       [truck, card].forEach(o => o.destroy());

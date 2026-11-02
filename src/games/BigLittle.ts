@@ -1,7 +1,8 @@
 // Friends — capital letters: a big mama animal holds a big letter; tap the baby holding the
-// matching little letter ("big B, little b"), and it runs to its mama. At the hardest level the
-// other babies hold look-alikes (b, d, p). Each family that finds each other joins a parade
-// along the bottom beside its letter pair ("Bb"); at the end each family hops as its sound plays.
+// matching little letter, and it runs to its mama ("Here's big bee, and little bee. It says /b/."):
+// a letter's name is what its big and little shapes share. At the hardest level the other babies
+// hold look-alikes (b, d, p). Each family that finds each other joins a parade along the bottom
+// beside its letter pair ("Bb"); at the end each family hops as its letter is named.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES, capitalOf } from '../data/curriculum';
@@ -71,11 +72,12 @@ export class BigLittle extends BaseGame {
       });
 
       await this.prompt(async () => {
+        await this.say(LINES.bigLetter);
+        await this.letterName(g);
         await this.say(r === 0 ? LINES.whichBaby[0] : pickOne(LINES.whichBaby));
-        await this.letterSound(g);
       });
       const res = await this.choose(babies, opts.indexOf(g), {
-        onScaffold: () => { void this.letterSound(g).catch(() => {}); },
+        onScaffold: () => { void this.letterName(g).catch(() => {}); },
       });
       this.learner.pushRecent('capitals', res.firstTry);
       this.learner.record('g:' + g, 'seen');
@@ -98,6 +100,12 @@ export class BigLittle extends BaseGame {
       burst(this, MAMA.x - 70, MAMA.y - 20, ['💖', '💜', '✨'], 14);
       this.tweens.add({ targets: mama, scale: 1.1, duration: 180, yoyo: true, repeat: 1 });
       if (r === 0) await this.say(LINES.foundMama);
+      // "Here's big bee, and little bee. It says /b/."
+      await this.say(LINES.bigLetter);
+      await this.letterName(g);
+      await this.say(LINES.littleLetter);
+      await this.letterName(g);
+      await this.say(LINES.itSays);
       await this.letterSound(g);
       await this.praise(res.firstTry);
       await this.tween({ targets: [big, ...babies.filter(b => b !== baby)], alpha: 0, duration: 250 });
@@ -124,12 +132,12 @@ export class BigLittle extends BaseGame {
     this.parade.push({ g, items: [mama, baby, tag] });
   }
 
-  /** Each family hops in turn as its letter's sound plays. */
+  /** Each family hops in turn as its letter is named. */
   private async paradeHop() {
     for (const { g, items } of this.parade) {
       this.tweens.add({ targets: items, y: '-=30', duration: 180, yoyo: true, ease: 'Quad.Out' });
       burst(this, items[0].x + 30, PARADE_Y - 40, ['💜', '✨'], 5);
-      await this.letterSound(g);
+      await this.letterName(g);
     }
   }
 }

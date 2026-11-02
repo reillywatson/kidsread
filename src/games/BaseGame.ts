@@ -349,8 +349,24 @@ export abstract class BaseGame extends Phaser.Scene {
   /** "like apple" — the keyword for a letter sound. */
   async keyword(g: string) { await this.say(LINES.like); await this.say(GRAPHEMES[g].key); }
   letterSound(g: string) { return this.guard(audio.sound(g)); }
-  /** A letter's name ("bee"). Single letters only; Z is "zee" or "zed" by the English setting. */
-  letterName(g: string) { return this.say(g === 'z' && settings.english === 'uk' ? LINES.zed : LINES.letterName[g]); }
+  /** A letter's name ("bee"; "cue you" for qu). Z is "zee" or "zed" by the English setting. */
+  async letterName(g: string) {
+    for (const c of g) await this.say(c === 'z' && settings.english === 'uk' ? LINES.zed : LINES.letterName[c]);
+  }
+  /** Before writing a letter: "This is the letter" + "tee", "It says" + /t/, and a beat. */
+  async introLetter(g: string) {
+    await this.say(LINES.thisIsLetter);
+    await this.letterName(g);
+    await this.say(LINES.itSays);
+    await this.letterSound(g);
+    await this.wait(500);
+  }
+  /** After writing it: "You made the letter" + "tee", then its keyword ("turtle"). */
+  async madeLetter(g: string) {
+    await this.say(LINES.youMadeLetter);
+    await this.letterName(g);
+    await this.say(GRAPHEMES[g].key);
+  }
   wait(ms: number) { return this.guard(new Promise<void>(r => this.time.delayedCall(ms, r))); }
   tween(cfg: Phaser.Types.Tweens.TweenBuilderConfig) { return this.guard(tweenP(this, cfg)); }
 

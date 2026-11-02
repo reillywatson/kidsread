@@ -143,9 +143,10 @@ function stretch(x, ms) {
   return Float32Array.from(out.concat(Array.from(x.slice(x.length - q))));
 }
 
-/** A clip cut from a sentence at the silence before its last word (see CUTS): everything before
- *  it ('head') or the word itself ('tail'). */
-function cut(x, keep) {
+/** A clip cut from a sentence at the silence before its last word, or at `at` ms (see CUTS):
+ *  everything before it ('head') or the word itself ('tail'). */
+function cut(x, { keep, at }) {
+  if (at) return keep === 'head' ? fade(x.slice(0, Math.round(SR * at / 1000)), 5, 40) : fade(x.slice(Math.round(SR * at / 1000)), 8, 20);
   const segs = segments(envelope(x), 0.04).filter(([a, b]) => b - a >= 3);
   if (segs.length < 2) throw new Error('no gap before the last word to cut at');
   return keep === 'head'
@@ -304,7 +305,7 @@ await pool(todo, 2, async j => {
   const made = j.spec && await makeSound(j.t, j.spec);
   if (j.spec && !made) throw new Error('its letter-sound recipe failed');
   const said = made ? null : await synth(j.send);
-  const x = normalize(made ? made.audio : trim(CUTS[j.t] ? cut(said, CUTS[j.t].keep) : said), 0.85);
+  const x = normalize(made ? made.audio : trim(CUTS[j.t] ? cut(said, CUTS[j.t]) : said), 0.85);
   await encode(CUTS[j.t]?.pause ? pad(x, CUTS[j.t].pause) : x, j.file);
   manifest.clips[j.key] = j.cache;
 });

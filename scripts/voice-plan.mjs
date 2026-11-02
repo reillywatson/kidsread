@@ -42,13 +42,17 @@ export function spoken(t) {
 
 // Clips cut from a whole sentence at the silence before its last word (voice.mjs). A lead-in said
 // on its own sounds finished, so it's recorded with a word after it, and that word cut off ('head')
-// with a pause after: "T" ends the sentence, as its silent closure leaves a clean gap to cut at.
+// with a pause after. The word is "A": the voice pauses cleanly before a vowel, while before a
+// consonant like "T" the end of "letter" already moves toward it and you can hear a tiny "t".
 // A letter name said alone can come out wrong ("ay" as "aye"), so it's the end of a sentence that
-// names it ('tail').
+// names it ('tail'). `at` (ms) places a cut by hand, for a take with no clean silence. "little"
+// runs straight into "A" ("littleA"), so its sentence has a written pause.
 export const CUTS = {
-  [ORIGINAL.thisIsLetter]: { from: '[warmly] This is the letter T.', keep: 'head', pause: 100 },
-  [ORIGINAL.youMadeLetter]: { from: '[warmly] You made the letter T!', keep: 'head', pause: 100 },
+  [ORIGINAL.thisIsLetter]: { from: '[warmly] This is the letter A.', keep: 'head', pause: 100 },
+  [ORIGINAL.youMadeLetter]: { from: '[warmly] You made the letter A!', keep: 'head', pause: 100 },
   [ORIGINAL.letterName.a]: { from: '[warmly] This is the letter A.', keep: 'tail' },
+  [ORIGINAL.bigLetter]: { from: '[warmly] Here’s big T,', keep: 'head', pause: 100 },
+  [ORIGINAL.littleLetter]: { from: '[warmly] and little... A!', keep: 'head', pause: 100 },
 };
 
 // Words, keywords and picture names: the same in both editions.

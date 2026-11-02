@@ -1,6 +1,6 @@
 // Rescue pups world — memory match. Early on: letter ↔ keyword picture (m ↔ 🐵).
 // Later: word ↔ picture and heart word ↔ heart word. At the medium and hard levels, sometimes
-// big letter ↔ little letter (B ↔ b).
+// big letter ↔ little letter (B ↔ b), which say the letter's name: it's what they share.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES, PIC, HEART, LESSONS, capitalOf } from '../data/curriculum';
@@ -42,7 +42,7 @@ export class PupMemory extends BaseGame {
     if (this.tier >= 1 && Math.random() < 0.45) {
       const gs = [...new Set(this.learner.pick(['g'], n * 2, { filter: g => !!capitalOf(g) }))].slice(0, n);
       if (gs.length === n) return gs.map(g => {
-        const say = () => this.letterSound(g);
+        const say = () => this.letterName(g);
         return [{ kind: 'upper', value: g, item: 'g:' + g, say }, { kind: 'letter', value: g, item: 'g:' + g, say }];
       });
     }

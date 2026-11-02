@@ -1,6 +1,7 @@
 // Critters world — letter formation, dot to dot: the letter is a constellation. Touch the stars in
 // order (or slide through them) and lines join them up; then Pikachu lights the letter up
-// with a thunderbolt. Gentler than free tracing: only the stars have to be reached.
+// with a thunderbolt. Gentler than free tracing: only the stars have to be reached. Like Rainbow
+// Letters, the letter is introduced by name and sound first, and named again when it's done.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES } from '../data/curriculum';
@@ -51,7 +52,7 @@ export class StarLetters extends BaseGame {
       t.draw();
 
       await this.prompt(async () => {
-        await this.letterSound(g);
+        await this.introLetter(g);
         if (r === 0 || this.tier === 0) { await this.say(LINES.watchMe); await t.demo(); }
         await this.say(LINES.touchStars);
       });
@@ -68,8 +69,7 @@ export class StarLetters extends BaseGame {
       void audio.say(pickOne(LINES.heroCall), { style: 'hero' });
       const card = picture(this, 1130, 230, GRAPHEMES[g].key, { size: 80 });
       await this.wait(700);
-      await this.letterSound(g);
-      await this.keyword(g);
+      await this.madeLetter(g);
       await this.praise(true);
       t.destroy();
       card.destroy();

@@ -131,6 +131,7 @@ const ORIGINAL = {
     w: 'double-you', x: 'ex', y: 'why', z: 'zee',
   } as Record<string, string>,
   zed: 'zed', thisIsLetter: 'This is the letter', youMadeLetter: 'You made the letter',
+  bigLetter: 'Here’s big', littleLetter: 'and little',
 
   // Words said in parts, for the drum game. One-part words aren't listed (they're just the word).
   syllables: {
