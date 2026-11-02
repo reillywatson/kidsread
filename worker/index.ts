@@ -1,7 +1,7 @@
 // Kids Read server: the static game (Workers static assets), plus a small API in front of a D1
 // database (schema in migrations/):
 //   GET/POST /api/backup/:code  a device's backup (players and progress), by its restore code
-//   GET /api/stats?key=…        pooled, anonymous play stats (game, time, score, lesson)
+//   GET /api/stats?key=…        pooled, anonymous play stats (game, time, score, lesson) and lesson changes
 //   GET /stats                  a page that shows them (needs the STATS_KEY secret)
 
 // Just the parts of the Workers types this uses.
@@ -39,6 +39,17 @@ export function cleanPlays(v: unknown): PlayIn[] {
     }));
 }
 
+export interface MoveIn { id: string; at: number; from: number; to: number; why: string }
+const WHY = new Set(['start', 'grownup', 'up', 'skip']);
+
+/** Keep only well-formed lesson changes. */
+export function cleanMoves(v: unknown): MoveIn[] {
+  if (!Array.isArray(v)) return [];
+  const num = (x: unknown, max: number) => (typeof x === 'number' && Number.isFinite(x) ? Math.max(0, Math.min(max, Math.round(x))) : 0);
+  return v.slice(0, MAX_PLAYS).filter(m => m && typeof m.id === 'string' && m.id.length <= 64 && WHY.has(m.why))
+    .map(m => ({ id: m.id, at: num(m.at, 9e15), from: num(m.from, 999), to: num(m.to, 999), why: m.why }));
+}
+
 async function backup(req: Request, env: Env, code: string) {
   if (!CODE.test(code)) return json({ error: 'bad code' }, 400);
   if (req.method === 'GET') {
@@ -48,17 +59,20 @@ async function backup(req: Request, env: Env, code: string) {
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
   const body = await req.text();
   if (body.length > MAX_BODY) return json({ error: 'too big' }, 413);
-  let parsed: { data?: unknown; plays?: unknown };
+  let parsed: { data?: unknown; plays?: unknown; moves?: unknown };
   try { parsed = JSON.parse(body); } catch { return json({ error: 'bad json' }, 400); }
   if (!parsed.data || typeof parsed.data !== 'object') return json({ error: 'no data' }, 400);
   const now = Date.now();
   const fam = await hash(code);
   const plays = cleanPlays(parsed.plays);
+  const moves = cleanMoves(parsed.moves);
   await env.DB.batch([
     env.DB.prepare('INSERT INTO backups (code, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(code) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at')
       .bind(code, JSON.stringify(parsed.data), now),
     ...plays.map(p => env.DB.prepare('INSERT OR IGNORE INTO plays (id, fam, game, at, ms, done, first_try, answers, stars, lesson) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
       .bind(`${fam}:${p.id}`, fam, p.game, p.at, p.ms, p.done ? 1 : 0, p.right, p.total, p.stars ?? null, p.lesson ?? null)),
+    ...moves.map(m => env.DB.prepare('INSERT OR IGNORE INTO moves (id, fam, at, from_lesson, to_lesson, why) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(`${fam}:${m.id}`, fam, m.at, m.from, m.to, m.why)),
   ]);
   return json({ ok: true, at: now, plays: plays.length });
 }
@@ -78,7 +92,12 @@ async function stats(req: Request, env: Env) {
   const byLesson = await q(`SELECT (lesson / 10) * 10 AS band, COUNT(*) AS plays, COUNT(DISTINCT fam) AS families,
     AVG(1 - done) AS left_early, SUM(first_try) * 1.0 / NULLIF(SUM(answers), 0) AS accuracy
     FROM plays WHERE at > ? AND lesson IS NOT NULL GROUP BY band ORDER BY band`);
-  return json({ days, totals, games, byDay, byLesson });
+  // Lesson changes, each with the plays and time spent on the lesson it moved on from.
+  const moves = await q(`SELECT substr(m.fam, 1, 6) AS fam, m.at, m.from_lesson, m.to_lesson, m.why,
+    (SELECT COUNT(*) FROM plays p WHERE p.fam = m.fam AND p.lesson = m.from_lesson AND p.at < m.at) AS plays,
+    (SELECT SUM(ms) FROM plays p WHERE p.fam = m.fam AND p.lesson = m.from_lesson AND p.at < m.at) AS ms
+    FROM moves m WHERE m.at > ? ORDER BY m.at DESC LIMIT 200`);
+  return json({ days, totals, games, byDay, byLesson, moves });
 }
 
 const STATS_PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -102,7 +121,12 @@ $('out').innerHTML='<section><b>'+(t.families||0)+'</b> families · <b>'+(t.play
 +s.games.map(g=>'<tr class="'+(g.plays>=5&&g.left_early>=.4?'warn':'')+'"><td>'+g.game+'</td><td class=n>'+g.plays+'</td><td class=n>'+g.families+'</td><td class=n>'+min(g.avg_ms)+'</td><td class=n>'+pct(g.left_early)+'</td><td class=n>'+(g.avg_stars==null?'—':g.avg_stars.toFixed(1))+'</td><td class=n>'+pct(g.accuracy)+'</td></tr>').join('')
 +'</table><p class="muted">Highlighted: left early 40%+ of the time (5+ plays).</p></section>'
 +'<section><h2>By lesson</h2><table><tr><th>Lessons</th><th class=n>Plays</th><th class=n>Families</th><th class=n>Left early</th><th class=n>First try</th></tr>'
-+s.byLesson.map(b=>'<tr><td>'+b.band+'–'+(b.band+9)+'</td><td class=n>'+b.plays+'</td><td class=n>'+b.families+'</td><td class=n>'+pct(b.left_early)+'</td><td class=n>'+pct(b.accuracy)+'</td></tr>').join('')+'</table></section>'}
++s.byLesson.map(b=>'<tr><td>'+b.band+'–'+(b.band+9)+'</td><td class=n>'+b.plays+'</td><td class=n>'+b.families+'</td><td class=n>'+pct(b.left_early)+'</td><td class=n>'+pct(b.accuracy)+'</td></tr>').join('')+'</table></section>'
++'<section><h2>Lesson changes</h2>'+(s.moves.length?'<p>'+['start','skip','up','grownup'].map(w=>'<b>'+s.moves.filter(m=>m.why===w).length+'</b> '+WHY[w]).join(' · ')+'</p>'
++'<table><tr><th>When</th><th>Family</th><th>Lesson</th><th>Why</th><th class=n>Plays at the old lesson</th><th class=n>Time</th></tr>'
++s.moves.map(m=>'<tr><td>'+new Date(m.at).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+'</td><td>'+m.fam+'</td><td>'+(m.why==='start'?'→ '+m.to_lesson:m.from_lesson+' → '+m.to_lesson)+'</td><td>'+WHY[m.why]+'</td><td class=n>'+(m.why==='start'?'—':m.plays)+'</td><td class=n>'+(m.why==='start'?'—':min(m.ms))+'</td></tr>').join('')
++'</table><p class="muted">Family is a short anonymous id, the same for every player on one device.</p>':'<p class="muted">None yet.</p>')+'</section>'}
+const WHY={start:'start question',skip:'skipped ahead',up:'mastered',grownup:'grown-up'};
 $('go').onclick=load;if($('key').value)load();
 </script></body></html>`;
 

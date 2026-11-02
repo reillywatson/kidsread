@@ -1,6 +1,6 @@
 import { test, expect, beforeEach } from 'vitest';
-import { CODE, normalizeCode, restoreCode, snapshot, playsSince, applyBackup } from '../src/sync';
-import { CODE as SERVER_CODE, cleanPlays } from '../worker/index';
+import { CODE, normalizeCode, restoreCode, snapshot, playsSince, movesSince, applyBackup } from '../src/sync';
+import { CODE as SERVER_CODE, cleanPlays, cleanMoves } from '../worker/index';
 
 // A minimal localStorage for Node.
 class MemStorage {
@@ -64,4 +64,24 @@ test('the server keeps only well-formed plays, clamped', () => {
   ]);
   expect(out).toEqual([{ id: 'x', game: 'zombies', at: 5, ms: 3_600_000, done: true, right: 0, total: 5, stars: undefined, lesson: undefined }]);
   expect(cleanPlays('nope')).toEqual([]);
+});
+
+test('lesson changes sent for stats carry no names', () => {
+  localStorage.setItem('kidsread.profiles', '[{"id":"p1","name":"Ada"}]');
+  localStorage.setItem('kidsread.p.p1', JSON.stringify({ moves: [
+    { id: 'a', at: 1000, from: 1, to: 12, why: 'start' },
+    { id: 'b', at: 5000, from: 12, to: 18, why: 'skip' },
+  ] }));
+  const moves = movesSince(snapshot(), 2000);
+  expect(moves).toEqual([{ id: 'b', at: 5000, from: 12, to: 18, why: 'skip' }]);
+  expect(JSON.stringify(moves)).not.toContain('Ada');
+});
+
+test('the server keeps only well-formed lesson changes', () => {
+  expect(cleanMoves([
+    { id: 'x', at: 5, from: 12, to: 18, why: 'skip' },
+    { id: 'y', at: 5, from: 1, to: 2, why: 'hacked' },
+    { at: 5, from: 1, to: 2, why: 'up' },
+  ])).toEqual([{ id: 'x', at: 5, from: 12, to: 18, why: 'skip' }]);
+  expect(cleanMoves(null)).toEqual([]);
 });

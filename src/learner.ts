@@ -21,6 +21,12 @@ export interface ItemState {
   skipped?: boolean;
 }
 
+/** Why the lesson changed: the start question, a grown-up, mastering the lesson, or skipping ahead. */
+export type MoveWhy = 'start' | 'grownup' | 'up' | 'skip';
+/** A lesson change, for the stats (how placement and pacing work out). */
+export interface Move { id: string; at: number; from: number; to: number; why: MoveWhy }
+const MAX_MOVES = 200;
+
 /** Answers to items from the lessons ahead (see Learner.pick's `probe`), toward skipping ahead. */
 export interface Probe { at: number; g: number; w: number; wrong: number }
 
@@ -59,6 +65,8 @@ export interface LearnerState {
   probe?: Probe;
   /** No skip-ahead tests until this many sessions have been played. */
   probeRest?: number;
+  /** Lesson changes (most recent last). */
+  moves?: Move[];
 }
 
 /** One game (or sticker playground visit), for the grown-ups' "What got played". */
@@ -117,7 +125,20 @@ export class Learner {
   startSession() { this.sessionUse.clear(); }
 
   get lesson() { return this.s.lesson; }
-  setLesson(n: number) { if (lessonInfo(n)) { this.s.lesson = n; this.save(); } }
+  setLesson(n: number, why: MoveWhy = 'grownup') {
+    if (!lessonInfo(n)) return;
+    this.noteMove(this.s.lesson, n, why);
+    this.s.lesson = n;
+    this.save();
+  }
+
+  /** Remember a lesson change (the start question's answer is kept even when it's lesson 1). */
+  private noteMove(from: number, to: number, why: MoveWhy) {
+    if (from === to && why !== 'start') return;
+    const moves = (this.s.moves ??= []);
+    moves.push({ id: Math.random().toString(36).slice(2, 12), at: this.now(), from, to, why });
+    if (moves.length > MAX_MOVES) moves.splice(0, moves.length - MAX_MOVES);
+  }
 
   isNew(id: string) {
     const it = this.s.items[id];
@@ -158,8 +179,9 @@ export class Learner {
    * gates before it open. `quiet` (a grown-up's pick) also welcomes those lands' friends at once;
    * otherwise the map celebrates each gate the next time it opens.
    */
-  place(lesson: number, { quiet = false } = {}) {
+  place(lesson: number, { quiet = false, why = 'skip' as MoveWhy } = {}) {
     if (!lessonInfo(lesson)) return;
+    this.noteMove(this.s.lesson, lesson, why);
     const t = this.now();
     for (const it of itemsUpTo(lesson)) {
       if (it.lesson >= lesson || this.s.items[it.id]) continue;
@@ -268,6 +290,7 @@ export class Learner {
     if (gOk && wOk && hOk) {
       // The very last lesson has nowhere to go: the whole course is done (the map's last gate opens).
       if (next === this.s.lesson) { this.s.courseDone = true; this.save(); return null; }
+      this.noteMove(this.s.lesson, next, 'up');
       this.s.lesson = next;
       this.s.pendingLevelUp = next;
       this.save();
@@ -285,8 +308,9 @@ export class Learner {
 
   /**
    * Choose n item values (e.g. 'm', 'cat') of the given kinds using spaced repetition.
-   * Mix: a limited number of new items (current lesson first), then due reviews,
-   * then known items favoring weaker ones. Repeats only when the pool is small.
+   * Mix: a limited number of new items (current lesson first), then a share for the current
+   * lesson's items that are due but not solid yet, then due reviews, then known items favoring
+   * weaker ones. Repeats only when the pool is small.
    */
   pick(kinds: ItemKind[], n: number, { filter = () => true, newRatio, probe = false }:
     { filter?: (x: string) => boolean; newRatio?: number; probe?: boolean } = {}): string[] {
@@ -308,21 +332,27 @@ export class Learner {
     const maxNew = Math.max(1, Math.round(n * newRatio));
 
     type Cand = { id: string; lesson: number; score: number };
-    const fresh: Cand[] = [], due: Cand[] = [], known: Cand[] = [];
+    const fresh: Cand[] = [], learning: Cand[] = [], due: Cand[] = [], known: Cand[] = [];
     for (const it of pool) {
       const st = this.s.items[it.id];
       const used = this.sessionUse.get(it.id) || 0;
-      if (this.isNew(it.id)) fresh.push({ ...it, score: it.lesson + Math.random() });
+      // The lesson's heart words first: only a few games show them, so they'd otherwise wait.
+      if (this.isNew(it.id)) fresh.push({ ...it, score: it.lesson + Math.random() + (it.id.startsWith('h:') ? 1 : 0) });
+      // Reviews are ranked by how overdue they are, so a backlog (after starting further on, or a
+      // few days away) would crowd out the lesson being learned, and the lesson would never finish.
+      else if (it.lesson === this.s.lesson && st.box < MASTERED_BOX && st.due <= t) learning.push({ ...it, score: -used * 15 + Math.random() * 5 });
       else if (st.due <= t) due.push({ ...it, score: (t - st.due) / MIN + (8 - st.box) * 10 - used * 15 + Math.random() * 5 });
       else known.push({ ...it, score: (8 - st.box) * 5 - used * 15 + Math.random() * 20 });
     }
     // Newest lesson first, so the child meets what this lesson is teaching.
-    for (const list of [fresh, due, known]) list.sort((a, b) => b.score - a.score);
+    for (const list of [fresh, learning, due, known]) list.sort((a, b) => b.score - a.score);
 
     const out: string[] = [];
     const take = (list: Cand[], k: number) => { while (k-- > 0 && list.length) out.push(list.shift()!.id); };
     take(fresh, maxNew);
+    take(learning, Math.max(1, Math.round(n / 3)));
     take(due, n - out.length);
+    take(learning, n - out.length);
     take(known, n - out.length);
     take(fresh, n - out.length);
     shuffle(out);

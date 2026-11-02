@@ -177,3 +177,25 @@ test('no testing ahead when skipping is off (playtesting)', () => {
   l.skipAhead = false;
   expect(l.pick(['g'], 6, { probe: true }).every(g => lessonOf('g:' + g) <= 12)).toBe(true);
 });
+
+test("the lesson being learned isn't crowded out by a backlog of overdue reviews", () => {
+  const { l, tick } = make();
+  l.place(20);
+  tick(5 * 864e5); // everything credited before lesson 20 is now days overdue
+  for (const w of ['kid', 'kit', 'kin', 'keg']) l.record('w:' + w, 'correct', 'word');
+  l.record('h:you', 'correct', 'heart');
+  tick(INTERVALS[1]);
+  for (let i = 0; i < 5; i++) {
+    const ws = l.pick(['w', 'h'], 6);
+    expect(ws.filter(w => ['kid', 'kit', 'kin', 'keg', 'you'].includes(w)).length).toBeGreaterThanOrEqual(2);
+    l.startSession();
+  }
+});
+
+test('lesson changes are remembered with why they happened', () => {
+  const { l } = make();
+  l.place(1, { quiet: true, why: 'start' });
+  l.place(12);
+  l.setLesson(13);
+  expect(l.s.moves!.map(m => [m.from, m.to, m.why])).toEqual([[1, 1, 'start'], [1, 12, 'skip'], [12, 13, 'grownup']]);
+});

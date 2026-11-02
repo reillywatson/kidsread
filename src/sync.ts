@@ -62,6 +62,17 @@ export function playsSince(snap: ReturnType<typeof snapshot>, since: number) {
   });
 }
 
+interface StoredMove { id: string; at: number; from: number; to: number; why: string }
+
+/** Lesson changes since `since`, from every player (for the stats; nothing that names anyone). */
+export function movesSince(snap: ReturnType<typeof snapshot>, since: number) {
+  return Object.entries(snap.data).filter(([k]) => k.startsWith('kidsread.p.')).flatMap(([, v]) => {
+    let moves: StoredMove[] = [];
+    try { moves = JSON.parse(v).moves ?? []; } catch { /* skip */ }
+    return moves.filter(m => m.at >= since).map(({ id, at, from, to, why }) => ({ id, at, from, to, why }));
+  });
+}
+
 let listeners: (() => void)[] = [];
 /** Called after each successful backup (the grown-up area shows the time). */
 export const onBackup = (f: () => void) => { listeners.push(f); return () => { listeners = listeners.filter(x => x !== f); }; };
@@ -73,8 +84,9 @@ export async function backupNow(force = false): Promise<boolean> {
   busy = true;
   try {
     const snap = snapshot();
-    // Plays since the last backup (with a day's overlap; the server ignores repeats).
-    const body = JSON.stringify({ data: snap, plays: playsSince(snap, lastBackup() - 864e5) });
+    // Plays and lesson changes since the last backup (with a day's overlap; the server ignores repeats).
+    const since = lastBackup() - 864e5;
+    const body = JSON.stringify({ data: snap, plays: playsSince(snap, since), moves: movesSince(snap, since) });
     const res = await fetch(`/api/backup/${restoreCode()}`, {
       method: 'POST', body, headers: { 'content-type': 'application/json' }, keepalive: body.length < 60_000,
     });

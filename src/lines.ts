@@ -131,6 +131,7 @@ export const LINES = {
     alligator: 'al... li... ga... tor', watermelon: 'wa... ter... mel... on', helicopter: 'hel... i... cop... ter',
   } as Record<string, string>,
   whichPot: 'Which pot does it go in?', readAndPlant: 'Read the word. Which vowel do you hear?',
+  missingVowel: 'Listen. Which vowel is missing?',
   testVoice: "Hi! Let's read together.",
 };
 

@@ -1,5 +1,6 @@
-// Plants vs. Zombies — drag and drop: two pots, each with a letter. Drag each picture into the
-// pot with the letter it starts with (tapping a pot works too). Flowers bloom over each pot as
+// Plants vs. Zombies — drag and drop: pots with letters (two, or three above the easiest level,
+// with letters that look or sound alike at the top). Drag each picture into the pot with the
+// letter it starts with (tapping a pot works too). Flowers bloom over each pot as
 // it fills up, and each sorted picture stays beside its pot. At the end each pot says its sound
 // and reads back its pictures.
 import Phaser from 'phaser';
@@ -33,23 +34,25 @@ export class Sort extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgGarden');
-    this.tickle(sprite(this, 640, 520, 'sunflower', 200));
+    // Between the two pots; with three, off to the side.
+    this.tickle(this.tier === 0 ? sprite(this, 640, 520, 'sunflower', 200) : sprite(this, 1190, 330, 'sunflower', 150));
   }
 
   protected async run() {
     const n = this.rounds(6);
-    // Two letters: the learner's pick, and a partner that sorts cleanly against it.
+    // The learner's pick, and partners that sort cleanly against it.
     const [a] = this.learner.pick(['g'], 1, { filter: sortable });
-    const b = graphemeDistractors(a, 6, this.tier, this.lesson).find(sortable) ?? 's';
-    const letters = shuffle([a, b]);
+    const partners = graphemeDistractors(a, 8, this.tier, this.lesson).filter(sortable).slice(0, this.tier === 0 ? 1 : 2);
+    const letters = shuffle([a, ...(partners.length ? partners : ['s'])]);
+    const xs = letters.length === 2 ? [300, 980] : [240, 640, 1040];
     const pots = letters.map((g, i) => {
-      const c = this.add.container(i === 0 ? 300 : 980, POT_Y, [sprite(this, 0, 0, 'pot', 190), text(this, 0, 20, GRAPHEMES[g].label, 90, '#ffffff').setStroke('#7a3414', 10)]);
+      const c = this.add.container(xs[i], POT_Y, [sprite(this, 0, 0, 'pot', 190), text(this, 0, 20, GRAPHEMES[g].label, 90, '#ffffff').setStroke('#7a3414', 10)]);
       this.tweens.add({ targets: c, y: { from: 800, to: POT_Y }, duration: 400, delay: i * 100, ease: 'Back.Out' });
       return tappable(c, 220, 210).setData({ g, bloom: 0 });
     });
     // Pictures: half for each letter, distinct pictures, shuffled.
     const pics = letters.flatMap(g => shuffle(picsStartingWithLetter(g).filter((w, i, all) => all.findIndex(o => BANK[o] === BANK[w]) === i))
-      .slice(0, Math.ceil(n / 2)).map(w => ({ w, g })));
+      .slice(0, Math.ceil(n / letters.length)).map(w => ({ w, g })));
     const order = shuffle(pics).slice(0, n);
     const sorted = new Map<Phaser.GameObjects.Container, { w: string; pic: Phaser.GameObjects.Text }[]>(pots.map(p => [p, []]));
 

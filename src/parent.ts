@@ -218,7 +218,7 @@ export function openParentArea(onClose: () => void, onPlaytest?: () => void) {
     }
     if (d.start) {
       const n = Number(d.start);
-      if (n > learner.lesson) learner.place(n, { quiet: true }); else learner.setLesson(n);
+      if (n > learner.lesson) learner.place(n, { quiet: true, why: 'grownup' }); else learner.setLesson(n);
     } else if (d.lesson) {
       learner.setLesson(d.lesson === '1' ? nextLesson(learner.lesson) : prevLesson(learner.lesson));
     } else if ('test' in d) {

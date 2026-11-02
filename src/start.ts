@@ -34,7 +34,7 @@ export function askStart(): Promise<void> {
       const b = (e.target as HTMLElement).closest<HTMLElement>('[data-start]');
       if (!b) return;
       const lesson = Number(b.dataset.start);
-      if (lesson > state.learner.lesson) state.learner.place(lesson, { quiet: true });
+      state.learner.place(lesson, { quiet: true, why: 'start' });
       root.remove();
       resolve();
     });
