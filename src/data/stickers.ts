@@ -20,11 +20,48 @@ export const STICKERS: Sticker[] = [
   { id: 'pup-dig', texture: 'pup-dig', name: 'Moose' },
   { id: 'monster', texture: 'monsterHappy', name: 'Letter Monster' },
   { id: 'frog', texture: 'frog', name: 'Froggy' },
-  ...[['🦄', 'unicorn'], ['🚀', 'rocket'], ['🦖', 'dinosaur'], ['🌈', 'rainbow'], ['🍦', 'ice cream'], ['🐙', 'octopus'],
+  // Emoji stickers, by kind. Only emoji from Unicode 13 or earlier, so older tablets draw them all.
+  ...[
+    // The first set
+    ['🦄', 'unicorn'], ['🚀', 'rocket'], ['🦖', 'dinosaur'], ['🌈', 'rainbow'], ['🍦', 'ice cream'], ['🐙', 'octopus'],
     ['🦋', 'butterfly'], ['🐳', 'whale'], ['🎈', 'balloon'], ['🏆', 'trophy'], ['🦁', 'lion'], ['🐉', 'dragon'],
     ['🍩', 'donut'], ['🚒', 'fire truck'], ['🎸', 'guitar'], ['🐧', 'penguin'], ['🦈', 'shark'], ['🍕', 'pizza'],
-    ['🚂', 'train'], ['🐢', 'turtle'], ['🌋', 'volcano'], ['🦒', 'giraffe'], ['🐼', 'panda'], ['🎂', 'cake'], ['👑', 'crown']]
-    .map(([emoji, name]) => ({ id: emoji, emoji, name })),
+    ['🚂', 'train'], ['🐢', 'turtle'], ['🌋', 'volcano'], ['🦒', 'giraffe'], ['🐼', 'panda'], ['🎂', 'cake'], ['👑', 'crown'],
+    // Animals
+    ['🐶', 'puppy'], ['🐱', 'kitty'], ['🐰', 'bunny'], ['🦊', 'fox'], ['🐻', 'bear'], ['🐨', 'koala'], ['🐯', 'tiger'],
+    ['🐮', 'cow'], ['🐷', 'pig'], ['🐵', 'monkey'], ['🐔', 'chicken'], ['🐤', 'baby chick'], ['🦉', 'owl'], ['🦜', 'parrot'],
+    ['🦩', 'flamingo'], ['🦚', 'peacock'], ['🦢', 'swan'], ['🦆', 'duck'], ['🐘', 'elephant'], ['🦛', 'hippo'], ['🦏', 'rhino'],
+    ['🦓', 'zebra'], ['🐪', 'camel'], ['🦘', 'kangaroo'], ['🦥', 'sloth'], ['🦦', 'otter'], ['🦔', 'hedgehog'], ['🦫', 'beaver'],
+    ['🐿️', 'chipmunk'], ['🦇', 'bat'], ['🐺', 'wolf'], ['🐴', 'horse'], ['🐑', 'sheep'], ['🐐', 'goat'], ['🦙', 'llama'],
+    ['🐊', 'crocodile'], ['🦎', 'lizard'], ['🐍', 'snake'], ['🦕', 'long-neck dinosaur'], ['🐬', 'dolphin'], ['🦭', 'seal'],
+    ['🦀', 'crab'], ['🦞', 'lobster'], ['🐠', 'fish'], ['🐡', 'pufferfish'], ['🦑', 'squid'], ['🐌', 'snail'], ['🐞', 'ladybug'],
+    ['🐝', 'bee'], ['🐛', 'caterpillar'], ['🐜', 'ant'], ['🕷️', 'spider'],
+    // Food
+    ['🍎', 'apple'], ['🍌', 'banana'], ['🍓', 'strawberry'], ['🍉', 'watermelon'], ['🍇', 'grapes'], ['🍒', 'cherries'],
+    ['🍍', 'pineapple'], ['🍋', 'lemon'], ['🍑', 'peach'], ['🥑', 'avocado'], ['🥕', 'carrot'], ['🌽', 'corn'], ['🥦', 'broccoli'],
+    ['🧀', 'cheese'], ['🍔', 'hamburger'], ['🌭', 'hot dog'], ['🍟', 'french fries'], ['🌮', 'taco'], ['🍝', 'spaghetti'],
+    ['🥞', 'pancakes'], ['🧇', 'waffle'], ['🥨', 'pretzel'], ['🍿', 'popcorn'], ['🧁', 'cupcake'], ['🍪', 'cookie'],
+    ['🍭', 'lollipop'], ['🍬', 'candy'], ['🍫', 'chocolate'], ['🍯', 'honey'], ['🥛', 'milk'], ['🧃', 'juice box'],
+    // Things that go
+    ['🚗', 'car'], ['🚌', 'bus'], ['🚑', 'ambulance'], ['🚓', 'police car'], ['🚜', 'tractor'], ['🚚', 'truck'],
+    ['🏎️', 'race car'], ['🏍️', 'motorcycle'], ['🚲', 'bike'], ['🛴', 'scooter'], ['✈️', 'airplane'], ['🚁', 'helicopter'],
+    ['⛵', 'sailboat'], ['🚤', 'speedboat'], ['🚢', 'ship'], ['🛶', 'canoe'], ['🛸', 'flying saucer'],
+    // Toys and fun
+    ['⚽', 'soccer ball'], ['🏀', 'basketball'], ['⚾', 'baseball'], ['🏈', 'football'], ['🎾', 'tennis ball'], ['🪁', 'kite'],
+    ['🧸', 'teddy bear'], ['🪀', 'yo-yo'], ['🎨', 'paints'], ['🖍️', 'crayon'], ['🥁', 'drum'], ['🎺', 'trumpet'], ['🎹', 'piano'],
+    ['🎻', 'violin'], ['🎁', 'present'], ['🎉', 'party popper'], ['🪄', 'magic wand'], ['🔮', 'crystal ball'], ['💎', 'diamond'],
+    ['🧲', 'magnet'], ['🔦', 'flashlight'], ['⏰', 'alarm clock'], ['☂️', 'umbrella'], ['🎩', 'top hat'], ['🕶️', 'sunglasses'],
+    ['👟', 'sneaker'], ['🧦', 'socks'], ['🏰', 'castle'], ['🎪', 'circus tent'], ['🎠', 'carousel'], ['🎡', 'Ferris wheel'],
+    ['🎢', 'roller coaster'], ['⛺', 'tent'],
+    // Outside and up in the sky
+    ['☀️', 'sun'], ['🌙', 'moon'], ['⭐', 'star'], ['🌎', 'Earth'], ['🪐', 'planet'], ['☄️', 'comet'], ['⚡', 'lightning'],
+    ['❄️', 'snowflake'], ['⛄', 'snowman'], ['🌪️', 'tornado'], ['🌊', 'wave'], ['🔥', 'fire'], ['🌷', 'tulip'], ['🌹', 'rose'],
+    ['🌵', 'cactus'], ['🌴', 'palm tree'], ['🌳', 'tree'], ['🍁', 'leaf'], ['🍀', 'four-leaf clover'], ['🍄', 'mushroom'],
+    ['🐚', 'seashell'], ['🎃', 'jack-o’-lantern'], ['🎄', 'Christmas tree'],
+    // Make-believe
+    ['🤖', 'robot'], ['👽', 'alien'], ['👻', 'ghost'], ['🧜', 'mermaid'], ['🧚', 'fairy'], ['🧙', 'wizard'], ['🧞', 'genie'],
+    ['🦸', 'superhero'], ['🥷', 'ninja'], ['🤠', 'cowboy'], ['🏴‍☠️', 'pirate flag'], ['🦷', 'tooth'],
+  ].map(([emoji, name]) => ({ id: emoji, emoji, name })),
 ];
 
 /** The family edition's names for its characters, by sticker id. */
