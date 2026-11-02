@@ -27,7 +27,7 @@ import { tmpdir } from 'node:os';
 import { GRAPHEMES } from '../src/data/curriculum.ts';
 import { slug } from '../src/lines.ts';
 import { LABEL, EL_VOICE, EL_MODEL, cachePath } from './voice-cache.mjs';
-import { uniqueTexts, spoken, SAID_AS_SOUND, SOUND_OPTIONS, pickedSounds, soundSources, describe } from './voice-plan.mjs';
+import { uniqueTexts, spoken, CUTS, SAID_AS_SOUND, SOUND_OPTIONS, pickedSounds, soundSources, describe } from './voice-plan.mjs';
 
 const run = promisify(execFile);
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -143,6 +143,18 @@ function stretch(x, ms) {
   return Float32Array.from(out.concat(Array.from(x.slice(x.length - q))));
 }
 
+/** A clip cut from a sentence at the silence before its last word (see CUTS): everything before
+ *  it ('head') or the word itself ('tail'). */
+function cut(x, keep) {
+  const segs = segments(envelope(x), 0.04).filter(([a, b]) => b - a >= 3);
+  if (segs.length < 2) throw new Error('no gap before the last word to cut at');
+  return keep === 'head'
+    ? fade(slice(x, 0, segs[segs.length - 2][1] + 4), 5, 40)
+    : fade(slice(x, segs[segs.length - 1][0] - 3, Math.ceil(x.length / FRAME)), 8, 20);
+}
+/** Silence added after a clip. */
+const pad = (x, ms) => Float32Array.from([...x, ...new Float32Array(Math.round(SR * ms / 1000))]);
+
 /** Trim leading/trailing silence, keeping a little padding. */
 function trim(x) {
   const e = envelope(x), segs = segments(e, 0.02);
@@ -236,7 +248,8 @@ const fresh = (prev, key, file) => !FORCE && prev === key && existsSync(file);
 const soundSpec = id => (SOUNDS[id]?.same ? SOUNDS[SOUNDS[id].same] : SOUNDS[id]);
 const jobs = uniqueTexts().map(t => ({ t, key: slug(t), file: join(OUT, slug(t) + '.m4a') })).map(j => {
   const spec = SAID_AS_SOUND[j.t] && soundSpec(SAID_AS_SOUND[j.t]);
-  return spec ? { ...j, spec, cache: cacheKey(JSON.stringify(spec)) } : { ...j, send: spoken(j.t), cache: cacheKey(spoken(j.t)) };
+  if (spec) return { ...j, spec, cache: cacheKey(JSON.stringify(spec)) };
+  return { ...j, send: spoken(j.t), cache: cacheKey(CUTS[j.t] ? JSON.stringify(CUTS[j.t]) : spoken(j.t)) };
 });
 const todo = jobs.filter(j => !fresh(old?.clips?.[j.key], j.cache, j.file));
 const soundIds = Object.keys(GRAPHEMES).filter(id => SOUNDS[id] && !SOUNDS[id].same);
@@ -290,8 +303,9 @@ console.log(`Making ${todo.length} phrases…`);
 await pool(todo, 2, async j => {
   const made = j.spec && await makeSound(j.t, j.spec);
   if (j.spec && !made) throw new Error('its letter-sound recipe failed');
-  const x = normalize(made ? made.audio : trim(await synth(j.send)), 0.85);
-  await encode(x, j.file);
+  const said = made ? null : await synth(j.send);
+  const x = normalize(made ? made.audio : trim(CUTS[j.t] ? cut(said, CUTS[j.t].keep) : said), 0.85);
+  await encode(CUTS[j.t]?.pause ? pad(x, CUTS[j.t].pause) : x, j.file);
   manifest.clips[j.key] = j.cache;
 });
 

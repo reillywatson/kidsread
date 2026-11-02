@@ -4,6 +4,7 @@
 // tickleable characters and a trophy finale.
 import Phaser from 'phaser';
 import * as audio from '../audio';
+import { settings } from '../settings';
 import { playMusic } from '../music';
 import { LINES } from '../lines';
 import { GRAPHEMES, HEART, capitalOf } from '../data/curriculum';
@@ -348,6 +349,8 @@ export abstract class BaseGame extends Phaser.Scene {
   /** "like apple" — the keyword for a letter sound. */
   async keyword(g: string) { await this.say(LINES.like); await this.say(GRAPHEMES[g].key); }
   letterSound(g: string) { return this.guard(audio.sound(g)); }
+  /** A letter's name ("bee"). Single letters only; Z is "zee" or "zed" by the English setting. */
+  letterName(g: string) { return this.say(g === 'z' && settings.english === 'uk' ? LINES.zed : LINES.letterName[g]); }
   wait(ms: number) { return this.guard(new Promise<void>(r => this.time.delayedCall(ms, r))); }
   tween(cfg: Phaser.Types.Tweens.TweenBuilderConfig) { return this.guard(tweenP(this, cfg)); }
 

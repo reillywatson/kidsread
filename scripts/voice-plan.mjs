@@ -32,12 +32,24 @@ for (const LINES of [ORIGINAL, FAMILY]) {
 
 const phraseSet = new Set([...allLines(ORIGINAL), ...allLines(FAMILY)]);
 // Connecting words read plainly, like single words ("like" + "apple").
-const PLAIN = new Set([ORIGINAL.like]);
+const PLAIN = new Set([ORIGINAL.like, ...Object.values(ORIGINAL.letterName), ORIGINAL.zed]);
 
 export function spoken(t) {
+  if (CUTS[t]) return CUTS[t].from;
   if (!phraseSet.has(t) || PLAIN.has(t)) return t;
   return `${TAGS.get(t) ?? '[warmly]'} ${t}`;
 }
+
+// Clips cut from a whole sentence at the silence before its last word (voice.mjs). A lead-in said
+// on its own sounds finished, so it's recorded with a word after it, and that word cut off ('head')
+// with a pause after: "T" ends the sentence, as its silent closure leaves a clean gap to cut at.
+// A letter name said alone can come out wrong ("ay" as "aye"), so it's the end of a sentence that
+// names it ('tail').
+export const CUTS = {
+  [ORIGINAL.thisIsLetter]: { from: '[warmly] This is the letter T.', keep: 'head', pause: 100 },
+  [ORIGINAL.youMadeLetter]: { from: '[warmly] You made the letter T!', keep: 'head', pause: 100 },
+  [ORIGINAL.letterName.a]: { from: '[warmly] This is the letter A.', keep: 'tail' },
+};
 
 // Words, keywords and picture names: the same in both editions.
 const shared = new Set();

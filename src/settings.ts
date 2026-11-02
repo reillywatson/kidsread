@@ -1,12 +1,16 @@
 // Device-wide settings (shared by all players on this device).
 
+/** Which English the narrator speaks: for now, only what Z is called ("zee" or "zed"). */
+export type English = 'us' | 'uk';
+
 export interface DeviceSettings {
   music: boolean;
   sfx: boolean;
+  english: English;
 }
 
 const KEY = 'kidsread.settings';
-const defaults: DeviceSettings = { music: true, sfx: true };
+const defaults: DeviceSettings = { music: true, sfx: true, english: 'us' };
 
 function load(): DeviceSettings {
   try { return { ...defaults, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { return { ...defaults }; }

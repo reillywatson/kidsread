@@ -1,7 +1,7 @@
-// Friends — letter formation: watch the letter being written, then trace it with your finger,
-// painting a rainbow. When it's done, the letter says its sound and its keyword picture pops
-// out and joins the parade along the bottom. At the end a rainbow arcs over the parade and each
-// friend hops as its letter's sound plays.
+// Friends — letter formation: the letter's name and sound ("This is the letter T. It says /t/."),
+// then watch it being written and trace it with your finger, painting a rainbow. When it's done,
+// the letter is named again and its keyword picture pops out and joins the parade along the
+// bottom. At the end a rainbow arcs over the parade and each friend hops as its letter is named.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES } from '../data/curriculum';
@@ -50,7 +50,11 @@ export class Rainbow extends BaseGame {
       t.draw();
 
       await this.prompt(async () => {
+        await this.say(LINES.thisIsLetter);
+        await this.letterName(g);
+        await this.say(LINES.itSays);
         await this.letterSound(g);
+        await this.wait(500);
         if (r === 0 || this.tier === 0) { await this.say(LINES.watchMe); await t.demo(); }
         await this.say(LINES.yourTurn);
       });
@@ -60,15 +64,16 @@ export class Rainbow extends BaseGame {
       this.learner.record('g:' + g, 'seen');
       this.score(true);
 
-      // The finished letter sparkles and says its sound.
+      // The finished letter sparkles and says its name.
       for (const [x, y] of t.points().filter((_, i) => i % 18 === 0)) burst(this, x, y, ['✨', '⭐'], 2);
       this.tweens.add({ targets: this.monster, y: this.monster.y - 50, duration: 200, yoyo: true, repeat: 1, ease: 'Quad.Out' });
       // The keyword picture pops out of the letter...
       const pic = emoji(this, 640, 350, GRAPHEMES[g].pic, 150).setScale(0).setDepth(5);
       this.sfx.pop();
       await this.tween({ targets: pic, scale: 1, duration: 400, ease: 'Back.Out' });
-      await this.letterSound(g);
-      await this.keyword(g);
+      await this.say(LINES.youMadeLetter);
+      await this.letterName(g);
+      await this.say(GRAPHEMES[g].key);
       await this.praise(true);
       t.destroy();
       brush.destroy();
@@ -92,7 +97,7 @@ export class Rainbow extends BaseGame {
     this.parade.push({ g, pic, tag });
   }
 
-  /** A rainbow arcs over the parade, and each friend hops as its letter says its sound. */
+  /** A rainbow arcs over the parade, and each friend hops as its letter is named. */
   private async rainbowParade() {
     if (!this.parade.length) return;
     const arc = this.add.graphics().setPosition(W / 2, 760).setAlpha(0).setScale(0.6);
@@ -102,7 +107,7 @@ export class Rainbow extends BaseGame {
     for (const { g, pic, tag } of this.parade) {
       this.tweens.add({ targets: [pic, tag], y: '-=50', duration: 200, yoyo: true, ease: 'Quad.Out' });
       burst(this, pic.x, pic.y - 20, ['✨', '⭐'], 6);
-      await this.letterSound(g);
+      await this.letterName(g);
     }
     this.tweens.add({ targets: this.monster, y: this.monster.y - 50, duration: 200, yoyo: true, repeat: 1, ease: 'Quad.Out' });
     await this.wait(400);

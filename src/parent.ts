@@ -3,7 +3,7 @@
 import * as state from './state';
 import { GRAPHEMES, LESSONS, lessonInfo, nextLesson, prevLesson } from './data/curriculum';
 import { TEXTURES, AVATARS } from './art';
-import { settings, updateSettings } from './settings';
+import { settings, updateSettings, type English } from './settings';
 import { LINES } from './lines';
 import * as audio from './audio';
 import { GAMES } from './games';
@@ -157,6 +157,10 @@ export function openParentArea(onClose: () => void, onPlaytest?: () => void) {
           <h2>Settings</h2>
           <label><input type="checkbox" data-music ${settings.music ? 'checked' : ''}> Background music</label>
           <label><input type="checkbox" data-sfx ${settings.sfx ? 'checked' : ''}> Sound effects</label>
+          <label>English
+            <select data-english>${[['us', 'American (Z is “zee”)'], ['uk', 'British, Canadian, Australian… (Z is “zed”)']]
+              .map(([v, l]) => `<option value="${v}" ${v === settings.english ? 'selected' : ''}>${l}</option>`).join('')}</select>
+          </label>
           <label>Games per session
             <select data-games>${[2, 3, 4, 5, 6].map(n => `<option ${n === s.settings.gamesPerSession ? 'selected' : ''}>${n}</option>`).join('')}</select>
           </label>
@@ -265,6 +269,7 @@ export function openParentArea(onClose: () => void, onPlaytest?: () => void) {
     else if ('games' in d) { state.learner.s.settings.gamesPerSession = Number(t.value); state.learner.save(); }
     else if ('music' in d) updateSettings({ music: t.checked });
     else if ('sfx' in d) updateSettings({ sfx: t.checked });
+    else if ('english' in d) updateSettings({ english: t.value as English });
   });
 
   render();

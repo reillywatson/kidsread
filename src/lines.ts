@@ -122,6 +122,15 @@ const ORIGINAL = {
     castle: 'Welcome to Star Castle!', moon: 'Welcome to the Moon Islands!',
   },
   watchMe: 'Watch me!', yourTurn: 'Your turn! Start at the green dot.', touchStars: 'Touch the stars in order!',
+  // Letter names, each spelled the way it sounds so the voice says "ay", not the word "a". They're
+  // recorded once and said after a lead-in ("This is the letter" + "bee"). Z is "zee", or "zed" by
+  // the grown-ups' English setting.
+  letterName: {
+    a: 'ay', b: 'bee', c: 'see', d: 'dee', e: 'ee', f: 'ef', g: 'gee', h: 'aitch', i: 'eye', j: 'jay', k: 'kay',
+    l: 'el', m: 'em', n: 'en', o: 'oh', p: 'pee', q: 'cue', r: 'ar', s: 'ess', t: 'tee', u: 'you', v: 'vee',
+    w: 'double-you', x: 'ex', y: 'why', z: 'zee',
+  } as Record<string, string>,
+  zed: 'zed', thisIsLetter: 'This is the letter', youMadeLetter: 'You made the letter',
 
   // Words said in parts, for the drum game. One-part words aren't listed (they're just the word).
   syllables: {
