@@ -1,4 +1,4 @@
-// Pokémon — sentence comprehension: read a sentence and say whether the picture matches.
+// Critters world — sentence comprehension: read a sentence and say whether the picture matches.
 // The silly pictures are near misses ("The cat is on the bed" with the bed on the cat), so
 // every word has to be read. A silly picture then turns into the right one.
 import Phaser from 'phaser';
@@ -13,22 +13,22 @@ import { burst, roundButton, sprite } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'truesilly',
-  theme: 'pokemon',
+  theme: 'critters',
   skill: 'sentence',
   title: 'True or Silly — does the picture match the sentence?',
   intro: LINES.intro.truesilly,
-  icon: 'pikachuSurprised',
+  icon: 'heroSurprised',
   eligible: lesson => lesson >= 9 && nounsAt(lesson).length >= 3,
 };
 
 export class TrueSilly extends BaseGame {
-  private pika!: Phaser.GameObjects.Image;
+  private hero!: Phaser.GameObjects.Image;
 
   constructor() { super(meta); }
 
   protected setup() {
     this.add.image(640, 360, 'bgField');
-    this.pika = this.tickle(sprite(this, 150, 470, 'pikachu', 280), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
+    this.hero = this.tickle(sprite(this, 150, 470, 'hero', 280), () => void audio.say(pickOne(LINES.heroCall), { style: 'hero' }));
     const g = this.add.graphics();
     g.fillStyle(0x000000, 0.15).fillRoundedRect(202, 108, 900, 150, 30);
     g.fillStyle(0xffffff).fillRoundedRect(190, 96, 900, 150, 30);
@@ -67,11 +67,11 @@ export class TrueSilly extends BaseGame {
 
       if (truth) {
         burst(this, card.x, card.y, ['⭐', '✨', '⚡']);
-        this.tweens.add({ targets: this.pika, y: this.pika.y - 60, duration: 220, yoyo: true, ease: 'Quad.Out' });
+        this.tweens.add({ targets: this.hero, y: this.hero.y - 60, duration: 220, yoyo: true, ease: 'Quad.Out' });
         await this.say(LINES.itMatches);
       } else {
         // Silly! Then show what the sentence really says.
-        this.pika.setTexture('pikachuSurprised');
+        this.hero.setTexture('heroSurprised');
         await this.tween({ targets: card, angle: { from: -8, to: 8 }, duration: 110, yoyo: true, repeat: 2 });
         card.angle = 0;
         await this.say(pickOne(LINES.silly));
@@ -80,7 +80,7 @@ export class TrueSilly extends BaseGame {
         card = drawPic(this, 640, 390, s.answer, 120).setScale(0);
         this.sfx.sparkle();
         await this.tween({ targets: card, scale: 1, duration: 350, ease: 'Back.Out' });
-        this.pika.setTexture('pikachu');
+        this.hero.setTexture('hero');
       }
       await this.readAloud(views);
       await this.praise(res.firstTry);

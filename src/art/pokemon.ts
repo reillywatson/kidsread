@@ -1,3 +1,4 @@
+// The family edition's Pokémon (see src/edition.ts).
 import { svg, line, cel, ell, eye, eyeWhite, shadow, isBlinking, shut, INK } from './util';
 
 // Pikachu palette

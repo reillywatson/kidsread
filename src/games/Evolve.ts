@@ -1,4 +1,4 @@
-// Pokémon — word chains (UFLI word work): "This says cat. Now make it say hat!"
+// Critters world — word chains (UFLI word work): "This says cat. Now make it say hat!"
 // Swap one letter; each new word evolves the Pokémon a little more.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
@@ -11,16 +11,16 @@ import { burst, sprite, tappable, text } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'evolve',
-  theme: 'pokemon',
+  theme: 'critters',
   skill: 'spelling',
-  title: 'Poké Evolve — change one letter to make a new word',
+  title: 'Word Magic — change one letter to make a new word',
   intro: LINES.intro.evolve,
-  icon: 'charmander',
+  icon: 'ember',
   // Needs enough words for chains longer than one step (from lesson 6: map, tap, sap, pat…).
   eligible: lesson => chainStarts(lesson).length >= 5,
 };
 
-const MONS = ['charmander', 'squirtle', 'bulbasaur', 'pikachu'];
+const MONS = ['ember', 'splash', 'leafy', 'hero'];
 const BOX_Y = 260;
 
 export class Evolve extends BaseGame {
@@ -33,7 +33,7 @@ export class Evolve extends BaseGame {
     this.add.image(640, 360, 'bgField');
     this.glow = this.add.circle(170, 430, 130, 0xfff59d, 0);
     this.mon = this.tickle(sprite(this, 170, 450, pickOne(MONS), 200),
-      () => { if (this.mon.texture.key.startsWith('pikachu')) void audio.say(pickOne(LINES.pika), { style: 'pika' }); });
+      () => { if (this.mon.texture.key.startsWith('hero')) void audio.say(pickOne(LINES.heroCall), { style: 'hero' }); });
   }
 
   protected async run() {

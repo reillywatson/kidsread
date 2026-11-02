@@ -9,13 +9,13 @@ import { openParentArea } from '../parent';
 import { newBooks } from './Books';
 import { H, W, burst, emoji, glossyCircle, roundButton, sprite, tappable, text, onTap } from '../widgets';
 
-const CAMEOS = ['pikachu', 'bulbasaur', 'charmander', 'squirtle', 'pup-chase', 'pup-marshall', 'pup-skye', 'pup-rubble',
-  'zombie', 'zombieCone', 'wallnut', 'frog', 'monsterHappy'];
+const CAMEOS = ['hero', 'leafy', 'ember', 'splash', 'pup-lead', 'pup-fire', 'pup-fly', 'pup-dig',
+  'pest', 'pestBig', 'roller', 'frog', 'monsterHappy'];
 
 const WORLDS: { theme: Theme; texture: string; color: number }[] = [
-  { theme: 'pvz', texture: 'peashooter', color: 0x7cc242 },
-  { theme: 'pokemon', texture: 'pikachu', color: 0xffd83b },
-  { theme: 'paw', texture: 'pupHead-chase', color: 0x42a5f5 },
+  { theme: 'garden', texture: 'shooter', color: 0x7cc242 },
+  { theme: 'critters', texture: 'hero', color: 0xffd83b },
+  { theme: 'pups', texture: 'pupHead-lead', color: 0x42a5f5 },
   { theme: 'friends', texture: 'monsterHappy', color: 0xb388ff },
 ];
 

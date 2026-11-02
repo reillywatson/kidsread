@@ -1,4 +1,4 @@
-// Pokémon — decoding. Word mode: read a word (tap letters for their sounds), catch the
+// Critters world — decoding. Word mode: read a word (tap letters for their sounds), catch the
 // matching picture in a Poké Ball. Letter mode (before enough picture words exist):
 // see a letter, catch the picture that starts with its sound. Caught balls line up on a rack,
 // and at the end they all pop open at once.
@@ -13,11 +13,11 @@ import { WordView, burst, picture, roundButton, sprite, text } from '../widgets'
 
 export const meta: GameMeta = {
   id: 'pikablend',
-  theme: 'pokemon',
+  theme: 'critters',
   skill: 'word',
-  title: 'Poké Catch — read a word, pick its picture',
+  title: 'Critter Catch — read a word, pick its picture',
   intro: LINES.intro.pikablend,
-  icon: 'pikachu',
+  icon: 'hero',
   eligible: () => true,
 };
 
@@ -25,17 +25,17 @@ const wordMode = (lesson: number) => readableWords(lesson, { pic: true }).length
 
 /** Rack spots for caught Poké Balls, right of the word board; and who's inside them. */
 const RACK = [[1110, 170], [1200, 170], [1110, 260], [1200, 260], [1110, 350], [1200, 350]];
-const INSIDE = ['bulbasaur', 'charmander', 'squirtle', 'pikachu'];
+const INSIDE = ['leafy', 'ember', 'splash', 'hero'];
 
 export class PikaBlend extends BaseGame {
-  private pika!: Phaser.GameObjects.Image;
+  private hero!: Phaser.GameObjects.Image;
   private rack: Phaser.GameObjects.Image[] = [];
 
   constructor() { super(meta); }
 
   protected setup() {
     this.add.image(640, 360, 'bgField');
-    this.pika = this.tickle(sprite(this, 150, 450, 'pikachu', 280), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
+    this.hero = this.tickle(sprite(this, 150, 450, 'hero', 280), () => void audio.say(pickOne(LINES.heroCall), { style: 'hero' }));
     this.rack = [];
     const g = this.add.graphics();
     g.fillStyle(0x8d6e3f).fillRect(630, 290, 20, 60);
@@ -46,7 +46,7 @@ export class PikaBlend extends BaseGame {
 
   private async celebrate(card: Phaser.GameObjects.Container) {
     // Shrink the picture into a Poké Ball and wobble it shut.
-    const ball = sprite(this, card.x, card.y, 'pokeball', 10);
+    const ball = sprite(this, card.x, card.y, 'catcher', 10);
     this.sfx.zap();
     await this.tween({ targets: card, scale: 0.1, alpha: 0, duration: 300 });
     await this.tween({ targets: ball, scale: 110 / ball.height, duration: 250, ease: 'Back.Out' });
@@ -54,9 +54,9 @@ export class PikaBlend extends BaseGame {
     await this.tween({ targets: ball, angle: { from: -20, to: 20 }, duration: 220, yoyo: true, repeat: 2 });
     ball.angle = 0;
     burst(this, ball.x, ball.y);
-    this.pika.setTexture('pikachu');
-    this.tweens.add({ targets: this.pika, y: this.pika.y - 60, duration: 220, yoyo: true, ease: 'Quad.Out' });
-    void audio.say(pickOne(LINES.pika), { style: 'pika' });
+    this.hero.setTexture('hero');
+    this.tweens.add({ targets: this.hero, y: this.hero.y - 60, duration: 220, yoyo: true, ease: 'Quad.Out' });
+    void audio.say(pickOne(LINES.heroCall), { style: 'hero' });
     // Onto the rack it goes.
     const spot = RACK[this.rack.length % RACK.length];
     this.rack.push(ball);
@@ -78,8 +78,8 @@ export class PikaBlend extends BaseGame {
       this.tweens.add({ targets: mon, scale: full, duration: 350, delay: i * 70, ease: 'Back.Out' });
       this.tweens.add({ targets: mon, y: mon.y - 30, duration: 200, delay: 450 + i * 70, yoyo: true, repeat: 1, ease: 'Quad.Out' });
     });
-    this.tweens.add({ targets: this.pika, y: this.pika.y - 60, duration: 220, yoyo: true, repeat: 1, ease: 'Quad.Out' });
-    void audio.say(pickOne(LINES.pika), { style: 'pika' });
+    this.tweens.add({ targets: this.hero, y: this.hero.y - 60, duration: 220, yoyo: true, repeat: 1, ease: 'Quad.Out' });
+    void audio.say(pickOne(LINES.heroCall), { style: 'hero' });
     await this.wait(1200);
   }
 
@@ -111,7 +111,7 @@ export class PikaBlend extends BaseGame {
         else await this.say(pickOne(LINES.readIt));
       });
       const res = await this.choose(cards, opts.indexOf(w), {
-        onWrong: () => { this.pika.setTexture('pikachuSurprised'); },
+        onWrong: () => { this.hero.setTexture('heroSurprised'); },
         onScaffold: () => { helped = true; void this.blend(view, w).catch(() => {}); },
         scaffoldAfter: 1,
       });

@@ -1,4 +1,4 @@
-// Pokémon — word recognition on the run: Pikachu races along three lanes; signs with words
+// Critters world — word recognition on the run: Pikachu races along three lanes; signs with words
 // come toward him. Hear a word, tap a lane to steer Pikachu through the right sign. Miss it
 // and the signs loop around for another go (with the right one glowing).
 import Phaser from 'phaser';
@@ -11,11 +11,11 @@ import { W, WordView, burst, emoji, sprite } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'dash',
-  theme: 'pokemon',
+  theme: 'critters',
   skill: 'word',
-  title: 'Pikachu Dash — steer through the sign with the word you hear',
+  title: 'Lane Dash — steer through the sign with the word you hear',
   intro: LINES.intro.dash,
-  icon: 'pikachu',
+  icon: 'hero',
   eligible: lesson => readableWords(lesson).length >= 4,
 };
 
@@ -26,7 +26,7 @@ const SCENERY = ['🌳', '🌲', '🌼', '🍄', '🌷', '🪨'];
 type Gate = Phaser.GameObjects.Container;
 
 export class Dash extends BaseGame {
-  private pika!: Phaser.GameObjects.Image;
+  private hero!: Phaser.GameObjects.Image;
   private lane = 1;
 
   constructor() { super(meta); }
@@ -36,8 +36,8 @@ export class Dash extends BaseGame {
     const g = this.add.graphics();
     LANES.forEach(y => { g.fillStyle(0xc8a06a, 0.5).fillRoundedRect(0, y + 18, W, 34, 17); });
     this.lane = 1;
-    this.pika = sprite(this, PIKA_X, LANES[1], 'pikachu', 115).setDepth(20);
-    this.tweens.add({ targets: this.pika, angle: { from: -6, to: 6 }, duration: 180, yoyo: true, repeat: -1 });
+    this.hero = sprite(this, PIKA_X, LANES[1], 'hero', 115).setDepth(20);
+    this.tweens.add({ targets: this.hero, angle: { from: -6, to: 6 }, duration: 180, yoyo: true, repeat: -1 });
     // Tap anywhere in a lane to move there.
     LANES.forEach((y, i) => {
       this.add.rectangle(W / 2, y, W, 120, 0xffffff, 0.001).setInteractive().on('pointerdown', () => this.steer(i));
@@ -55,7 +55,7 @@ export class Dash extends BaseGame {
     if (i === this.lane) return;
     this.lane = i;
     this.sfx.hop();
-    this.tweens.add({ targets: this.pika, y: LANES[i], duration: 200, ease: 'Quad.Out' });
+    this.tweens.add({ targets: this.hero, y: LANES[i], duration: 200, ease: 'Quad.Out' });
   }
 
   private gate(word: string, y: number): Gate {
@@ -96,7 +96,7 @@ export class Dash extends BaseGame {
         misses++;
         this.sfx.boing();
         this.cameras.main.shake(150, 0.004);
-        this.tweens.add({ targets: this.pika, x: PIKA_X - 30, duration: 120, yoyo: true });
+        this.tweens.add({ targets: this.hero, x: PIKA_X - 30, duration: 120, yoyo: true });
         void audio.say(w);
         // Back around they go, and the right sign glows.
         await this.tween({ targets: gates, x: W - 150, duration: 500, ease: 'Quad.Out' });
@@ -113,7 +113,7 @@ export class Dash extends BaseGame {
       burst(this, g.x, g.y, ['🪙', '⭐', '⚡'], 12);
       gates.filter(o => o !== g).forEach(o => this.tweens.add({ targets: o, x: -200, alpha: 0, duration: 500 }));
       this.tweens.add({ targets: g, scale: 1.6, alpha: 0, angle: 20, duration: 300, onComplete: () => g.destroy() });
-      this.tweens.add({ targets: this.pika, y: LANES[this.lane] - 70, duration: 200, yoyo: true, ease: 'Quad.Out' });
+      this.tweens.add({ targets: this.hero, y: LANES[this.lane] - 70, duration: 200, yoyo: true, ease: 'Quad.Out' });
       await this.say(w);
       await this.praise(misses === 0);
       gates.forEach(o => o.destroy());

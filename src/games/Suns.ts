@@ -1,9 +1,10 @@
-// Plants vs. Zombies — word recognition: hear a word, catch the sun that says it.
+// Garden world — word recognition: hear a word, catch the sun that says it.
 // Includes heart words; distractors get closer to the target as the tier rises.
-// A sun counter ticks up 25 a sun, as in the real game, and every sun caught plants a sunflower
-// in the row along the bottom. At the end, every sunflower makes a bonus sun for the counter.
+// A sun counter ticks up (one a sun; 25 in the family edition, as in Plants vs. Zombies), and
+// every sun caught plants a sunflower in the row along the bottom. At the end, every sunflower makes a bonus sun for the counter.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
+import { FAMILY } from '../edition';
 import { readableWords, wordDistractors, wordItem } from '../choices';
 import { shuffle } from '../learner';
 import { LINES } from '../lines';
@@ -11,7 +12,7 @@ import { WordView, burst, sprite, tappable, text } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'suns',
-  theme: 'pvz',
+  theme: 'garden',
   skill: 'word',
   title: 'Sunflower Suns — hear a word, tap the matching word',
   intro: LINES.intro.suns,
@@ -41,10 +42,10 @@ export class Suns extends BaseGame {
       sprite(this, -36, 0, 'sun', 56), this.bankLabel]).setDepth(900);
   }
 
-  /** Count the bank up by 25, a little at a time. */
+  /** Count the bank up by one sun, a little at a time. */
   private addSun() {
     const from = this.bank;
-    this.bank += 25;
+    this.bank += FAMILY ? 25 : 1;
     this.tweens.addCounter({ from, to: this.bank, duration: 400, onUpdate: t => this.bankLabel.setText(String(Math.round(t.getValue() ?? 0))) });
     this.tweens.add({ targets: this.bankBox, scale: { from: 1.2, to: 1 }, duration: 250, ease: 'Back.Out' });
     this.sfx.twinkle();

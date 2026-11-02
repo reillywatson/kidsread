@@ -1,8 +1,11 @@
 // What the narrator says: every phrase and word (with its delivery), and the recipes for letter
 // sounds. Shared by voice.mjs (which records and processes) and voice-restore.mjs.
 import { LESSONS, GRAPHEMES, PIC, BANK, HEART } from '../src/data/curriculum.ts';
-import { STICKERS } from '../src/data/stickers.ts';
-import { LINES, allLines, slug } from '../src/lines.ts';
+import { STICKERS, FAMILY_NAMES } from '../src/data/stickers.ts';
+import { linesFor, allLines, slug } from '../src/lines.ts';
+
+// Both editions' lines are recorded (see src/edition.ts); a build leaves out the other one's.
+const ORIGINAL = linesFor(false), FAMILY = linesFor(true);
 
 // Words recorded with a letter sound's recipe instead of being said on their own: every way of
 // sending "a" by itself came out as a breathy "uhh", so it's made like the short a in "at".
@@ -11,35 +14,50 @@ export const SAID_AS_SOUND = { a: 'a' };
 // Delivery for each kind of line (v4 audio tags). Single words get none: clarity first.
 const TAGS = new Map();
 const tag = (t, ...groups) => groups.flat(2).forEach(x => TAGS.set(x, t));
-tag('[excited]', LINES.praise, LINES.streak, LINES.stars.slice(1), Object.values(LINES.worldHello), LINES.evolved, LINES.foundAll, LINES.hiNew,
-  LINES.welcomeBack, LINES.gotSticker, LINES.newSound, LINES.levelUp, LINES.tapPresent, LINES.pawRoll, LINES.musicOn, LINES.soundsOn,
-  LINES.bonus, LINES.timesUp, LINES.silly, LINES.itMatches, LINES.bossDown, LINES.madeIt, LINES.savedKitten, LINES.blastOff);
-tag('[cheerfully]', Object.values(LINES.intro));
-tag('[squeaky, high-pitched cartoon voice]', LINES.pika);
-tag('[slow, groaning zombie voice]', LINES.groans);
-tag('[grossed out, silly]', LINES.yuck);
-tag('[croaky, playful]', LINES.ribbit);
-tag('[playful puppy bark]', LINES.ruff);
-tag('[tiny kitten voice]', LINES.meow);
-tag('[slowly, clapping out each part]', Object.values(LINES.syllables));
-tag('[excited]', LINES.foundAll2, LINES.readBook, LINES.foundMama, LINES.newFriend, LINES.newLand, LINES.treasure, LINES.mapDone,
-  LINES.mapHello, Object.values(LINES.lands), Object.values(LINES.gates));
-const phraseSet = new Set(allLines());
+for (const LINES of [ORIGINAL, FAMILY]) {
+  tag('[excited]', LINES.praise, LINES.streak, LINES.stars.slice(1), Object.values(LINES.worldHello), LINES.evolved, LINES.foundAll, LINES.hiNew,
+    LINES.welcomeBack, LINES.gotSticker, LINES.newSound, LINES.levelUp, LINES.tapPresent, LINES.teamRoll, LINES.musicOn, LINES.soundsOn,
+    LINES.bonus, LINES.timesUp, LINES.silly, LINES.itMatches, LINES.bossDown, LINES.madeIt, LINES.savedKitten, LINES.blastOff);
+  tag('[cheerfully]', Object.values(LINES.intro));
+  tag('[squeaky, high-pitched cartoon voice]', LINES.heroCall);
+  tag(LINES === FAMILY ? '[slow, groaning zombie voice]' : '[silly, hungry monster voice]', LINES.groans);
+  tag('[grossed out, silly]', LINES.yuck);
+  tag('[croaky, playful]', LINES.ribbit);
+  tag('[playful puppy bark]', LINES.ruff);
+  tag('[tiny kitten voice]', LINES.meow);
+  tag('[slowly, clapping out each part]', Object.values(LINES.syllables));
+  tag('[excited]', LINES.foundAll2, LINES.readBook, LINES.foundMama, LINES.newFriend, LINES.newLand, LINES.treasure, LINES.mapDone,
+    LINES.mapHello, Object.values(LINES.lands), Object.values(LINES.gates));
+}
+
+const phraseSet = new Set([...allLines(ORIGINAL), ...allLines(FAMILY)]);
 // Connecting words read plainly, like single words ("like" + "apple").
-const PLAIN = new Set([LINES.like]);
+const PLAIN = new Set([ORIGINAL.like]);
 
 export function spoken(t) {
   if (!phraseSet.has(t) || PLAIN.has(t)) return t;
   return `${TAGS.get(t) ?? '[warmly]'} ${t}`;
 }
 
-export const texts = new Set(allLines());
-for (const l of LESSONS) for (const w of l.w) texts.add(w);
-for (const w of Object.keys(HEART)) texts.add(w);
-for (const w of Object.keys(PIC)) texts.add(w);
-for (const w of Object.keys(BANK)) texts.add(w);
-for (const g of Object.values(GRAPHEMES)) texts.add(g.key);
-for (const s of STICKERS) texts.add(s.name);
+// Words, keywords and picture names: the same in both editions.
+const shared = new Set();
+for (const l of LESSONS) for (const w of l.w) shared.add(w);
+for (const w of Object.keys(HEART)) shared.add(w);
+for (const w of Object.keys(PIC)) shared.add(w);
+for (const w of Object.keys(BANK)) shared.add(w);
+for (const g of Object.values(GRAPHEMES)) shared.add(g.key);
+
+/** Phrases and sticker names one edition says. */
+const editionTexts = family => new Set([...allLines(family ? FAMILY : ORIGINAL),
+  ...STICKERS.map(s => (family && FAMILY_NAMES[s.id]) || s.name)]);
+
+export const texts = new Set([...editionTexts(false), ...editionTexts(true), ...shared]);
+
+/** File names (slugs) of the recordings only the other edition uses: left out of a build. */
+export function otherEditionClips(family) {
+  const mine = new Set([...editionTexts(family), ...shared].map(slug));
+  return [...editionTexts(!family)].map(slug).filter(k => !mine.has(k));
+}
 
 // Letter sounds. Speech engines can't say isolated phonemes, so each sound is cut out of real
 // speech. Recipes:
@@ -126,10 +144,16 @@ export function describe(spec) {
   return `“${spec.say}”${spec.max ? `, ${spec.max}ms` : ''}`;
 }
 
-/** One text per file name (a few phrases differ only in punctuation or case, e.g. "Yes!" and "yes"). */
+/** One text per file name (a few phrases differ only in punctuation or case, e.g. "Yes!" and "yes").
+ *  A character voice can't take a reading word's: a squeaky "Zip!" would replace the word "zip". */
 export function uniqueTexts() {
-  const seen = new Set();
-  return [...texts].filter(t => !seen.has(slug(t)) && seen.add(slug(t)));
+  const seen = new Map();
+  return [...texts].filter(t => {
+    const first = seen.get(slug(t));
+    if (first === undefined) return seen.set(slug(t), t);
+    if (shared.has(t) && /voice\]/.test(TAGS.get(first) ?? '')) throw new Error(`"${t}" and "${first}" would share the recording ${slug(t)}.m4a but are said differently`);
+    return false;
+  });
 }
 
 /** Every exact text the narrator may be asked to say (phrases, words, letter-sound sources). */

@@ -12,7 +12,7 @@ import type { Session } from '../session';
 import { pickOne, type Result, type Skill, type Tier } from '../learner';
 import { H, W, burst, confetti, emoji, roundButton, sprite, text, tweenP, wiggle, type Tappable, type WordView } from '../widgets';
 
-export type Theme = 'pvz' | 'pokemon' | 'paw' | 'friends';
+export type Theme = 'garden' | 'critters' | 'pups' | 'friends';
 
 export interface GameMeta {
   id: string;
@@ -42,7 +42,7 @@ export class Aborted extends Error { constructor() { super('aborted'); this.name
 const TIME_BOX = 50_000;
 /** Right answers in a row that fill the power meter. */
 const POWER = 3;
-const POWER_ICON: Record<Theme, string> = { pvz: '☀️', pokemon: '⚡', paw: '🐾', friends: '⭐' };
+const POWER_ICON: Record<Theme, string> = { garden: '☀️', critters: '🌰', pups: '🐾', friends: '⭐' };
 const TRACK_Y = 46;
 /** Seconds without a tap before the prompt is repeated. */
 const IDLE = 8;
@@ -234,15 +234,15 @@ export abstract class BaseGame extends Phaser.Scene {
     this.cameras.main.flash(250, 255, 255, 210);
     confetti(this, 70);
     const theme = this.meta.theme;
-    if (theme === 'pvz') {
+    if (theme === 'garden') {
       // A volley of peas across every lane.
       for (let k = 0; k < 9; k++) {
-        const pea = sprite(this, -40, 170 + (k % 3) * 190 + Math.random() * 40, 'pea', 54).setDepth(990);
+        const pea = sprite(this, -40, 170 + (k % 3) * 190 + Math.random() * 40, 'shot', 54).setDepth(990);
         this.tweens.add({ targets: pea, x: W + 60, duration: 650, delay: k * 90, onStart: () => this.sfx.pew(), onComplete: () => pea.destroy() });
       }
-    } else if (theme === 'pokemon') {
+    } else if (theme === 'critters') {
       // Pikachu zips across under a shower of lightning.
-      const p = sprite(this, -160, H / 2, 'pikachu', 260).setDepth(990);
+      const p = sprite(this, -160, H / 2, 'hero', 260).setDepth(990);
       this.sfx.zap();
       this.tweens.add({ targets: p, x: W + 160, duration: 1300, ease: 'Sine.InOut', onComplete: () => p.destroy() });
       this.tweens.add({ targets: p, y: H / 2 - 90, duration: 325, yoyo: true, repeat: 1, ease: 'Sine.Out' });
@@ -250,7 +250,7 @@ export abstract class BaseGame extends Phaser.Scene {
         const b = emoji(this, Math.random() * W, -60, '⚡', 70).setDepth(991);
         this.tweens.add({ targets: b, y: H + 60, duration: 700 + Math.random() * 500, delay: k * 60, onComplete: () => b.destroy() });
       }
-    } else if (theme === 'paw') {
+    } else if (theme === 'pups') {
       // The pup truck races by, leaving paw prints.
       const truck = sprite(this, -260, H - 110, 'truck', 150).setDepth(990);
       this.sfx.siren();

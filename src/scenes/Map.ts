@@ -22,7 +22,7 @@ const BOTTOM = 300, TOP = 320;
 /** A press that moves less than this is a tap, not a scroll. */
 const TAP = 14;
 const GATE_ICON = { rocket: '🚀', boss: '🧟', ladder: '🐱', river: '🌊' };
-const LAND_ICON = { friends: 'monsterHappy', pvz: 'peashooter', paw: 'pupHead-chase', pokemon: 'pikachu' };
+const LAND_ICON = { friends: 'monsterHappy', garden: 'shooter', pups: 'pupHead-lead', critters: 'hero' };
 
 /** A place on the path: a lesson's stone, or a land's gate. */
 interface Spot { key: string; x: number; y: number; land: Region; lesson?: number; gate?: boolean; obj?: Phaser.GameObjects.Container }

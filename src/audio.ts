@@ -135,8 +135,8 @@ async function playBuffer(key: string, rate = 1): Promise<boolean> {
  * Character voices: the narrator's recording sped up or slowed down. The character lines are
  * already recorded in character (see the voice script's delivery tags), so this is a light touch.
  */
-export type Style = 'narrator' | 'pika' | 'zombie' | 'monster' | 'frog' | 'pup';
-const STYLE_RATE: Record<Style, number> = { narrator: 1, pika: 1.2, zombie: 0.85, monster: 0.9, frog: 1.1, pup: 1.05 };
+export type Style = 'narrator' | 'hero' | 'pest' | 'monster' | 'frog' | 'pup';
+const STYLE_RATE: Record<Style, number> = { narrator: 1, hero: 1.2, pest: 0.85, monster: 0.9, frog: 1.1, pup: 1.05 };
 
 function missing(what: string) {
   if (import.meta.env.DEV) console.warn(`No recording for ${what} — run \`npm run voice\``);

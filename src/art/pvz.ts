@@ -1,17 +1,8 @@
 import { svg, line, cel, ell, eye, shadow, isBlinking, shut, INK } from './util';
+import { stem, baseLeaves } from './garden';
 
+// The family edition's Plants vs. Zombies characters (see src/edition.ts).
 const G = '#8bd44a', GS = '#55a02c', GD = '#3b7d22', LEAF = '#79c843', LEAFS = '#4b9330';
-
-const stem = (x: number, top: number, bottom: number) => `
-  <path d="M${x} ${top} C${x - 6} ${top + 40} ${x + 8} ${bottom - 30} ${x} ${bottom}" fill="none" stroke="${INK}" stroke-width="16" stroke-linecap="round"/>
-  <path d="M${x} ${top} C${x - 6} ${top + 40} ${x + 8} ${bottom - 30} ${x} ${bottom}" fill="none" stroke="${GS}" stroke-width="10" stroke-linecap="round"/>
-  <path d="M${x - 2} ${top} C${x - 8} ${top + 40} ${x + 4} ${bottom - 30} ${x - 2} ${bottom}" fill="none" stroke="${G}" stroke-width="4" stroke-linecap="round"/>`;
-
-const baseLeaves = (cx: number, y: number) =>
-  cel(`M${cx} ${y} C${cx - 30} ${y - 34} ${cx - 76} ${y - 24} ${cx - 92} ${y - 4} C${cx - 64} ${y + 12} ${cx - 22} ${y + 12} ${cx} ${y}Z`, LEAF, LEAFS,
-    { off: [-4, -6], inner: `<path d="M${cx - 4} ${y - 2} Q${cx - 44} ${y - 14} ${cx - 82} ${y - 6}" fill="none" stroke="${GD}" stroke-width="3" opacity=".6"/>` })
-  + cel(`M${cx} ${y} C${cx + 32} ${y - 36} ${cx + 80} ${y - 28} ${cx + 96} ${y - 10} C${cx + 70} ${y + 8} ${cx + 28} ${y + 12} ${cx} ${y}Z`, LEAF, LEAFS,
-    { off: [-4, -6], inner: `<path d="M${cx + 4} ${y - 2} Q${cx + 48} ${y - 16} ${cx + 86} ${y - 12}" fill="none" stroke="${GD}" stroke-width="3" opacity=".6"/>` });
 
 export function peashooter() {
   return svg('0 0 230 250', `
@@ -100,20 +91,4 @@ export function zombie(cone = false) {
 
 export function pea() {
   return svg('0 0 40 40', cel(ell(20, 20, 16, 16), G, GS, { off: [-3, -4], stroke: 2.5, hl: [14, 13, 5, 3] }));
-}
-
-export function sunToken() {
-  return svg('0 0 120 120', `
-    <defs><radialGradient id="g"><stop offset="0" stop-color="#fff9c4"/><stop offset=".55" stop-color="#ffe14d"/><stop offset="1" stop-color="#ffe14d" stop-opacity="0"/></radialGradient></defs>
-    <circle cx="60" cy="60" r="58" fill="url(#g)"/>
-    ${Array.from({ length: 12 }, (_, i) => `<path d="M60 6 L66 26 L54 26Z" fill="#ffd43b" transform="rotate(${i * 30} 60 60)"/>`).join('')}
-    ${cel(ell(60, 60, 34, 34), '#fff3a6', '#ffc61a', { off: [-6, -7], stroke: 3, hl: [50, 48, 10, 6] })}`);
-}
-
-export function flowerPot() {
-  return svg('0 0 160 150', `
-    ${shadow(80, 144, 62, 8)}
-    ${cel('M24 44 L136 44 L120 142 L40 142Z', '#e58553', '#b4532a', { off: [-10, 0], hl: [46, 90, 6, 36] })}
-    ${cel('M12 24 L148 24 Q152 24 152 30 L152 48 Q152 54 146 54 L14 54 Q8 54 8 48 L8 30 Q8 24 12 24Z', '#ec8f5c', '#c0602f', { off: [-6, -5] })}
-    <path d="${ell(80, 30, 62, 6)}" fill="#5a3a22"/>`);
 }

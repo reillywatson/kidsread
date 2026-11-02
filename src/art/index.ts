@@ -1,8 +1,16 @@
 // Every texture the game uses. Built-in art is SVG, rasterized at load.
 //
+// The characters come in two editions (see src/edition.ts), drawn at the same sizes under the same
+// keys: the original edition's critters, garden and pups, or the family edition's Pokémon, Plants vs.
+// Zombies and Paw Patrol. Only the edition being built is included.
+//
 // To use your own pictures instead, drop a PNG/WebP/JPG into src/assets/art/ named after
-// the texture key (e.g. "pikachu.png", "pup-chase.png", "zombie.png"). It replaces the
+// the texture key (e.g. "hero.png", "pup-lead.png", "pest.png"). It replaces the
 // drawing everywhere. Transparent backgrounds work best.
+import { FAMILY } from '../edition';
+import * as cr from './critters';
+import * as gd from './garden';
+import * as pu from './pups';
 import * as pk from './pokemon';
 import * as pvz from './pvz';
 import * as paw from './paw';
@@ -10,33 +18,69 @@ import * as fr from './friends';
 import * as bg from './scenes';
 import { withBlink } from './util';
 
-export { PUP_NAMES, pupName, type PupId } from './paw';
+export { PUPS } from './pups';
 
 const W = 1280, H = 720;
 
+type Draw = () => string;
+/** One edition's characters: key -> [draw, raster width, raster height]. */
+type Cast = Record<string, [Draw, number, number]>;
+
+const pupArt = (pup: (id: pu.PupId) => string, head: (id: pu.PupId) => string): Cast => Object.fromEntries(pu.PUPS.flatMap(p => [
+  [`pup-${p}`, [() => pup(p), 336, 476]], [`pupHead-${p}`, [() => head(p), 336, 367]]]));
+
+const original = (): Cast => ({
+  hero: [() => cr.hero('happy'), 320, 400],
+  heroSurprised: [() => cr.hero('surprised'), 320, 400],
+  leafy: [cr.leafy, 384, 336],
+  ember: [cr.ember, 336, 400],
+  splash: [cr.splash, 336, 400],
+  catcher: [cr.acorn, 220, 220],
+  shooter: [gd.spritz, 330, 360],
+  sunflower: [() => gd.sunflower(true), 330, 405],
+  sunflowerSad: [() => gd.sunflower(false), 330, 405],
+  roller: [gd.pumpkin, 270, 315],
+  pest: [() => gd.muncher(false), 260, 421],
+  pestBig: [() => gd.muncher(true), 260, 421],
+  shot: [gd.drop, 60, 60],
+  ...pupArt(pu.pup, pu.pupHead),
+  badge: [pu.badge, 200, 220],
+  truck: [() => pu.pupTruck('lead'), 480, 300],
+  fireTruck: [() => pu.pupTruck('fire'), 480, 300],
+  bgLawn: [bg.bgPatch, W, H],
+  bgBay: [() => bg.bgBay(bg.lighthouse()), W, H],
+});
+
+const family = (): Cast => ({
+  hero: [() => pk.pikachu('happy'), 320, 400],
+  heroSurprised: [() => pk.pikachu('surprised'), 320, 400],
+  leafy: [pk.bulbasaur, 384, 336],
+  ember: [pk.charmander, 336, 400],
+  splash: [pk.squirtle, 336, 400],
+  catcher: [pk.pokeball, 220, 220],
+  shooter: [pvz.peashooter, 330, 360],
+  sunflower: [() => pvz.sunflower(true), 330, 405],
+  sunflowerSad: [() => pvz.sunflower(false), 330, 405],
+  roller: [pvz.wallnut, 270, 315],
+  pest: [() => pvz.zombie(false), 260, 421],
+  pestBig: [() => pvz.zombie(true), 260, 421],
+  shot: [pvz.pea, 60, 60],
+  ...pupArt(paw.pup, paw.pupHead),
+  badge: [() => paw.pawBadge(), 200, 220],
+  truck: [() => paw.pupTruck('lead'), 480, 300],
+  fireTruck: [() => paw.pupTruck('fire'), 480, 300],
+  bgLawn: [bg.bgLawn, W, H],
+  bgBay: [() => bg.bgBay(bg.lookout()), W, H],
+});
+
+const CAST = FAMILY ? family() : original();
+
 /** key -> [svg, raster width, raster height]. Rasterized ~2× drawn size so tablets stay crisp. */
 export const TEXTURES: Record<string, [string, number, number]> = {
-  pikachu: [pk.pikachu('happy'), 320, 400],
-  pikachuSurprised: [pk.pikachu('surprised'), 320, 400],
-  bulbasaur: [pk.bulbasaur(), 384, 336],
-  charmander: [pk.charmander(), 336, 400],
-  squirtle: [pk.squirtle(), 336, 400],
-  pokeball: [pk.pokeball(), 220, 220],
-  peashooter: [pvz.peashooter(), 330, 360],
-  sunflower: [pvz.sunflower(true), 330, 405],
-  sunflowerSad: [pvz.sunflower(false), 330, 405],
-  wallnut: [pvz.wallnut(), 270, 315],
-  zombie: [pvz.zombie(false), 260, 421],
-  zombieCone: [pvz.zombie(true), 260, 421],
-  pea: [pvz.pea(), 60, 60],
-  sun: [pvz.sunToken(), 260, 260],
-  pot: [pvz.flowerPot(), 320, 300],
-  ...Object.fromEntries(paw.PUP_NAMES.map(p => [`pup-${p}`, [paw.pup(p), 336, 476]])),
-  ...Object.fromEntries(paw.PUP_NAMES.map(p => [`pupHead-${p}`, [paw.pupHead(p), 336, 367]])),
-  pawBadge: [paw.pawBadge(), 200, 220],
-  truck: [paw.pupTruck('chase'), 480, 300],
-  fireTruck: [paw.pupTruck('marshall'), 480, 300],
-  bone: [paw.bone(), 240, 120],
+  ...Object.fromEntries(Object.entries(CAST).map(([k, [draw, w, h]]) => [k, [draw(), w, h]])),
+  sun: [gd.sunToken(), 260, 260],
+  pot: [gd.flowerPot(), 320, 300],
+  bone: [pu.bone(), 240, 120],
   monster: [fr.monster('open'), 280, 340],
   monsterYuck: [fr.monster('yuck'), 280, 340],
   monsterHappy: [fr.monster('smile'), 280, 340],
@@ -49,10 +93,8 @@ export const TEXTURES: Record<string, [string, number, number]> = {
   speaker: [fr.speaker(), 96, 96],
   plus: [fr.plus(), 200, 200],
   bgHome: [bg.bgHome(), W, H],
-  bgLawn: [bg.bgLawn(), W, H],
   bgSky: [bg.bgSky(), W, H],
   bgField: [bg.bgField(), W, H],
-  bgBay: [bg.bgBay(), W, H],
   bgPond: [bg.bgPond(), W, H],
   bgKitchen: [bg.bgKitchen(), W, H],
   bgBook: [bg.bgBook(), W, H],
@@ -61,12 +103,11 @@ export const TEXTURES: Record<string, [string, number, number]> = {
 };
 
 // Eyes-shut frames for characters that blink (see liven() in widgets.ts).
+const BLINKS = ['hero', 'leafy', 'ember', 'splash', 'shooter', 'sunflower', 'roller', 'pest', 'pestBig', 'truck', 'fireTruck',
+  ...pu.PUPS.flatMap(p => [`pup-${p}`, `pupHead-${p}`])];
 const BLINKERS: Record<string, () => string> = {
-  pikachu: () => pk.pikachu('happy'), bulbasaur: pk.bulbasaur, charmander: pk.charmander, squirtle: pk.squirtle,
-  peashooter: pvz.peashooter, sunflower: () => pvz.sunflower(true), wallnut: pvz.wallnut, zombie: () => pvz.zombie(false),
-  zombieCone: () => pvz.zombie(true), monster: () => fr.monster('open'), monsterHappy: () => fr.monster('smile'), frog: fr.frog,
-  truck: () => paw.pupTruck('chase'), fireTruck: () => paw.pupTruck('marshall'),
-  ...Object.fromEntries(paw.PUP_NAMES.flatMap(p => [[`pup-${p}`, () => paw.pup(p)], [`pupHead-${p}`, () => paw.pupHead(p)]])),
+  ...Object.fromEntries(BLINKS.map(k => [k, CAST[k][0]])),
+  monster: () => fr.monster('open'), monsterHappy: () => fr.monster('smile'), frog: fr.frog,
 };
 for (const [key, draw] of Object.entries(BLINKERS)) {
   const [, w, h] = TEXTURES[key];
@@ -80,5 +121,5 @@ export const OVERRIDES: Record<string, string> = Object.fromEntries(
 );
 
 /** Profile avatars (texture keys). */
-export const AVATARS = ['pikachu', 'bulbasaur', 'charmander', 'squirtle', 'pupHead-chase', 'pupHead-marshall', 'pupHead-skye', 'pupHead-rubble',
-  'peashooter', 'sunflower', 'wallnut', 'zombie', 'monsterHappy', 'frog'];
+export const AVATARS = ['hero', 'leafy', 'ember', 'splash', 'pupHead-lead', 'pupHead-fire', 'pupHead-fly', 'pupHead-dig',
+  'shooter', 'sunflower', 'roller', 'pest', 'monsterHappy', 'frog'];

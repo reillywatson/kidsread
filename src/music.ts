@@ -7,7 +7,7 @@
 import { ac, musicBus } from './audio';
 import { settings } from './settings';
 
-export type SongId = 'home' | 'pvz' | 'pokemon' | 'paw' | 'friends';
+export type SongId = 'home' | 'garden' | 'critters' | 'pups' | 'friends';
 
 type Lead = 'marimba' | 'pluck' | 'bell';
 type Comp = 'uke' | 'pad';
@@ -20,19 +20,19 @@ const SONGS: Record<SongId, Song> = {
     melody: `E5 . G5 . A5 G5 E5 . | D5 . C5 . D5 E5 . . | E5 . G5 . A5 G5 E5 C5 | D5 . . . - - - - |
              C5 . E5 . G5 . A5 . | G5 . E5 . D5 . . . | E5 D5 C5 D5 E5 . G5 . | C5 . . . - - - -`,
   },
-  pvz: {
+  garden: {
     bpm: 98, lead: 'pluck', comp: 'uke', swing: 0.16,
     chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'G', 'Am'],
     melody: `A4 . C5 . E5 . C5 . | F5 . E5 . C5 . . . | G4 . B4 . D5 . B4 . | C5 . . . E5 . . . |
              A4 . C5 . E5 . A5 . | G5 . F5 . E5 . C5 . | D5 . B4 . G4 . B4 . | A4 . . . - - - -`,
   },
-  pokemon: {
+  critters: {
     bpm: 120, lead: 'bell', comp: 'pad', swing: 0.05,
     chords: ['G', 'D', 'Em', 'C', 'G', 'D', 'C', 'G'],
     melody: `G4 . B4 . D5 . . G5 | F#5 . D5 . A4 . . . | E5 . G5 . B5 . A5 G5 | E5 . . . - - - - |
              C5 . E5 . G5 . E5 . | D5 . B4 . G4 . . . | A4 B4 C5 D5 E5 . F#5 . | G5 . . . - - - -`,
   },
-  paw: {
+  pups: {
     bpm: 112, lead: 'pluck', comp: 'uke', swing: 0.1,
     chords: ['F', 'Bb', 'C', 'F', 'F', 'Bb', 'C', 'F'],
     melody: `F4 . A4 . C5 . A4 . | Bb4 . D5 . F5 . D5 . | C5 . E5 . G5 . E5 C5 | F5 . . . F5 . - - |

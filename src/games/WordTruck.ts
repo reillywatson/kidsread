@@ -1,4 +1,4 @@
-// Paw Patrol — sentence building (UFLI sentence dictation): hear a sentence, then tap its
+// Rescue pups world — sentence building (UFLI sentence dictation): hear a sentence, then tap its
 // words in order. Each word becomes a trailer hitched behind Marshall's fire truck; the
 // capital letter and the period are clues to the first and last word. Then the truck drives off.
 import Phaser from 'phaser';
@@ -13,7 +13,7 @@ import { W, burst, sprite, tappable, text } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'wordtruck',
-  theme: 'paw',
+  theme: 'pups',
   skill: 'sentence',
   title: 'Word Truck — hear a sentence, build it word by word',
   intro: LINES.intro.wordtruck,
@@ -40,7 +40,7 @@ export class WordTruck extends BaseGame {
     road.fillStyle(0xffffff, 0.8);
     for (let x = 20; x < W; x += 90) road.fillRect(x, ROAD_Y + 55, 46, 6);
     this.truck = sprite(this, TRUCK_X, ROAD_Y - 6, 'fireTruck', 140);
-    this.tickle(sprite(this, 95, 610, 'pup-marshall', 190), () => void audio.say(LINES.ruff, { style: 'pup' }));
+    this.tickle(sprite(this, 95, 610, 'pup-fire', 190), () => void audio.say(LINES.ruff, { style: 'pup' }));
   }
 
   /** A word tile that turns into a trailer (body + wheels) once it's hitched. */
@@ -151,7 +151,7 @@ export class WordTruck extends BaseGame {
       this.sfx.siren();
       burst(this, 640, ROAD_Y, ['🚒', '⭐', '✨']);
       await this.tween({ targets: [this.truck, ...cars], x: `+=${W + 300}`, duration: 1700, ease: 'Quad.In' });
-      if (Math.random() < 0.3) await this.say(LINES.pawRoll);
+      if (Math.random() < 0.3) await this.say(LINES.teamRoll);
       await this.praise(ok);
       [...cars, pic].forEach(o => o.destroy());
       this.truck.x = W + 200;

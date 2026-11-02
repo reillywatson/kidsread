@@ -1,4 +1,4 @@
-// Paw Patrol — memory match. Early on: letter ↔ keyword picture (m ↔ 🐵).
+// Rescue pups world — memory match. Early on: letter ↔ keyword picture (m ↔ 🐵).
 // Later: word ↔ picture and heart word ↔ heart word. At the medium and hard levels, sometimes
 // big letter ↔ little letter (B ↔ b).
 import Phaser from 'phaser';
@@ -7,17 +7,17 @@ import { GRAPHEMES, PIC, HEART, LESSONS, capitalOf } from '../data/curriculum';
 import { readableWords } from '../choices';
 import { shuffle, pickOne } from '../learner';
 import { LINES } from '../lines';
-import { PUP_NAMES } from '../art';
+import { PUPS } from '../art';
 import * as audio from '../audio';
 import { WordView, burst, emoji, sprite, tappable, text } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'pupmemory',
-  theme: 'paw',
+  theme: 'pups',
   skill: 'heart',
   title: 'Pup Match — memory with letters, words and heart words',
   intro: LINES.intro.pupmemory,
-  icon: 'pawBadge',
+  icon: 'badge',
   eligible: () => true,
 };
 
@@ -33,7 +33,7 @@ export class PupMemory extends BaseGame {
   protected setup() {
     this.add.image(640, 360, 'bgBay');
     this.add.rectangle(640, 400, 1280, 640, 0xffffff, 0.35);
-    const pupId = pickOne(PUP_NAMES);
+    const pupId = pickOne(PUPS);
     this.pup = this.tickle(sprite(this, 110, 580, `pup-${pupId}`, 250), () => void audio.say(LINES.ruff, { style: 'pup' }));
   }
 
@@ -106,7 +106,7 @@ export class PupMemory extends BaseGame {
       bg.fillStyle(0x000000, 0.2).fillRoundedRect(-CW / 2 + 4, -CH / 2 + 8, CW, CH, 22);
       bg.fillStyle(0x1e88e5).fillRoundedRect(-CW / 2, -CH / 2, CW, CH, 22);
       bg.lineStyle(6, 0xffffff).strokeRoundedRect(-CW / 2, -CH / 2, CW, CH, 22);
-      back.add([bg, sprite(this, 0, 0, 'pawBadge', 110)]);
+      back.add([bg, sprite(this, 0, 0, 'badge', 110)]);
       const front = this.drawFace(d.f).setVisible(false);
       c.add([back, front]);
       tappable(c, CW, CH);

@@ -56,7 +56,7 @@ export class Boot extends Phaser.Scene {
     // ?playtest opens the playtest panel directly (handy as a bookmark on the tablet).
     if (new URLSearchParams(location.search).has('playtest')) this.scene.start('Playtest');
     else if (meta) {
-      selectProfile((profiles()[0] ?? createProfile('pikachu')).id);
+      selectProfile((profiles()[0] ?? createProfile('hero')).id);
       const s = new Session();
       s.games = [meta];
       s.start(this);

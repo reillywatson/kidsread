@@ -1,6 +1,8 @@
 // Player profiles. Each profile has its own learner progress; device settings and
 // recorded letter sounds are shared.
 import { Learner, type Storage, type LearnerState, type Skill, type Tier } from './learner';
+import { renamed } from './edition';
+import { AVATARS } from './art';
 
 export interface Profile { id: string; avatar: string; name: string; created: number; lastPlayed: number }
 
@@ -19,13 +21,16 @@ export function profileStorage(id: string): Storage {
   return { get: () => readJSON<Partial<LearnerState>>(key(id)), set: v => writeJSON(key(id), v) };
 }
 
+/** A saved profile picture, or the first one if it's not drawn in this edition. */
+const avatarOf = (saved: string) => { const a = renamed(saved); return AVATARS.includes(a) ? a : AVATARS[0]; };
+
 export function profiles(): Profile[] {
   const list = readJSON<Profile[]>(INDEX);
-  if (list) return list;
+  if (list) return list.map(p => ({ ...p, avatar: avatarOf(p.avatar) }));
   // First run after profiles were added: keep any existing progress as the first player.
   const legacy = readJSON<Partial<LearnerState>>(LEGACY);
   if (legacy) {
-    const p = newProfile('pikachu');
+    const p = newProfile('hero');
     writeJSON(key(p.id), legacy);
     writeJSON(INDEX, [p]);
     localStorage.removeItem(LEGACY);

@@ -1,4 +1,4 @@
-// Plants vs. Zombies — vowel focus: plant the word on a seed packet in the pot with its vowel
+// Garden world — vowel focus: plant the word on a seed packet in the pot with its vowel
 // (cat → a, pig → i). At the easiest level the word is shown whole, with its picture, and said;
 // above that the vowel is hidden (c_t) and the word only said, so the vowel has to be heard (a
 // visible vowel can just be matched to the pot by its shape). A plant pops up when it's right, then moves to the garden
@@ -14,7 +14,7 @@ import { WordView, burst, emoji, sprite, tappable, text } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'garden',
-  theme: 'pvz',
+  theme: 'garden',
   skill: 'word',
   title: 'Garden Sort — plant each word in the pot with its vowel',
   intro: LINES.intro.garden,
@@ -22,7 +22,7 @@ export const meta: GameMeta = {
   eligible: lesson => vowelsAt(lesson).length >= 2,
 };
 
-const PLANTS = ['sunflower', 'peashooter', 'wallnut'];
+const PLANTS = ['sunflower', 'shooter', 'roller'];
 /** Garden bed spots along the fence, kept clear of the seed packet in the middle. */
 const BED = [[250, 345], [1030, 345], [355, 345], [925, 345], [145, 345], [1135, 345]];
 

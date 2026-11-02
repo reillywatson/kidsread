@@ -1,4 +1,4 @@
-// Bonus (Plants vs. Zombies): Wall-nut Bowling. Tap a lane to roll a Wall-nut down it and
+// Bonus (Garden world): Garden Bowling. Tap a lane to roll a Wall-nut down it and
 // bowl over every zombie in the way. Just for fun.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
@@ -9,11 +9,11 @@ import { W, burst, sprite } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'bowling',
-  theme: 'pvz',
+  theme: 'garden',
   skill: 'fun',
-  title: 'Wall-nut Bowling (bonus)',
+  title: 'Garden Bowling (bonus)',
   intro: LINES.intro.bowling,
-  icon: 'wallnut',
+  icon: 'roller',
   eligible: () => true,
   bonus: true,
 };
@@ -35,13 +35,13 @@ export class Bowling extends BaseGame {
     LANES.forEach((y, lane) => {
       const zone = this.add.rectangle(W / 2 + 40, y, W - 80, 176, 0xffffff, 0.001).setInteractive({ useHandCursor: true });
       zone.on('pointerdown', () => this.roll(lane));
-      sprite(this, 120, y - 10, 'wallnut', 90);
+      sprite(this, 120, y - 10, 'roller', 90);
     });
   }
 
   private spawn() {
     const lane = Math.floor(Math.random() * 3);
-    const z = sprite(this, START_X, LANES[lane] - 30, Math.random() < 0.35 ? 'zombieCone' : 'zombie', 165);
+    const z = sprite(this, START_X, LANES[lane] - 30, Math.random() < 0.35 ? 'pestBig' : 'pest', 165);
     z.setData('lane', lane);
     this.zombies.push(z);
     this.tweens.add({
@@ -62,7 +62,7 @@ export class Bowling extends BaseGame {
   private roll(lane: number) {
     if (this.rolling[lane]) return;
     this.rolling[lane] = true;
-    const nut = sprite(this, 150, LANES[lane] + 20, 'wallnut', 100);
+    const nut = sprite(this, 150, LANES[lane] + 20, 'roller', 100);
     audio.sfx.whoosh();
     this.tweens.add({ targets: nut, angle: 720, duration: 1300, ease: 'Linear' });
     this.tweens.add({
@@ -75,7 +75,7 @@ export class Bowling extends BaseGame {
           audio.sfx.splat();
           burst(this, z.x, z.y, ['💥', '⭐', '🟢'], 8);
           this.point();
-          if (Math.random() < 0.3) void audio.say(pickOne(LINES.groans), { style: 'zombie' });
+          if (Math.random() < 0.3) void audio.say(pickOne(LINES.groans), { style: 'pest' });
           this.tweens.add({ targets: z, x: z.x + 220, y: z.y - 180, angle: 540, alpha: 0, duration: 700, ease: 'Quad.Out', onComplete: () => this.remove(z) });
         }
       },
@@ -84,7 +84,7 @@ export class Bowling extends BaseGame {
   }
 
   protected async run() {
-    this.point = this.scoreCounter('zombie');
+    this.point = this.scoreCounter('pest');
     const spawner = this.time.addEvent({ delay: 1100, loop: true, callback: () => this.spawn() });
     this.spawn();
     if (import.meta.env.DEV) Object.assign(window, { __answer: () => { const z = this.zombies.find(o => !o.getData('down')); if (z) this.roll(z.getData('lane')); } });

@@ -1,4 +1,4 @@
-// Plants vs. Zombies — auditory drill: hear a sound, zap the zombie holding that letter.
+// Garden world — auditory drill: hear a sound, zap the zombie holding that letter.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { GRAPHEMES } from '../data/curriculum';
@@ -10,11 +10,11 @@ import { burst, emoji, sprite, text, tappable } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'zombies',
-  theme: 'pvz',
+  theme: 'garden',
   skill: 'grapheme',
-  title: 'Zombie Letters — hear a sound, tap the letter',
+  title: 'Letter Zap — hear a sound, tap the letter',
   intro: LINES.intro.zombies,
-  icon: 'zombie',
+  icon: 'pest',
   eligible: () => true,
 };
 
@@ -30,7 +30,7 @@ export class Zombies extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgLawn');
-    this.shooters = LANES.map(y => sprite(this, 130, y - 20, 'peashooter', 130));
+    this.shooters = LANES.map(y => sprite(this, 130, y - 20, 'shooter', 130));
     this.shooters.forEach((s, i) => {
       this.tweens.add({ targets: s, scaleY: s.scaleY * 1.05, duration: 600 + i * 90, yoyo: true, repeat: -1 });
       this.tickle(s);
@@ -63,7 +63,7 @@ export class Zombies extends BaseGame {
         sign.fillStyle(0x8d6e3f).fillRect(-5, -150, 10, 60);
         sign.fillStyle(0xfff8e1).fillRoundedRect(-62, -225, 124, 90, 14);
         sign.lineStyle(5, 0x8d6e3f).strokeRoundedRect(-62, -225, 124, 90, 14);
-        z.add([sign, text(this, 0, -180, this.shown(x), 64), sprite(this, 0, -60, Math.random() < 0.35 ? 'zombieCone' : 'zombie', 165)]);
+        z.add([sign, text(this, 0, -180, this.shown(x), 64), sprite(this, 0, -60, Math.random() < 0.35 ? 'pestBig' : 'pest', 165)]);
         // The sign counts too: the box runs from the top of the sign down to the zombie's feet.
         tappable(z, 130, 270, 0, -100);
         z.setData('g', x);
@@ -74,7 +74,7 @@ export class Zombies extends BaseGame {
 
       let help = this.tier === 0;
       await this.prompt(async () => {
-        await this.say(r === 0 ? LINES.zapZombie : pickOne([LINES.find, LINES.zap, LINES.whereIs]));
+        await this.say(r === 0 ? LINES.zapPest : pickOne([LINES.find, LINES.zap, LINES.whereIs]));
         await this.letterSound(g);
         if (help) {
           (this.bubble.list[1] as Phaser.GameObjects.Text).setText(GRAPHEMES[g].pic);
@@ -86,7 +86,7 @@ export class Zombies extends BaseGame {
       const res = await this.choose(zs, opts.indexOf(g), {
         onWrong: obj => {
           const groan = pickOne(LINES.groans);
-          void audio.say(groan, { style: 'zombie' });
+          void audio.say(groan, { style: 'pest' });
           const t = text(this, obj.x, obj.y - 260, groan, 34, '#4e342e').setDepth(60);
           this.tweens.add({ targets: t, y: t.y - 40, alpha: 0, duration: 1200, onComplete: () => t.destroy() });
         },
@@ -100,7 +100,7 @@ export class Zombies extends BaseGame {
       this.tweens.killTweensOf(z);
       const lane = lanes[opts.indexOf(g)];
       const shooter = this.shooters[lane];
-      const pea = sprite(this, shooter.x + 60, shooter.y - 18, 'pea', 30);
+      const pea = sprite(this, shooter.x + 60, shooter.y - 18, 'shot', 30);
       this.sfx.pew();
       this.tweens.add({ targets: shooter, x: shooter.x - 12, duration: 80, yoyo: true });
       await this.tween({ targets: pea, x: z.x - 40, duration: Math.max(150, (z.x - pea.x) * 0.5), ease: 'Linear' });

@@ -1,4 +1,4 @@
-// Pokémon — letter formation, dot to dot: the letter is a constellation. Touch the stars in
+// Critters world — letter formation, dot to dot: the letter is a constellation. Touch the stars in
 // order (or slide through them) and lines join them up; then Pikachu lights the letter up
 // with a thunderbolt. Gentler than free tracing: only the stars have to be reached.
 import Phaser from 'phaser';
@@ -12,16 +12,16 @@ import { W, H, burst, emoji, picture, sprite } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'starletters',
-  theme: 'pokemon',
+  theme: 'critters',
   skill: 'writing',
   title: 'Star Letters — connect the stars to write each letter',
   intro: LINES.intro.stars,
-  icon: 'pikachu',
+  icon: 'hero',
   eligible: () => true,
 };
 
 export class StarLetters extends BaseGame {
-  private pika!: Phaser.GameObjects.Image;
+  private hero!: Phaser.GameObjects.Image;
 
   constructor() { super(meta); }
 
@@ -32,7 +32,7 @@ export class StarLetters extends BaseGame {
       const s = emoji(this, Math.random() * W, Math.random() * H * 0.9, '✨', 10 + Math.random() * 14).setAlpha(0.6);
       this.tweens.add({ targets: s, alpha: 0.15, duration: 800 + Math.random() * 1500, yoyo: true, repeat: -1 });
     }
-    this.pika = this.tickle(sprite(this, 1130, 530, 'pikachu', 220), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
+    this.hero = this.tickle(sprite(this, 1130, 530, 'hero', 220), () => void audio.say(pickOne(LINES.heroCall), { style: 'hero' }));
   }
 
   protected async run() {
@@ -64,8 +64,8 @@ export class StarLetters extends BaseGame {
       this.sfx.zap();
       this.cameras.main.flash(250, 255, 240, 120);
       for (const [x, y] of t.points().filter((_, i) => i % 12 === 0)) burst(this, x, y, ['⚡', '⭐'], 2);
-      this.tweens.add({ targets: this.pika, y: this.pika.y - 60, duration: 220, yoyo: true, ease: 'Quad.Out' });
-      void audio.say(pickOne(LINES.pika), { style: 'pika' });
+      this.tweens.add({ targets: this.hero, y: this.hero.y - 60, duration: 220, yoyo: true, ease: 'Quad.Out' });
+      void audio.say(pickOne(LINES.heroCall), { style: 'hero' });
       const card = picture(this, 1130, 230, GRAPHEMES[g].key, { size: 80 });
       await this.wait(700);
       await this.letterSound(g);

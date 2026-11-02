@@ -1,4 +1,4 @@
-// Paw Patrol — letter formation: the letter is a road. Drive Chase's truck along it from the
+// Rescue pups world — letter formation: the letter is a road. Drive Chase's truck along it from the
 // green light, stroke by stroke; the road lights up behind the truck. Then the siren plays and
 // the letter says its sound.
 import Phaser from 'phaser';
@@ -11,7 +11,7 @@ import { burst, picture, sprite } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'road',
-  theme: 'paw',
+  theme: 'pups',
   skill: 'writing',
   title: 'Letter Road — drive the truck along each letter',
   intro: LINES.intro.road,
@@ -20,13 +20,13 @@ export const meta: GameMeta = {
 };
 
 export class Road extends BaseGame {
-  private chase!: Phaser.GameObjects.Image;
+  private leader!: Phaser.GameObjects.Image;
 
   constructor() { super(meta); }
 
   protected setup() {
     this.add.image(640, 360, 'bgBay');
-    this.chase = this.tickle(sprite(this, 1130, 540, 'pup-chase', 230), () => void audio.say(LINES.ruff, { style: 'pup' }));
+    this.leader = this.tickle(sprite(this, 1130, 540, 'pup-lead', 230), () => void audio.say(LINES.ruff, { style: 'pup' }));
   }
 
   protected async run() {
@@ -61,7 +61,7 @@ export class Road extends BaseGame {
       // Paw prints along the finished letter, and Chase cheers.
       for (const [x, y] of t.points().filter((_, i) => i % 14 === 0)) burst(this, x, y, ['🐾', '⭐'], 2);
       this.sfx.bark();
-      this.tweens.add({ targets: this.chase, y: this.chase.y - 50, duration: 200, yoyo: true, repeat: 1, ease: 'Quad.Out' });
+      this.tweens.add({ targets: this.leader, y: this.leader.y - 50, duration: 200, yoyo: true, repeat: 1, ease: 'Quad.Out' });
       const card = picture(this, 1130, 230, GRAPHEMES[g].key, { size: 80 });
       await this.letterSound(g);
       await this.keyword(g);

@@ -89,6 +89,37 @@ export const bgLawn = () => {
     <rect x="76" y="170" width="8" height="550" fill="#8d6e3f"/>`);
 };
 
+// The original edition's version of the lawn: three vegetable beds as lanes (same centers,
+// y = 260, 440, 620), a garden shed on the left (x < 80) and a hedge on the right.
+export const bgPatch = () => {
+  const beds = [0, 1, 2].map(r => {
+    const y = 170 + r * 180;
+    const sprouts = Array.from({ length: 10 }, (_, c) => {
+      const x = 150 + c * 102 + (r % 2) * 40;
+      return `<path d="M${x} ${y + 140} q-14 -18 -22 -12 q8 10 22 12 q14 -18 22 -12 q-8 10 -22 12" fill="#5cbf4a" stroke="#2f7a24" stroke-width="2"/>`;
+    }).join('');
+    return `<rect x="80" y="${y}" width="1100" height="180" fill="${r % 2 ? '#86cc4c' : '#93d457'}"/>
+      ${cel(`M100 ${y + 28} Q100 ${y + 18} 112 ${y + 18} L1158 ${y + 18} Q1170 ${y + 18} 1170 ${y + 28} L1170 ${y + 160} Q1170 ${y + 170} 1158 ${y + 170} L112 ${y + 170} Q100 ${y + 170} 100 ${y + 160}Z`,
+        '#a9774c', '#7f5533', { off: [0, -8], stroke: 3, inner: [50, 90, 130].map(d => `<path d="M110 ${y + d} L1160 ${y + d}" stroke="#8d6040" stroke-width="3" opacity=".5"/>`).join('') })}
+      ${sprouts}`;
+  }).join('');
+  return bg(`
+    ${sky('#79cdfb', '#c2ecff', 175)}
+    ${cloud(380, 70, 0.7)}${cloud(900, 50, 0.6)}
+    ${hill('M0 172 Q300 90 640 140 T1280 120 L1280 172 L0 172Z', '#9ed48a', '#7cc06a')}
+    ${tree(300, 168, 0.7)}${pine(560, 168, 0.6)}${tree(820, 170, 0.75)}${tree(1080, 168, 0.6)}
+    <rect y="150" width="${W}" height="22" fill="#7cc242"/>
+    ${beds}
+    ${cel('M1180 170 L1280 170 L1280 720 L1180 720Z', '#4caf50', '#2e7d32', { off: [-10, 0], stroke: 0,
+      inner: Array.from({ length: 12 }, (_, i) => `<circle cx="${1200 + (i % 2) * 50}" cy="${190 + i * 46}" r="30" fill="#43a047"/>`).join('') })}
+    ${cel('M0 150 L80 150 L80 720 L0 720Z', '#c98a52', '#9a6234', { off: [-12, 0], stroke: 0,
+      inner: Array.from({ length: 5 }, (_, i) => `<path d="M${8 + i * 16} 150 L${8 + i * 16} 720" stroke="#8a5530" stroke-width="3"/>`).join('') })}
+    ${cel('M-10 160 L40 110 L90 160Z', '#c0504d', '#8e2f2c', { off: [-4, -2], stroke: 3 })}
+    <rect x="12" y="300" width="56" height="120" rx="6" fill="#6d4423" ${line(3)}/><circle cx="58" cy="362" r="4" fill="#ffd54f"/>
+    <rect x="16" y="520" width="50" height="50" fill="#b3e5fc" ${line(3)}/><path d="M41 520 L41 570 M16 545 L66 545" stroke="${INK}" stroke-width="3"/>
+    <rect x="76" y="150" width="8" height="570" fill="#8d6e3f"/>`);
+};
+
 const birds = (pts: number[][]) => pts.map(([x, y, k]) =>
   `<path d="M${x - 12 * k} ${y - 4 * k} Q${x - 6 * k} ${y - 10 * k} ${x} ${y} Q${x + 6 * k} ${y - 10 * k} ${x + 12 * k} ${y - 4 * k}" fill="none" stroke="#3c5a78" stroke-width="${3 * k}" stroke-linecap="round" opacity=".7"/>`).join('');
 
@@ -120,7 +151,31 @@ export const bgField = () => bg(`
     `<path d="M${i * 16 - 56} 20 l8 -${46 + (i % 3) * 10} l8 ${46 + (i % 3) * 10}Z" fill="${i % 2 ? '#2f8a35' : '#3fa63a'}" stroke="#1b5e20" stroke-width="2"/>`).join('')}</g>`).join('')}
   ${tufts(560, 30, '#3a9b30', 5)}${flowers(580, 12, 7, 100)}`);
 
-export const bgBay = () => bg(`
+// The tower on the hill (right): the family edition's lookout, or the original edition's lighthouse.
+export const lookout = () => `<g transform="translate(1090 40)">
+    ${cel('M-34 140 L-48 470 L48 470 L34 140Z', '#f2f4f5', '#c4cbd0', { off: [-12, 0] })}
+    ${[210, 285, 360].map(y => `<rect x="-20" y="${y}" width="40" height="38" rx="7" fill="#81d4fa" ${line(3.5)}/>`).join('')}
+    ${cel('M-130 118 Q0 160 130 118 L112 150 Q0 186 -112 150Z', '#fdd835', '#e0b000', { off: [-6, -4] })}
+    ${cel('M-108 120 L-86 44 Q0 12 86 44 L108 120 Q0 148 -108 120Z', '#c4ecff', '#8fd0f2', { off: [-10, -6], hl: [-50, 70, 16, 30] })}
+    ${cel('M-64 40 Q0 -26 64 40 Q0 22 -64 40Z', '#ef4b3f', '#b71c1c', { off: [-6, -4] })}
+    ${cel(ell(0, 84, 24, 24), '#2f78e0', '#1a4fa8', { off: [-3, -3] })}
+    <circle cx="0" cy="90" r="8" fill="#fff"/><circle cx="-10" cy="77" r="4" fill="#fff"/><circle cx="0" cy="72" r="4" fill="#fff"/><circle cx="10" cy="77" r="4" fill="#fff"/>
+    <path d="M0 6 L0 -24" stroke="${INK}" stroke-width="5"/>${cel(ell(0, -30, 9, 9), '#ef4b3f', '#b71c1c', { off: [-2, -2], stroke: 3 })}
+  </g>`;
+
+export const lighthouse = () => `<g transform="translate(1090 40)">
+    ${cel('M-30 150 L-46 470 L46 470 L30 150Z', '#f7f7f7', '#c9cfd4', { off: [-12, 0],
+      inner: [190, 290, 390].map(y => `<path d="M-60 ${y} L60 ${y - 14} L60 ${y + 36} L-60 ${y + 50}Z" fill="#e53935"/>`).join('') })}
+    <rect x="-14" y="400" width="28" height="70" rx="12" fill="#8d5a32" ${line(3)}/>
+    ${cel('M-62 136 L62 136 L56 156 L-56 156Z', '#455a64', '#263238', { off: [-3, -3], stroke: 3.5 })}
+    ${cel('M-38 76 L38 76 L38 136 L-38 136Z', '#fff59d', '#ffe082', { off: [-6, 0], stroke: 4,
+      inner: '<path d="M-12 76 L-12 136 M12 76 L12 136" stroke="#455a64" stroke-width="4"/>' })}
+    ${cel('M-50 78 Q0 20 50 78Z', '#e53935', '#a51b12', { off: [-6, -4], stroke: 4 })}
+    <path d="M0 34 L0 14" stroke="${INK}" stroke-width="5"/>${cel(ell(0, 10, 8, 8), '#e53935', '#a51b12', { off: [-2, -2], stroke: 3 })}
+    <path d="M-40 106 L-130 80 L-130 132Z M40 106 L130 80 L130 132Z" fill="#fff59d" opacity=".45"/>
+  </g>`;
+
+export const bgBay = (tower: string) => bg(`
   ${sky('#ffcf8a', '#9fdcff', 520)}
   ${sun(200, 140, 40)}${cloud(500, 90, 0.8)}${cloud(860, 130, 0.6)}
   <defs><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fb3e8"/><stop offset="1" stop-color="#1f7fc4"/></linearGradient></defs>
@@ -130,16 +185,7 @@ export const bgBay = () => bg(`
     <path d="M10 -40 Q8 -80 18 -100" stroke="#8d5a32" stroke-width="7" fill="none"/>
     ${[-40, 10, 60, 120, 170].map(a => `<path d="M18 -100 q30 ${Math.sin(a) * 10} 50 20" stroke="#2e7d32" stroke-width="8" fill="none" transform="rotate(${a} 18 -100)" stroke-linecap="round"/>`).join('')}</g>
   ${hill('M820 560 Q900 420 1080 400 Q1240 400 1280 440 L1280 600 L820 600Z', '#7ccf5a', '#58b041')}
-  <g transform="translate(1090 40)">
-    ${cel('M-34 140 L-48 470 L48 470 L34 140Z', '#f2f4f5', '#c4cbd0', { off: [-12, 0] })}
-    ${[210, 285, 360].map(y => `<rect x="-20" y="${y}" width="40" height="38" rx="7" fill="#81d4fa" ${line(3.5)}/>`).join('')}
-    ${cel('M-130 118 Q0 160 130 118 L112 150 Q0 186 -112 150Z', '#fdd835', '#e0b000', { off: [-6, -4] })}
-    ${cel('M-108 120 L-86 44 Q0 12 86 44 L108 120 Q0 148 -108 120Z', '#c4ecff', '#8fd0f2', { off: [-10, -6], hl: [-50, 70, 16, 30] })}
-    ${cel('M-64 40 Q0 -26 64 40 Q0 22 -64 40Z', '#ef4b3f', '#b71c1c', { off: [-6, -4] })}
-    ${cel(ell(0, 84, 24, 24), '#2f78e0', '#1a4fa8', { off: [-3, -3] })}
-    <circle cx="0" cy="90" r="8" fill="#fff"/><circle cx="-10" cy="77" r="4" fill="#fff"/><circle cx="0" cy="72" r="4" fill="#fff"/><circle cx="10" cy="77" r="4" fill="#fff"/>
-    <path d="M0 6 L0 -24" stroke="${INK}" stroke-width="5"/>${cel(ell(0, -30, 9, 9), '#ef4b3f', '#b71c1c', { off: [-2, -2], stroke: 3 })}
-  </g>
+  ${tower}
   ${hill('M0 540 Q300 520 640 545 T1280 540 L1280 720 L0 720Z', '#8fd14f', '#74b93e')}
   ${tree(70, 560, 0.75)}${bush(300, 570, 0.6)}${flowers(560, 10, 2, 40)}
   <rect y="640" width="${W}" height="80" fill="#8f8f8f"/><rect y="640" width="${W}" height="8" fill="#bdbdbd"/>

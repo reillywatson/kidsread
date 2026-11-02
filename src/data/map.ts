@@ -3,13 +3,14 @@
 // joins the adventure. Treasure chests (one per land) open with stars.
 // No Phaser here (pure data, tested in tests/map.test.ts).
 import { LESSON_NUMS } from './curriculum';
+import { FAMILY } from '../edition';
 
 export type GateGame = 'rocket' | 'boss' | 'ladder' | 'river';
 
 export interface Region {
   id: string;
   name: string;
-  theme: 'pvz' | 'pokemon' | 'paw' | 'friends';
+  theme: 'garden' | 'critters' | 'pups' | 'friends';
   /** First and last lesson numbers in this land. */
   first: number;
   last: number;
@@ -23,24 +24,31 @@ export interface Region {
   sticker: string;
 }
 
-export const REGIONS: Region[] = [
+/** The family edition's names for its lands (see src/edition.ts). */
+const FAMILY_NAMES: Record<string, string> = {
+  backyard: 'Zombie Backyard', bay: 'Adventure Bay', forest: 'Pokémon Forest', peaks: 'Lookout Peaks',
+};
+
+const LANDS: Region[] = [
   { id: 'meadow', name: 'Sunny Meadow', theme: 'friends', first: 1, last: 9, colors: [0xb9e88a, 0x8fcf5c],
     decor: ['🌼', '🌷', '🦋', '🌳', '🐞', '🌻'], gate: 'rocket', friend: 'monsterHappy', sticker: 'monster' },
-  { id: 'backyard', name: 'Zombie Backyard', theme: 'pvz', first: 12, last: 17, colors: [0xa7d96b, 0x7cc242],
-    decor: ['🌻', '🪦', '🏡', '🌱', '🍄', '🪴'], gate: 'boss', friend: 'peashooter', sticker: 'peashooter' },
-  { id: 'bay', name: 'Adventure Bay', theme: 'paw', first: 18, last: 26, colors: [0xffe2a8, 0xf5c86b],
-    decor: ['🏖️', '⛵', '🐚', '🌴', '🦀', '🗼'], gate: 'ladder', friend: 'pup-chase', sticker: 'chase' },
-  { id: 'forest', name: 'Pokémon Forest', theme: 'pokemon', first: 27, last: 39, colors: [0x9ed48a, 0x5fa64a],
-    decor: ['🌲', '🌳', '🍄', '🦔', '🍃', '⚡'], gate: 'river', friend: 'pikachu', sticker: 'pikachu' },
-  { id: 'peaks', name: 'Lookout Peaks', theme: 'paw', first: 42, last: 52, colors: [0xd8e4ea, 0xa9bcc8],
-    decor: ['⛰️', '🏔️', '🐐', '🌲', '🦅', '❄️'], gate: 'ladder', friend: 'pup-skye', sticker: 'skye' },
-  { id: 'volcano', name: 'Magic-E Volcano', theme: 'pvz', first: 54, last: 58, colors: [0xf2b48a, 0xd97a4a],
-    decor: ['🌋', '🔥', '🪨', '🌵', '💎', '🦎'], gate: 'boss', friend: 'wallnut', sticker: 'wallnut' },
-  { id: 'castle', name: 'Star Castle', theme: 'pokemon', first: 60, last: 70, colors: [0xd9c8f2, 0xb39ae0],
-    decor: ['🏰', '⭐', '🐉', '👑', '🦄', '🌈'], gate: 'river', friend: 'charmander', sticker: 'charmander' },
+  { id: 'backyard', name: 'Veggie Patch', theme: 'garden', first: 12, last: 17, colors: [0xa7d96b, 0x7cc242],
+    decor: ['🌻', '🥕', '🏡', '🌱', '🍄', '🪴'], gate: 'boss', friend: 'shooter', sticker: 'shooter' },
+  { id: 'bay', name: 'Puppy Harbor', theme: 'pups', first: 18, last: 26, colors: [0xffe2a8, 0xf5c86b],
+    decor: ['🏖️', '⛵', '🐚', '🌴', '🦀', '⚓'], gate: 'ladder', friend: 'pup-lead', sticker: 'pup-lead' },
+  { id: 'forest', name: 'Critter Forest', theme: 'critters', first: 27, last: 39, colors: [0x9ed48a, 0x5fa64a],
+    decor: ['🌲', '🌳', '🍄', '🦔', '🍃', '🌰'], gate: 'river', friend: 'hero', sticker: 'hero' },
+  { id: 'peaks', name: 'Snowy Peaks', theme: 'pups', first: 42, last: 52, colors: [0xd8e4ea, 0xa9bcc8],
+    decor: ['⛰️', '🏔️', '🐐', '🌲', '🦅', '❄️'], gate: 'ladder', friend: 'pup-fly', sticker: 'pup-fly' },
+  { id: 'volcano', name: 'Magic-E Volcano', theme: 'garden', first: 54, last: 58, colors: [0xf2b48a, 0xd97a4a],
+    decor: ['🌋', '🔥', '🪨', '🌵', '💎', '🦎'], gate: 'boss', friend: 'roller', sticker: 'roller' },
+  { id: 'castle', name: 'Star Castle', theme: 'critters', first: 60, last: 70, colors: [0xd9c8f2, 0xb39ae0],
+    decor: ['🏰', '⭐', '🐉', '👑', '🦄', '🌈'], gate: 'river', friend: 'ember', sticker: 'ember' },
   { id: 'moon', name: 'Moon Islands', theme: 'friends', first: 72, last: 82, colors: [0x5c6bc0, 0x3949ab],
-    decor: ['🌙', '⭐', '🪐', '🌟', '☁️', '🛸'], gate: 'rocket', friend: 'squirtle', sticker: 'squirtle' },
+    decor: ['🌙', '⭐', '🪐', '🌟', '☁️', '🛸'], gate: 'rocket', friend: 'splash', sticker: 'splash' },
 ];
+
+export const REGIONS: Region[] = FAMILY ? LANDS.map(r => ({ ...r, name: FAMILY_NAMES[r.id] ?? r.name })) : LANDS;
 
 export const regionOf = (lesson: number) => REGIONS.find(r => lesson >= r.first && lesson <= r.last) ?? REGIONS[0];
 export const lessonsOf = (r: Region) => LESSON_NUMS.filter(n => n >= r.first && n <= r.last);

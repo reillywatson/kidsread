@@ -1,16 +1,16 @@
-// Bonus (Paw Patrol): Treat Catch. Treats fall from the sky; drag (or tap) to move the pup
+// Bonus (Rescue pups world): Treat Catch. Treats fall from the sky; drag (or tap) to move the pup
 // underneath them. Just for fun.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
 import { LINES } from '../lines';
 import { pickOne } from '../learner';
-import { PUP_NAMES } from '../art';
+import { PUPS } from '../art';
 import * as audio from '../audio';
 import { W, burst, emoji, sprite } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'treats',
-  theme: 'paw',
+  theme: 'pups',
   skill: 'fun',
   title: 'Treat Catch (bonus)',
   intro: LINES.intro.treats,
@@ -31,7 +31,7 @@ export class Treats extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgBay');
-    this.pup = sprite(this, W / 2, 500, `pup-${pickOne(PUP_NAMES)}`, 230).setDepth(5);
+    this.pup = sprite(this, W / 2, 500, `pup-${pickOne(PUPS)}`, 230).setDepth(5);
     this.targetX = W / 2;
     this.falling = [];
     // Move the pup toward wherever the child touches or drags.

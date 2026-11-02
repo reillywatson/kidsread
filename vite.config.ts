@@ -1,5 +1,6 @@
 import { defineConfig, type Plugin } from 'vite';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 
 const PICKS = 'scripts/sound-picks.json';
@@ -58,10 +59,44 @@ function serviceWorker(): Plugin {
   };
 }
 
+/**
+ * Build-only: leaves out the other edition's recordings (see src/edition.ts), both the files copied
+ * from public/voice and their entries in the voice manifest the game is built with. Its art and
+ * lines are left out by the bundler, since __FAMILY__ is a constant.
+ */
+function edition(family: boolean): Plugin {
+  let drop = new Set<string>();
+  let outDir = 'dist';
+  const manifest = resolve('src/voice/manifest.json');
+  return {
+    name: 'edition',
+    apply: 'build',
+    enforce: 'pre',
+    configResolved(config) { outDir = resolve(config.root, config.build.outDir); },
+    async buildStart() {
+      const { otherEditionClips } = await import('./scripts/voice-plan.mjs');
+      drop = new Set(otherEditionClips(family));
+    },
+    load(id) {
+      if (id !== manifest) return null;
+      const m = JSON.parse(readFileSync(id, 'utf8'));
+      for (const k of drop) delete m.clips[k];
+      return JSON.stringify(m);
+    },
+    closeBundle() {
+      for (const k of drop) rmSync(join(outDir, 'voice', k + '.m4a'), { force: true });
+    },
+  };
+}
+
 // Its own port, so it never ends up sharing 5173 with another project's dev server (one on IPv4,
 // one on IPv6, each answering "localhost" depending on the browser). strictPort fails loudly instead.
+// Which edition to build (see src/edition.ts): EDITION=family for the one played at home.
+const FAMILY = process.env.EDITION === 'family';
+
 export default defineConfig({
-  plugins: [soundPicks(), serviceWorker()],
+  define: { __FAMILY__: JSON.stringify(FAMILY) },
+  plugins: [soundPicks(), serviceWorker(), edition(FAMILY)],
   server: { port: 5317, strictPort: true },
   preview: { port: 5318, strictPort: true },
 });

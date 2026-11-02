@@ -1,4 +1,4 @@
-// Plants vs. Zombies — cloze reading: a zombie ate one word of the sentence. Read the rest
+// Garden world — cloze reading: a zombie ate one word of the sentence. Read the rest
 // (with the picture as a clue) and pick the word that fills the gap. Usually it's the noun;
 // in "on"/"in" sentences it's sometimes the little word that changes the whole meaning.
 // Every zombie beaten earns a new plant for the lawn, and every peashooter joins the volley.
@@ -15,11 +15,11 @@ import { W, WordView, burst, sprite, tappable } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'missingword',
-  theme: 'pvz',
+  theme: 'garden',
   skill: 'sentence',
   title: 'Missing Word — pick the word that completes the sentence',
   intro: LINES.intro.missingword,
-  icon: 'zombie',
+  icon: 'pest',
   eligible: lesson => lesson >= 9 && nounsAt(lesson).length >= 4,
 };
 
@@ -28,9 +28,9 @@ const CARD_Y = 610;
 /** Plants earned along the way, in the order they're planted (left of the sentence and cards). */
 const LAWN: { key: string; x: number; y: number }[] = [
   { key: 'sunflower', x: 235, y: 618 },
-  { key: 'peashooter', x: 225, y: 330 },
-  { key: 'wallnut', x: 72, y: 628 },
-  { key: 'peashooter', x: 70, y: 310 },
+  { key: 'shooter', x: 225, y: 330 },
+  { key: 'roller', x: 72, y: 628 },
+  { key: 'shooter', x: 70, y: 310 },
 ];
 
 export class MissingWord extends BaseGame {
@@ -42,7 +42,7 @@ export class MissingWord extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgGarden');
-    this.shooter = this.tickle(sprite(this, 120, 470, 'peashooter', 170));
+    this.shooter = this.tickle(sprite(this, 120, 470, 'shooter', 170));
     const g = this.add.graphics();
     g.fillStyle(0x000000, 0.15).fillRoundedRect(172, 108, 940, 150, 26);
     g.fillStyle(0xfff8e1).fillRoundedRect(160, 96, 940, 150, 26);
@@ -51,7 +51,7 @@ export class MissingWord extends BaseGame {
 
   /** A zombie shuffles in, ready to munch. */
   private async zombieIn() {
-    this.zombie = sprite(this, W + 150, ZOMBIE.y, Math.random() < 0.35 ? 'zombieCone' : 'zombie', 260);
+    this.zombie = sprite(this, W + 150, ZOMBIE.y, Math.random() < 0.35 ? 'pestBig' : 'pest', 260);
     this.tweens.add({ targets: this.zombie, angle: { from: -4, to: 4 }, duration: 500, yoyo: true, repeat: -1 });
     await this.tween({ targets: this.zombie, x: ZOMBIE.x, duration: 900, ease: 'Sine.Out' });
   }
@@ -70,9 +70,9 @@ export class MissingWord extends BaseGame {
 
   /** All the peashooters fire; the sunflowers bob along. */
   private async volley() {
-    const shooters = [this.shooter, ...this.plants.filter(p => p.texture.key.startsWith('peashooter'))];
+    const shooters = [this.shooter, ...this.plants.filter(p => p.texture.key.startsWith('shooter'))];
     const shots = shooters.map((sh, i) => {
-      const pea = sprite(this, sh.x + sh.displayWidth * 0.4, sh.y - sh.displayHeight * 0.18, 'pea', 34);
+      const pea = sprite(this, sh.x + sh.displayWidth * 0.4, sh.y - sh.displayHeight * 0.18, 'shot', 34);
       this.tweens.add({ targets: sh, x: sh.x - 10, duration: 80, yoyo: true, delay: i * 120 });
       return this.tween({ targets: pea, x: this.zombie.x - 30, y: this.zombie.y - 60 + i * 12, duration: 450, delay: i * 120, ease: 'Linear',
         onStart: () => this.sfx.pew() }).then(() => { pea.destroy(); this.sfx.splat(); });
@@ -133,7 +133,7 @@ export class MissingWord extends BaseGame {
       });
 
       await this.prompt(async () => {
-        if (r === 0) await this.say(LINES.zombieAte);
+        if (r === 0) await this.say(LINES.pestAte);
         await this.say(LINES.whichWord);
       });
       const res = await this.choose(cards, options.indexOf(answer), {

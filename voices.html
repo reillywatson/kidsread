@@ -49,7 +49,7 @@
   <main id="main"></main>
   <script type="module">
     import manifest from '/src/voice/manifest.json';
-    import { LINES, slug } from '/src/lines.ts';
+    import { linesFor, slug } from '/src/lines.ts';
     import { GRAPHEMES } from '/src/data/curriculum.ts';
     import { uniqueTexts, spoken, SAID_AS_SOUND, pickedSounds, describe } from '/scripts/voice-plan.mjs';
     const picks = await fetch('/__sound-picks').then(r => r.json()).catch(() => ({}));
@@ -163,8 +163,10 @@
       return Object.entries(v).flatMap(([k, x]) => walk(x, [...path, k]));
     };
     const phraseSlugs = new Set();
-    for (const [key, v] of Object.entries(LINES)) {
-      const texts = [...new Set(walk(v, [key]))];
+    // Both editions (src/edition.ts): each group lists the original lines, then the family edition's.
+    const family = linesFor(true);
+    for (const [key, v] of Object.entries(linesFor(false))) {
+      const texts = [...new Set([...walk(v, [key]), ...walk(family[key], [key])])];
       texts.forEach(t => phraseSlugs.add(slug(t)));
       groups.push([key.replace(/([A-Z])/g, ' $1').toLowerCase(), texts.map(t => item({ label: t, sub: spoken(t), file: clips[slug(t)] ? slug(t) : null }))]);
     }

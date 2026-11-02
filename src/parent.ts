@@ -12,7 +12,7 @@ import { applyBackup, backupNow, fetchBackup, lastBackup, normalizeCode, onBacku
 import type { Theme } from './games/BaseGame';
 import { startButtons } from './start';
 
-const WORLD: Record<Theme, string> = { pvz: '🌻', pokemon: '⚡', paw: '🐾', friends: '💜' };
+const WORLD: Record<Theme, string> = { garden: '🌻', critters: '🌰', pups: '🐾', friends: '💜' };
 const gameName = (id: string) => {
   if (id === 'stickers') return '📒 Sticker playground';
   if (id === 'books') return '📚 Storybooks';
@@ -116,7 +116,7 @@ export function openParentArea(onClose: () => void, onPlaytest?: () => void) {
             <span><b>Lesson ${l.n}</b>: ${esc(l.title)}</span>
             <button data-lesson="1">▶</button>
           </p>
-          <p class="muted">Lessons follow the UFLI Foundations order. The game moves up on its own once the
+          <p class="muted">Lessons follow a systematic phonics order: letter sounds, then short words, blends and longer spelling patterns. The game moves up on its own once the
           lesson's new sounds and most of its words are answered correctly on separate tries, and skips
           ahead to the next land when the sounds and words before it all come back right.</p>
           <h3>Or jump to a starting point</h3>

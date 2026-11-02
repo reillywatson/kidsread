@@ -2,6 +2,7 @@
 // (drives difficulty tiers), and UFLI lesson advancement based on mastery.
 import { FIRST_LESSON, LAST_LESSON, lessonInfo, nextLesson, itemsUpTo, parseId, WORD_LESSON, type ItemKind } from './data/curriculum';
 import { REGIONS, type MapState } from './data/map';
+import { renamed } from './edition';
 
 const MIN = 60e3, DAY = 864e5;
 // Box n is due INTERVALS[n] after it was last promoted. The short early steps give
@@ -118,6 +119,9 @@ export class Learner {
   constructor(private storage: Storage, private now: () => number = () => Date.now()) {
     const saved = storage.get();
     this.s = { ...defaults(), ...saved, settings: { ...defaults().settings, ...saved?.settings } };
+    // Sticker ids from before the editions (see renamed()).
+    this.s.stickers = this.s.stickers.map(renamed);
+    if (this.s.board) for (const page of Object.values(this.s.board)) for (const p of page) p.id = renamed(p.id);
   }
 
   save() { this.storage.set(this.s); }

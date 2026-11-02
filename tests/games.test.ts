@@ -1,8 +1,8 @@
 import { test, expect } from 'vitest';
 import { neighbors, buildChain, bestChain, chainStarts, decodable, shortVowel, soundCount, countable } from '../src/choices';
 import { segment, LESSONS, HEART, PIC, BANK, GRAPHEMES } from '../src/data/curriculum';
-import { STICKERS } from '../src/data/stickers';
-import { LINES, allLines, slug } from '../src/lines';
+import { STICKERS, FAMILY_NAMES } from '../src/data/stickers';
+import { LINES, allLines, linesFor, slug } from '../src/lines';
 import manifest from '../src/voice/manifest.json';
 
 test('word chains change exactly one sound per step', () => {
@@ -49,9 +49,9 @@ test('sound counting uses graphemes, not letters', () => {
 test('every phrase, word and letter sound has a recording', () => {
   const clips = manifest.clips as Record<string, string>;
   const missing = [
-    ...allLines(),
+    ...allLines(linesFor(false)), ...allLines(linesFor(true)),
     ...LESSONS.flatMap(l => l.w), ...Object.keys(HEART), ...Object.keys(PIC), ...Object.keys(BANK),
-    ...Object.values(GRAPHEMES).map(g => g.key), ...STICKERS.map(s => s.name),
+    ...Object.values(GRAPHEMES).map(g => g.key), ...STICKERS.map(s => s.name), ...Object.values(FAMILY_NAMES),
   ].filter(t => !clips[slug(t)]);
   expect(missing, 'run `npm run voice`').toEqual([]);
   expect(Object.keys(manifest.sounds).sort()).toEqual(Object.keys(GRAPHEMES).sort());

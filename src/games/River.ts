@@ -1,4 +1,4 @@
-// Pokémon — goal game: get Pikachu across the river to Squirtle. Each step, stepping stones
+// Critters world — goal game: get Pikachu across the river to Squirtle. Each step, stepping stones
 // float up with words on them; tap the one that names the picture and Pikachu hops onto it.
 // The stones stay, building a path across.
 import Phaser from 'phaser';
@@ -12,11 +12,11 @@ import { WordView, burst, picture, sprite, tappable } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'river',
-  theme: 'pokemon',
+  theme: 'critters',
   skill: 'word',
-  title: 'River Crossing — read the stones to get Pikachu across',
+  title: 'River Crossing — read the stones to get across',
   intro: LINES.intro.river,
-  icon: 'squirtle',
+  icon: 'splash',
   eligible: lesson => readableWords(lesson, { pic: true }).length >= 4,
   goal: true,
 };
@@ -26,7 +26,7 @@ const FIRST_X = 250, LAST_X = 1030;
 const LANES: Record<number, number[]> = { 2: [380, 580], 3: [330, 470, 610] };
 
 export class River extends BaseGame {
-  private pika!: Phaser.GameObjects.Image;
+  private hero!: Phaser.GameObjects.Image;
   private friend!: Phaser.GameObjects.Image;
 
   constructor() { super(meta); }
@@ -38,8 +38,8 @@ export class River extends BaseGame {
       banks.fillStyle(0x5d9c3a).fillEllipse(x, BANK_Y + 60, 320, 260);
       banks.fillStyle(0x7cc242).fillEllipse(x, BANK_Y + 40, 300, 240);
     }
-    this.pika = this.tickle(sprite(this, 70, BANK_Y - 20, 'pikachu', 150), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
-    this.friend = this.tickle(sprite(this, 1205, BANK_Y - 20, 'squirtle', 150));
+    this.hero = this.tickle(sprite(this, 70, BANK_Y - 20, 'hero', 150), () => void audio.say(pickOne(LINES.heroCall), { style: 'hero' }));
+    this.friend = this.tickle(sprite(this, 1205, BANK_Y - 20, 'splash', 150));
     this.tweens.add({ targets: this.friend, angle: { from: -5, to: 5 }, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
   }
 
@@ -55,12 +55,12 @@ export class River extends BaseGame {
 
   private async jumpTo(x: number, y: number) {
     this.sfx.hop();
-    const top = Math.min(this.pika.y, y) - 110;
+    const top = Math.min(this.hero.y, y) - 110;
     await Promise.all([
-      this.tween({ targets: this.pika, x, duration: 520, ease: 'Linear' }),
+      this.tween({ targets: this.hero, x, duration: 520, ease: 'Linear' }),
       (async () => {
-        await this.tween({ targets: this.pika, y: top, duration: 260, ease: 'Quad.Out' });
-        await this.tween({ targets: this.pika, y, duration: 260, ease: 'Quad.In' });
+        await this.tween({ targets: this.hero, y: top, duration: 260, ease: 'Quad.Out' });
+        await this.tween({ targets: this.hero, y, duration: 260, ease: 'Quad.In' });
       })(),
     ]);
     this.sfx.splash();
@@ -118,8 +118,8 @@ export class River extends BaseGame {
     this.friend.angle = 0;
     this.sfx.fanfare();
     burst(this, 1160, BANK_Y - 60, ['💛', '💙', '⭐', '✨'], 18);
-    for (const c of [this.pika, this.friend]) this.tweens.add({ targets: c, y: c.y - 60, duration: 220, yoyo: true, repeat: 2, ease: 'Quad.Out' });
-    void audio.say(pickOne(LINES.pika), { style: 'pika' });
+    for (const c of [this.hero, this.friend]) this.tweens.add({ targets: c, y: c.y - 60, duration: 220, yoyo: true, repeat: 2, ease: 'Quad.Out' });
+    void audio.say(pickOne(LINES.heroCall), { style: 'hero' });
     await this.wait(700);
     await this.say(LINES.madeIt);
   }

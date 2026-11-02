@@ -1,4 +1,4 @@
-// Paw Patrol — goal game: rescue the kitten stuck up the tree. Chase says a word sound by
+// Rescue pups world — goal game: rescue the kitten stuck up the tree. Chase says a word sound by
 // sound ("c-a-t"); tap the picture it makes (oral blending, no reading). Every right answer
 // adds a rung to the ladder and Chase climbs, until he can reach the kitten.
 import Phaser from 'phaser';
@@ -12,11 +12,11 @@ import { burst, emoji, picture, sprite } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'ladder',
-  theme: 'paw',
+  theme: 'pups',
   skill: 'phonemic',
   title: 'Kitten Rescue — blend the sounds to build a ladder',
   intro: LINES.intro.ladder,
-  icon: 'pup-chase',
+  icon: 'pup-lead',
   eligible: () => true,
   goal: true,
 };
@@ -28,7 +28,7 @@ const TOP = 190;
 const RAIL = 48;
 
 export class Ladder extends BaseGame {
-  private chase!: Phaser.GameObjects.Image;
+  private leader!: Phaser.GameObjects.Image;
   private kitten!: Phaser.GameObjects.Text;
   private ladder!: Phaser.GameObjects.Graphics;
 
@@ -47,7 +47,7 @@ export class Ladder extends BaseGame {
     this.kitten = emoji(this, TREE_X - 95, 190, '🐱', 64);
     this.tweens.add({ targets: this.kitten, angle: { from: -8, to: 8 }, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
     this.ladder = this.add.graphics();
-    this.chase = this.tickle(sprite(this, LADDER_X, GROUND - 85, 'pup-chase', 170), () => void audio.say(LINES.ruff, { style: 'pup' }));
+    this.leader = this.tickle(sprite(this, LADDER_X, GROUND - 85, 'pup-lead', 170), () => void audio.say(LINES.ruff, { style: 'pup' }));
   }
 
   private drawLadder(top: number, rungs: number, step: number) {
@@ -68,7 +68,7 @@ export class Ladder extends BaseGame {
     const words = shuffle([...pool]).slice(0, n);
     const nChoices = [2, 3, 3][this.tier];
     const step = (GROUND - TOP) / Math.max(1, words.length);
-    const meow = () => { if (!audio.isSpeaking()) void audio.say(LINES.meow, { style: 'pika' }); };
+    const meow = () => { if (!audio.isSpeaking()) void audio.say(LINES.meow, { style: 'hero' }); };
     this.kitten.setInteractive({ useHandCursor: true }).on('pointerdown', meow);
 
     for (let r = 0; r < words.length && !this.timeUp(); r++) {
@@ -108,7 +108,7 @@ export class Ladder extends BaseGame {
       this.time.delayedCall(150, () => this.sfx.hammer());
       this.drawLadder(GROUND - (r + 1) * step, r + 1, step);
       this.sfx.hop();
-      await this.tween({ targets: this.chase, y: GROUND - (r + 1) * step - 60, duration: 450, ease: 'Sine.InOut' });
+      await this.tween({ targets: this.leader, y: GROUND - (r + 1) * step - 60, duration: 450, ease: 'Sine.InOut' });
       await this.say(w);
       await this.praise(res.firstTry);
       cards.forEach(c => c.destroy());
@@ -117,19 +117,19 @@ export class Ladder extends BaseGame {
 
     // Finish the ladder (in case time ran out), climb to the top, and save the kitten.
     this.drawLadder(TOP, words.length, step);
-    await this.tween({ targets: this.chase, y: TOP + 40, duration: 500, ease: 'Sine.InOut' });
+    await this.tween({ targets: this.leader, y: TOP + 40, duration: 500, ease: 'Sine.InOut' });
     this.tweens.killTweensOf(this.kitten);
     this.kitten.angle = 0;
-    await this.tween({ targets: this.kitten, x: this.chase.x + 10, y: this.chase.y - 40, duration: 500, ease: 'Quad.Out' });
+    await this.tween({ targets: this.kitten, x: this.leader.x + 10, y: this.leader.y - 40, duration: 500, ease: 'Quad.Out' });
     meow();
     this.sfx.fanfare();
-    burst(this, this.chase.x, this.chase.y - 40, ['💖', '💛', '⭐'], 18);
+    burst(this, this.leader.x, this.leader.y - 40, ['💖', '💛', '⭐'], 18);
     // Down they come together.
     await Promise.all([
-      this.tween({ targets: this.chase, y: GROUND - 85, duration: 900, ease: 'Sine.InOut' }),
+      this.tween({ targets: this.leader, y: GROUND - 85, duration: 900, ease: 'Sine.InOut' }),
       this.tween({ targets: this.kitten, y: GROUND - 125, duration: 900, ease: 'Sine.InOut' }),
     ]);
-    this.tweens.add({ targets: [this.chase, this.kitten], y: '-=40', duration: 200, yoyo: true, repeat: 1, ease: 'Quad.Out' });
+    this.tweens.add({ targets: [this.leader, this.kitten], y: '-=40', duration: 200, yoyo: true, repeat: 1, ease: 'Quad.Out' });
     await this.say(LINES.savedKitten);
     if (Math.random() < 0.5) await this.say(pickOne(LINES.praise));
   }

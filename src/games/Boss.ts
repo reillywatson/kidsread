@@ -1,4 +1,4 @@
-// Plants vs. Zombies — goal game: beat the Zombie Boss. Hear a sound, tap the seed packet
+// Garden world — goal game: beat the Zombie Boss. Hear a sound, tap the seed packet
 // with that letter, and the peashooter fires a volley that knocks a chunk off the boss's
 // health bar. A wrong packet lets the boss stomp a little closer (it never reaches the house).
 import Phaser from 'phaser';
@@ -11,11 +11,11 @@ import { W, burst, confetti, emoji, sprite, tappable, text } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'boss',
-  theme: 'pvz',
+  theme: 'garden',
   skill: 'grapheme',
-  title: 'Zombie Boss — hear a sound, tap its letter to beat the boss',
+  title: 'Boss Battle — hear a sound, tap its letter to beat the boss',
   intro: LINES.intro.boss,
-  icon: 'zombieCone',
+  icon: 'pestBig',
   eligible: () => true,
   goal: true,
 };
@@ -34,9 +34,9 @@ export class Boss extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgLawn');
-    this.shooter = this.tickle(sprite(this, 150, LANE_Y + 10, 'peashooter', 170));
+    this.shooter = this.tickle(sprite(this, 150, LANE_Y + 10, 'shooter', 170));
     // A giant zombie with a crown.
-    this.boss = this.add.container(HOME_X, LANE_Y - 30, [sprite(this, 0, 0, 'zombieCone', 368), emoji(this, 14, -196, '👑', 72)]);
+    this.boss = this.add.container(HOME_X, LANE_Y - 30, [sprite(this, 0, 0, 'pestBig', 368), emoji(this, 14, -196, '👑', 72)]);
     this.tweens.add({ targets: this.boss, angle: { from: -3, to: 3 }, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
     this.bar = this.add.graphics().setDepth(50);
   }
@@ -66,7 +66,7 @@ export class Boss extends BaseGame {
   /** Peashooter volley at the boss. */
   private async volley(peas: number) {
     for (let k = 0; k < peas; k++) {
-      const pea = sprite(this, this.shooter.x + 70, this.shooter.y - 30 + (k % 2) * 10, 'pea', 36);
+      const pea = sprite(this, this.shooter.x + 70, this.shooter.y - 30 + (k % 2) * 10, 'shot', 36);
       this.sfx.pew();
       this.tweens.add({ targets: this.shooter, scaleX: this.shooter.scaleX * 0.9, duration: 60, yoyo: true });
       this.tweens.add({
@@ -102,7 +102,7 @@ export class Boss extends BaseGame {
 
       let help = this.tier === 0;
       await this.prompt(async () => {
-        await this.say(r === 0 ? LINES.zapZombie : pickOne([LINES.find, LINES.zap]));
+        await this.say(r === 0 ? LINES.zapPest : pickOne([LINES.find, LINES.zap]));
         await this.letterSound(g);
         if (help) await this.keyword(g);
       });
@@ -110,7 +110,7 @@ export class Boss extends BaseGame {
         onWrong: () => {
           // The boss stomps closer and groans.
           this.sfx.stomp();
-          void audio.say(pickOne(LINES.groans), { style: 'zombie' });
+          void audio.say(pickOne(LINES.groans), { style: 'pest' });
           this.tweens.add({ targets: this.boss, x: Math.max(CLOSEST_X, this.boss.x - 60), duration: 350, ease: 'Quad.Out' });
         },
         onScaffold: () => { help = true; void this.letterSound(g).catch(() => {}); },

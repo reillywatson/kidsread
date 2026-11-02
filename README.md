@@ -14,7 +14,9 @@ effects are synthesized live.
 npm install
 npm run dev        # http://localhost:5317, also on your LAN (open it on a phone/tablet)
 npm test           # curriculum, learner model, game logic, voice coverage
-npm run build      # typecheck + production build in dist/
+npm run dev:family # the same, family edition (see Editions)
+npm run build      # typecheck + production build in dist/ (original edition)
+npm run deploy     # family edition build, deployed to Cloudflare
 npm run voice      # re-record speech (macOS only; see below)
 ```
 
@@ -22,6 +24,26 @@ Dev shortcut: `/?game=zombies` jumps straight into one minigame as the first pla
 
 On a phone, add it to the home screen for full-screen landscape play. Recording letter sounds in the
 grown-up area needs a secure origin (HTTPS or localhost), so it won't work over plain LAN http.
+
+## Editions
+
+The game is built in one of two editions (`src/edition.ts`):
+
+- **Original** (the default: `npm run dev`, `npm run build`): every character is our own — Zippy
+  the red panda and the forest critters, Spritz and the Munchers in the vegetable garden, and Scout,
+  Biscuit, Pip and Moose the rescue pups. This is the only edition that can be published (app
+  stores, a public site).
+- **Family** (`EDITION=family`: `npm run dev:family`, `npm run build:family`, and `npm run deploy`,
+  which serves the kids at home): the same games with Pokémon, Plants vs. Zombies and Paw Patrol.
+  Those characters belong to Nintendo/The Pokémon Company, EA/PopCap and Spin Master, so this
+  edition is for private use only. Never publish it.
+
+Code names each character by its part (`hero`, `pest`, `shooter`, `pup-lead`…). Each edition has its
+own art for those keys (`src/art/index.ts`), its own names (`FAMILY_NAMES` in `src/data/stickers.ts`
+and `src/data/map.ts`) and its own versions of the lines that mention them (`FAMILY_LINES` in
+`src/lines.ts`). A build includes only its own edition: the other's art and lines are dropped by the
+bundler, and its recordings by the `edition` plugin in `vite.config.ts`. The original build contains
+no other company's character names, art or recordings.
 
 ## Players
 
@@ -33,15 +55,14 @@ the home screen to switch players. Grown-ups can name, re-picture or delete play
 
 | World | Game | Skill (UFLI routine) |
 |---|---|---|
-| 🌱 Plants vs. Zombies | **Zombie Letters** — hear a sound, zap the zombie holding that letter | Auditory drill (sound → grapheme) |
-| 🌱 Plants vs. Zombies | **Sunflower Suns** — hear a word, catch the sun that says it | Word recognition, heart words |
-| 🌱 Plants vs. Zombies | **Garden Sort** — read a word, plant it in the pot with its vowel | Short-vowel discrimination |
-| ⚡ Pokémon | **Poké Catch** — read a word (tap letters for sounds), catch its picture. Before picture words exist: see a letter, catch the picture starting with its sound | Blending / visual drill |
-| ⚡ Pokémon | **Poké Spell** — hear a word, build it in sound boxes | Encoding (word work) |
-| ⚡ Pokémon | **Poké Evolve** — “this says cat, now make it say hat”: swap one letter | Word chains |
-| 🐾 Paw Patrol | **Pup Pad** — read a sentence (“The cat is not big.”), pick the picture | Decodable connected text |
-| 🐾 Paw Patrol | **Pup Match** — memory: letter ↔ keyword picture, word ↔ picture, heart word pairs | Letter–sound / word review |
-| 🐾 Paw Patrol | **Rubble's Bones** — give Rubble one bone per sound in a word | Phonemic segmentation (no reading) |
+| 🌱 Garden | **Letter Zap** — hear a sound, zap the Muncher holding that letter | Auditory drill (sound → grapheme) |
+| 🌱 Garden | **Sunflower Suns** — hear a word, catch the sun that says it | Word recognition, heart words |
+| 🌱 Garden | **Garden Sort** — read a word, plant it in the pot with its vowel | Short-vowel discrimination |
+| 🌰 Critters | **Critter Catch** — read a word (tap letters for sounds), catch its picture. Before picture words exist: see a letter, catch the picture starting with its sound | Blending / visual drill |
+| 🌰 Critters | **Critter Spell** — hear a word, build it in sound boxes | Encoding (word work) |
+| 🌰 Critters | **Word Magic** — “this says cat, now make it say hat”: swap one letter | Word chains |
+| 🐾 Rescue pups | **Pup Pad** — read a sentence (“The cat is not big.”), pick the picture | Decodable connected text |
+| 🐾 Rescue pups | **Pup Match** — memory: letter ↔ keyword picture, word ↔ picture, heart word pairs | Letter–sound / word review |
 | 👾 Friends | **Letter Monster** — feed it pictures that start with its sound | Initial sound ↔ grapheme |
 | 👾 Friends | **Rhyme Frog** — hop to the picture that rhymes | Phonological awareness (no reading) |
 | 👾 Friends | **Bubble Pop** — pop every bubble with the sound you hear | Auditory drill, fast |
@@ -51,9 +72,9 @@ least every third session) slip one in after the first game, announced with a bi
 
 | World | Bonus game |
 |---|---|
-| 🌱 Plants vs. Zombies | **Wall-nut Bowling** — tap a lane to bowl over the zombies |
-| ⚡ Pokémon | **Poké Pop-up** — catch Pokémon popping out of the tall grass |
-| 🐾 Paw Patrol | **Treat Catch** — move the pup to catch falling treats |
+| 🌱 Garden | **Garden Bowling** — tap a lane to roll a pumpkin at the Munchers |
+| 🌰 Critters | **Critter Pop-up** — tap critters popping out of the tall grass |
+| 🐾 Rescue pups | **Treat Catch** — move the pup to catch falling treats |
 | 👾 Friends | **Balloon Party** — pop balloons; gold star balloons are worth extra |
 
 The ▶ button plays a mixed session (default 4 games, then a sticker). Tapping a character plays only
@@ -75,7 +96,7 @@ npm run voice -- --say     # use macOS voices instead (no key needed)
 
 Each kind of line gets its own delivery via v4 audio tags (in `scripts/voice.mjs`): praise and
 rewards `[excited]`, game intros `[cheerfully]`, instructions `[warmly]`, character lines in
-character (squeaky Pikachu, groaning zombies), and single words plain for clarity. Run it from your
+character (a squeaky Zippy, hungry Munchers), and single words plain for clarity. Run it from your
 own terminal: ElevenLabs flags requests that arrive through proxies, and the free tier allows only
 two requests at a time (the script respects that and retries when rate-limited).
 
@@ -97,15 +118,15 @@ or word is missing a recording, so add new phrases to `src/lines.ts` and re-run 
 
 ## Art
 
-Characters and scenes are SVG drawings in `src/art/` (Pokémon, Plants vs. Zombies, Paw Patrol and
-the unbranded friends), rasterized at load. They're cel-shaded with `cel()` in `src/art/util.ts`:
+Characters and scenes are SVG drawings in `src/art/` (the original edition's `critters`, `garden` and
+`pups`, the family edition's `pokemon`, `pvz` and `paw`, and the `friends` both share), rasterized at load. They're cel-shaded with `cel()` in `src/art/util.ts`:
 each shape gets a crisp shadow crescent and highlight inside its outline. Characters that have an
 eyes-shut frame (generated automatically with `withBlink`) blink on their own wherever they appear.
 
 Browse everything at **/art.html** while `npm run dev` is running.
 
 To use your own images instead, drop a PNG/WebP/JPG into `src/assets/art/` named after the texture
-key — `pikachu.png`, `pup-chase.png`, `zombie.png`, `bgLawn.jpg`, … (see `TEXTURES` in
+key — `hero.png`, `pup-lead.png`, `pest.png`, `bgLawn.jpg`, … (see `TEXTURES` in
 `src/art/index.ts`). It replaces the drawing everywhere.
 
 ## How the learning works
@@ -140,6 +161,7 @@ trickiest items, lesson, music/sound settings, session length, and letter-sound 
 
 ## Notes
 
-- The Plants vs. Zombies, Pokémon and Paw Patrol characters are original drawings in those styles,
-  meant for personal/family use only. Don't publish or distribute builds that use them.
+- The family edition's Plants vs. Zombies, Pokémon and Paw Patrol characters are drawings of other
+  companies' characters, for personal/family use only. Don't publish or distribute family builds
+  (see Editions). New phrases that name a character need both editions' versions in `src/lines.ts`.
 - Progress is stored per player in localStorage; recordings are stored in IndexedDB.

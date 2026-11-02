@@ -1,4 +1,4 @@
-// Paw Patrol — visual search: "I spy something that starts with /b/." A dozen pictures are
+// Rescue pups world — visual search: "I spy something that starts with /b/." A dozen pictures are
 // scattered over the bay; find every one that starts with the sound (2–3 per round). Wrong
 // taps just say the picture's name, which is its own hint.
 import Phaser from 'phaser';
@@ -12,11 +12,11 @@ import { burst, emoji, sprite, tappable, text, wiggle } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'ispy',
-  theme: 'paw',
+  theme: 'pups',
   skill: 'grapheme',
   title: 'I Spy — find everything that starts with a sound',
   intro: LINES.intro.ispy,
-  icon: 'pawBadge',
+  icon: 'badge',
   eligible: () => true,
 };
 
@@ -24,7 +24,7 @@ const AREA = { x0: 290, x1: 1220, y0: 130, y1: 640, cols: 5, rows: 3 };
 const ITEMS = 12;
 
 export class ISpy extends BaseGame {
-  private chase!: Phaser.GameObjects.Image;
+  private leader!: Phaser.GameObjects.Image;
   private lens!: Phaser.GameObjects.Text;
   private badge!: Phaser.GameObjects.Text;
 
@@ -32,7 +32,7 @@ export class ISpy extends BaseGame {
 
   protected setup() {
     this.add.image(640, 360, 'bgBay');
-    this.chase = this.tickle(sprite(this, 140, 540, 'pup-chase', 240), () => void audio.say(LINES.ruff, { style: 'pup' }));
+    this.leader = this.tickle(sprite(this, 140, 540, 'pup-lead', 240), () => void audio.say(LINES.ruff, { style: 'pup' }));
     const b = this.add.container(140, 260);
     b.add([this.add.circle(0, 0, 62, 0xffffff).setStrokeStyle(8, 0x1e4fd8), emoji(this, 44, -44, '🔍', 40)]);
     this.badge = text(this, 0, 0, '', 76, '#1e4fd8');
@@ -116,7 +116,7 @@ export class ISpy extends BaseGame {
       this.score(misses === 0);
       await this.wait(600);
       this.sfx.bark();
-      this.tweens.add({ targets: this.chase, y: this.chase.y - 50, duration: 200, yoyo: true, repeat: 1, ease: 'Quad.Out' });
+      this.tweens.add({ targets: this.leader, y: this.leader.y - 50, duration: 200, yoyo: true, repeat: 1, ease: 'Quad.Out' });
       await this.say(pickOne([LINES.foundAll2, ...LINES.praise]));
       await this.letterSound(g);
       await this.praise(misses === 0);

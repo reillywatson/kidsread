@@ -125,7 +125,7 @@ test('starting further on credits what came before as seen once and opens the la
   expect(l.isNew('g:e')).toBe(true); // lesson 18's own sound is still new
   expect(l.s.map!.cleared).toEqual(['meadow', 'backyard']);
   expect(l.s.map!.celebrated).toEqual(['meadow', 'backyard']);
-  expect(l.s.stickers).toEqual(['monster', 'peashooter']);
+  expect(l.s.stickers).toEqual(['monster', 'shooter']);
 });
 
 test('skipping ahead leaves the gates for the map to celebrate', () => {

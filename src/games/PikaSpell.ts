@@ -1,4 +1,4 @@
-// Pokémon — encoding (UFLI word work): hear a word, build it sound by sound in
+// Critters world — encoding (UFLI word work): hear a word, build it sound by sound in
 // Elkonin boxes from letter tiles. Filling the word catches a Pokémon: the ball wobbles, pops
 // open, and the Pokémon joins the team along the top. At the end the whole team cheers.
 import Phaser from 'phaser';
@@ -12,28 +12,28 @@ import { burst, picture, sprite, tappable, text, wiggle, roundButton } from '../
 
 export const meta: GameMeta = {
   id: 'pikaspell',
-  theme: 'pokemon',
+  theme: 'critters',
   skill: 'spelling',
-  title: 'Poké Spell — hear a word, build it with letters',
+  title: 'Critter Spell — hear a word, build it with letters',
   intro: LINES.intro.pikaspell,
-  icon: 'pokeball',
+  icon: 'catcher',
   eligible: lesson => readableWords(lesson, { heart: false }).length >= 2,
 };
 
 const BOX_Y = 330;
 const TILE_Y = 580;
 /** Who each spelled word catches, in order. */
-const CATCHES = ['bulbasaur', 'charmander', 'squirtle'];
+const CATCHES = ['leafy', 'ember', 'splash'];
 
 export class PikaSpell extends BaseGame {
-  private pika!: Phaser.GameObjects.Image;
+  private hero!: Phaser.GameObjects.Image;
   private team: Phaser.GameObjects.Image[] = [];
 
   constructor() { super(meta); }
 
   protected setup() {
     this.add.image(640, 360, 'bgField');
-    this.pika = this.tickle(sprite(this, 1150, 470, 'pikachu', 220), () => void audio.say(pickOne(LINES.pika), { style: 'pika' }));
+    this.hero = this.tickle(sprite(this, 1150, 470, 'hero', 220), () => void audio.say(pickOne(LINES.heroCall), { style: 'hero' }));
     this.team = [];
   }
 
@@ -64,10 +64,10 @@ export class PikaSpell extends BaseGame {
   /** The whole team jumps for joy with Pikachu. */
   private async teamCheer() {
     if (!this.team.length) return;
-    [...this.team, this.pika].forEach((m, i) =>
+    [...this.team, this.hero].forEach((m, i) =>
       this.tweens.add({ targets: m, y: m.y - 50, duration: 220, delay: i * 90, yoyo: true, repeat: 1, ease: 'Quad.Out' }));
     this.team.forEach(m => burst(this, m.x, m.y - 30, ['⭐', '✨'], 5));
-    void audio.say(pickOne(LINES.pika), { style: 'pika' });
+    void audio.say(pickOne(LINES.heroCall), { style: 'hero' });
     await this.wait(1000);
   }
 
@@ -152,7 +152,7 @@ export class PikaSpell extends BaseGame {
       this.record('w:' + w, ok ? 'correct' : misses === 1 ? 'help' : 'wrong');
       this.score(ok);
       await this.say(w);
-      const ball = sprite(this, 640, 470, 'pokeball', 10);
+      const ball = sprite(this, 640, 470, 'catcher', 10);
       objs.push(ball);
       this.sfx.zap();
       await this.tween({ targets: ball, scale: 120 / ball.height, duration: 300, ease: 'Back.Out' });

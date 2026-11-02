@@ -8,7 +8,7 @@ import { LESSONS } from '../data/curriculum';
 import type { Tier } from '../learner';
 import { Session } from '../session';
 
-const WORLDS: [Theme, string][] = [['pvz', '🌻 Plants vs. Zombies'], ['pokemon', '⚡ Pokémon'], ['paw', '🐾 Paw Patrol'], ['friends', '💜 Friends']];
+const WORLDS: [Theme, string][] = [['garden', '🌻 Garden'], ['critters', '🌰 Critters'], ['pups', '🐾 Rescue Pups'], ['friends', '💜 Friends']];
 const LEVELS = ['Easy', 'Medium', 'Hard'];
 const KEY = 'kidsread.playtest';
 

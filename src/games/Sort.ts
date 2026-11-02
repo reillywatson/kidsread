@@ -1,4 +1,4 @@
-// Plants vs. Zombies — drag and drop: pots with letters (two, or three above the easiest level,
+// Garden world — drag and drop: pots with letters (two, or three above the easiest level,
 // with letters that look or sound alike at the top). Drag each picture into the pot with the
 // letter it starts with (tapping a pot works too). Flowers bloom over each pot as
 // it fills up, and each sorted picture stays beside its pot. At the end each pot says its sound
@@ -14,7 +14,7 @@ import { burst, emoji, picture, sprite, tappable, text } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'sort',
-  theme: 'pvz',
+  theme: 'garden',
   skill: 'grapheme',
   title: 'Seed Sort — drag each picture to the pot with its first letter',
   intro: LINES.intro.sort,

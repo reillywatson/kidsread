@@ -1,4 +1,4 @@
-// Bonus (Pokémon): Poké Pop-up. Pokémon pop out of holes in the tall grass; tap one to catch
+// Bonus (Critters world): Critter Pop-up. Critters pop out of holes in the tall grass; tap one to catch
 // it in a Poké Ball before it ducks back down. Just for fun.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
@@ -9,17 +9,17 @@ import { burst, sprite } from '../widgets';
 
 export const meta: GameMeta = {
   id: 'whack',
-  theme: 'pokemon',
+  theme: 'critters',
   skill: 'fun',
-  title: 'Poké Pop-up (bonus)',
+  title: 'Critter Pop-up (bonus)',
   intro: LINES.intro.whack,
-  icon: 'pokeball',
+  icon: 'catcher',
   eligible: () => true,
   bonus: true,
 };
 
 const HOLES = [[330, 360], [640, 360], [950, 360], [330, 580], [640, 580], [950, 580]];
-const MONS = ['pikachu', 'bulbasaur', 'charmander', 'squirtle'];
+const MONS = ['hero', 'leafy', 'ember', 'splash'];
 
 export class Whack extends BaseGame {
   private up: (Phaser.GameObjects.Image | null)[] = [];
@@ -66,8 +66,8 @@ export class Whack extends BaseGame {
       hide.remove();
       point();
       audio.sfx.zap();
-      if (Math.random() < 0.35) void audio.say(pickOne(LINES.pika), { style: 'pika' });
-      const ball = sprite(this, x, y, 'pokeball', 10).setDepth(20);
+      if (Math.random() < 0.35) void audio.say(pickOne(LINES.heroCall), { style: 'hero' });
+      const ball = sprite(this, x, y, 'catcher', 10).setDepth(20);
       this.tweens.add({ targets: mon, scale: 0.05, alpha: 0, duration: 250, onComplete: () => mon.destroy() });
       this.tweens.add({
         targets: ball, scale: 90 / ball.height, duration: 220, ease: 'Back.Out',
@@ -83,7 +83,7 @@ export class Whack extends BaseGame {
   protected async run() {
     HOLES.forEach(([x, y]) => this.holeArt(x, y, false));
     HOLES.forEach(([x, y]) => this.holeArt(x, y, true));
-    const point = this.scoreCounter('pokeball');
+    const point = this.scoreCounter('catcher');
     const popper = this.time.addEvent({ delay: 750, loop: true, callback: () => this.pop(point) });
     this.pop(point);
     if (import.meta.env.DEV) Object.assign(window, { __answer: () => this.up.find(m => m && !m.getData('caught'))?.emit('pointerdown') });
