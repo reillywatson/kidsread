@@ -16,7 +16,9 @@ npm run dev        # http://localhost:5317, also on your LAN (open it on a phone
 npm test           # curriculum, learner model, game logic, voice coverage
 npm run dev:family # the same, family edition (see Editions)
 npm run build      # typecheck + production build in dist/ (original edition)
-npm run deploy     # family edition build, deployed to Cloudflare
+npm run deploy     # both editions, each to its own Worker on Cloudflare
+npm run deploy:family    # just the family edition (kidsread)
+npm run deploy:original  # just the original edition (kidsreadpublic)
 npm run voice      # re-record speech (macOS only; see below)
 ```
 
@@ -33,10 +35,15 @@ The game is built in one of two editions (`src/edition.ts`):
   the red panda and the forest critters, Spritz and the Munchers in the vegetable garden, and Scout,
   Biscuit, Pip and Moose the rescue pups. This is the only edition that can be published (app
   stores, a public site).
-- **Family** (`EDITION=family`: `npm run dev:family`, `npm run build:family`, and `npm run deploy`,
+- **Family** (`EDITION=family`: `npm run dev:family`, `npm run build:family`, and `npm run deploy:family`,
   which serves the kids at home): the same games with Pokémon, Plants vs. Zombies and Paw Patrol.
   Those characters belong to Nintendo/The Pokémon Company, EA/PopCap and Spin Master, so this
   edition is for private use only. Never publish it.
+
+Each edition has its own site: the family edition at kidsread.worth-consuming.workers.dev, and the
+original at kidsreadpublic.worth-consuming.workers.dev (the same Worker code under another name).
+`npm run deploy` updates both. Both use the same D1 database, so a restore code works on either site and
+the stats page counts plays from both.
 
 Code names each character by its part (`hero`, `pest`, `shooter`, `pup-lead`…). Each edition has its
 own art for those keys (`src/art/index.ts`), its own names (`FAMILY_NAMES` in `src/data/stickers.ts`

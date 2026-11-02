@@ -2,6 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   // The game is static (Vite builds into dist/, served by Workers static assets). A small Worker
   // (worker/index.ts) answers /api/* and /stats: backups and anonymous play stats, in D1.
+  // `npm run deploy:original` deploys the original edition as "kidsreadpublic", with the same database.
   "name": "kidsread",
   "compatibility_date": "2026-10-15",
   "main": "worker/index.ts",

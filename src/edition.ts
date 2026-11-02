@@ -1,6 +1,6 @@
 // Two editions of the game, picked when it's built. The original edition (the default, and the
 // only one for the app stores) has its own characters. The family edition (EDITION=family, which
-// `npm run deploy` uses for the site the kids play at home) swaps in characters from shows and
+// `npm run deploy:family` builds for the site the kids play at home) swaps in characters from shows and
 // games they love: Plants vs. Zombies, Pokémon and Paw Patrol. Those belong to other companies,
 // so the family edition is for private use only and is never published.
 //
