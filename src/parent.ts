@@ -8,7 +8,8 @@ import { LINES } from './lines';
 import * as audio from './audio';
 import { GAMES } from './games';
 import { summarize, duration, ago } from './usage';
-import { applyBackup, backupNow, fetchBackup, lastBackup, normalizeCode, onBackup, restoreCode, CODE } from './sync';
+import { backupNow, fetchBackup, joinFamily, joinLink, lastBackup, normalizeCode, onBackup, restoreCode, CODE } from './sync';
+import qrcode from 'qrcode-generator';
 import type { Theme } from './games/BaseGame';
 import { startButtons } from './start';
 
@@ -57,6 +58,26 @@ function usage(learner: typeof state.learner) {
 const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 const avatarImg = (key: string, size = 44) =>
   `<img src="data:image/svg+xml;base64,${btoa(TEXTURES[key][0])}" width="${size}" height="${size}" alt="">`;
+
+/** The QR code for joinLink(), as an SVG. */
+function qrSvg() {
+  const qr = qrcode(0, 'M');
+  qr.addData(joinLink());
+  qr.make();
+  return qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+}
+
+/** Ask, then link this device to the family with `code`. Resolves true once it's linked. */
+export async function confirmJoin(code: string, note: (t: string) => void = () => {}): Promise<boolean> {
+  let found;
+  try { found = await fetchBackup(code); } catch { note('Couldn’t reach the server. Are you online?'); return false; }
+  if (!found) { note('No family found for that code.'); return false; }
+  const players = Object.keys(found.data.data ?? {}).filter(k => k.startsWith('kidsread.p.')).length;
+  if (!confirm(`Link this device to that family (${players} player${players === 1 ? '' : 's'})?\n\nThis device's players are added to the family's and kept in sync from now on.`)) { note(''); return false; }
+  note('Linking…');
+  if (!(await joinFamily(code))) { note('Couldn’t link. Are you online?'); return false; }
+  return true;
+}
 
 const lastBackupText = () => (lastBackup()
   ? `${ago(lastBackup())}, ${new Date(lastBackup()).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : 'not yet');
@@ -141,16 +162,27 @@ export function openParentArea(onClose: () => void, onPlaytest?: () => void) {
         </section>
 
         <section>
-          <h2>Backup</h2>
-          <p>Every player's progress on this device is backed up automatically.
-            Last backup: <b data-last>${lastBackupText()}</b>
-            ${import.meta.env.DEV ? '<span class="muted">(backups run on the live site, not in development)</span>' : ''}</p>
-          <p>Restore code: <code class="restore">${restoreCode()}</code> <button data-copy>Copy</button> <button data-backup>Back up now</button></p>
-          <p class="muted">Keep this code somewhere safe. On a new device, or after clearing the browser, enter it
-            below to bring everything back: players, progress, stars, stickers and books. Letter sounds you
-            recorded yourself aren't included.</p>
+          <h2>Family sync</h2>
+          <p>Every device linked with this family code has the same players, progress, stars, stickers and
+            books, kept in sync automatically. It's also your backup.
+            Last synced: <b data-last>${lastBackupText()}</b>
+            ${import.meta.env.DEV ? '<span class="muted">(syncing runs on the live site, not in development)</span>' : ''}</p>
+          <p>Family code: <code class="restore">${restoreCode()}</code> <button data-copy>Copy</button> <button data-backup>Sync now</button></p>
+          <h3>Add a device</h3>
+          <div class="link-device">
+            <div class="qr">${qrSvg()}</div>
+            <p class="muted">Scan this with the other device's camera, or open the link on it:<br>
+              <code>${esc(joinLink())}</code><br>
+              If the game there was added to the home screen, open it from there instead, go to its grown-up area,
+              and enter the family code below. Keep the code private: anyone with it can see and change your
+              family's progress.</p>
+          </div>
+          <h3>Join another family code</h3>
+          <p class="muted">Links this device to that family. Its players are added to the family's, so nothing on
+            either side is lost (if the same child has a player on both, delete the extra one afterwards).
+            Letter sounds you recorded yourself stay on this device.</p>
           <p><input data-restore-code placeholder="XXXX-XXXX-XXXX" maxlength="16" autocapitalize="characters" spellcheck="false">
-            <button data-restore>Restore</button> <span class="muted" data-note></span></p>
+            <button data-restore>Join</button> <span class="muted" data-note></span></p>
         </section>
 
         <section>
@@ -200,24 +232,17 @@ export function openParentArea(onClose: () => void, onPlaytest?: () => void) {
       return;
     }
     if ('backup' in d) {
-      b.textContent = 'Backing up…';
-      b.textContent = (await backupNow(true)) ? 'Backed up!' : 'Couldn’t back up (offline?)';
+      b.textContent = 'Syncing…';
+      b.textContent = (await backupNow(true)) ? 'Synced!' : 'Couldn’t sync (offline?)';
       return;
     }
     if ('restore' in d) {
       const input = root.querySelector<HTMLInputElement>('[data-restore-code]')!;
       const code = normalizeCode(input.value);
-      if (!CODE.test(code)) { note('That doesn’t look like a restore code (it’s 12 letters and numbers).'); return; }
-      if (code === restoreCode()) { note('That’s this device’s own code.'); return; }
+      if (!CODE.test(code)) { note('That doesn’t look like a family code (it’s 12 letters and numbers).'); return; }
+      if (code === restoreCode()) { note('This device already uses that code.'); return; }
       note('Looking…');
-      let found;
-      try { found = await fetchBackup(code); } catch { note('Couldn’t reach the server. Are you online?'); return; }
-      if (!found) { note('No backup found for that code.'); return; }
-      const players = Object.keys(found.data.data).filter(k => k.startsWith('kidsread.p.')).length;
-      if (!confirm(`Restore the backup from ${new Date(found.at).toLocaleString()} (${players} player${players === 1 ? '' : 's'})?\n\nThis replaces the players and progress on this device. (This device's current progress is backed up first, under its own code.)`)) { note(''); return; }
-      await backupNow(true);
-      applyBackup(code, found.data);
-      location.reload();
+      if (await confirmJoin(code, note)) location.reload();
       return;
     }
     if (d.start) {

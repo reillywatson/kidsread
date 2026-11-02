@@ -68,6 +68,8 @@ export interface LearnerState {
   probeRest?: number;
   /** Lesson changes (most recent last). */
   moves?: Move[];
+  /** When this was last saved (ms), so synced copies know which is newer (see merge.ts). */
+  updated?: number;
 }
 
 /** One game (or sticker playground visit), for the grown-ups' "What got played". */
@@ -117,14 +119,22 @@ export class Learner {
   skipAhead = true;
 
   constructor(private storage: Storage, private now: () => number = () => Date.now()) {
-    const saved = storage.get();
-    this.s = { ...defaults(), ...saved, settings: { ...defaults().settings, ...saved?.settings } };
-    // Sticker ids from before the editions (see renamed()).
-    this.s.stickers = this.s.stickers.map(renamed);
-    if (this.s.board) for (const page of Object.values(this.s.board)) for (const p of page) p.id = renamed(p.id);
+    this.s = this.load();
   }
 
-  save() { this.storage.set(this.s); }
+  private load(): LearnerState {
+    const saved = this.storage.get();
+    const s = { ...defaults(), ...saved, settings: { ...defaults().settings, ...saved?.settings } };
+    // Sticker ids from before the editions (see renamed()).
+    s.stickers = s.stickers.map(renamed);
+    if (s.board) for (const page of Object.values(s.board)) for (const p of page) p.id = renamed(p.id);
+    return s;
+  }
+
+  /** Pick up a saved copy changed underneath (a sync merged in another device's progress). */
+  reload() { if (this.storage.get()) this.s = this.load(); }
+
+  save() { this.s.updated = this.now(); this.storage.set(this.s); }
   reset() { this.s = defaults(); this.sessionUse.clear(); this.save(); }
   startSession() { this.sessionUse.clear(); }
 

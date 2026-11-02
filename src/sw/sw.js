@@ -4,6 +4,8 @@
 //  - Pages are fetched fresh when online (so new builds arrive) and from the cache when not.
 //  - Voice clips have versioned URLs (?v=), so they're served from the cache forever, and the
 //    page asks for all of them to be downloaded in the background (see main.ts).
+//  - The server's API (family sync, stats) always goes to the network: a cached copy of the
+//    family's progress would be out of date.
 const VERSION = '__VERSION__';
 const SHELL = __SHELL__;
 const SHELL_CACHE = 'shell-' + VERSION;
@@ -43,7 +45,7 @@ async function networkFirst(req) {
 self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
-  if (req.method !== 'GET' || url.origin !== location.origin) return;
+  if (req.method !== 'GET' || url.origin !== location.origin || url.pathname.startsWith('/api/') || url.pathname === '/stats') return;
   if (req.mode === 'navigate') e.respondWith(networkFirst(req));
   else if (url.pathname.startsWith('/voice/')) e.respondWith(cacheFirst(VOICE_CACHE, req));
   else e.respondWith(cacheFirst(SHELL_CACHE, req));

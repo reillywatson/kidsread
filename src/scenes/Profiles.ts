@@ -7,6 +7,7 @@ import { LINES } from '../lines';
 import * as audio from '../audio';
 import { playMusic } from '../music';
 import { askStart } from '../start';
+import { onBackup } from '../sync';
 import { W, H, burst, onTap, roundButton, sprite, tappable, text } from '../widgets';
 
 function avatarButton(scene: Phaser.Scene, x: number, y: number, r: number, texture: string, color = 0xffffff) {
@@ -32,6 +33,10 @@ export class Profiles extends Phaser.Scene {
     const list = profiles();
     if (!list.length) { this.scene.start('AvatarPicker'); return; }
     let busy = false;
+    // A sync can bring players (or new pictures) from another device: show them.
+    const shown = JSON.stringify(list.map(p => [p.id, p.avatar]));
+    const stop = onBackup(() => { if (!busy && JSON.stringify(profiles().map(p => [p.id, p.avatar])) !== shown) this.scene.restart(); });
+    this.events.once('shutdown', stop);
     const n = list.length + 1;
     const perRow = Math.min(n, 5);
     const r = n > 5 ? 82 : 100;

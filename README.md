@@ -42,7 +42,7 @@ The game is built in one of two editions (`src/edition.ts`):
 
 Each edition has its own site: the family edition at kidsread.worth-consuming.workers.dev, and the
 original at kidsreadpublic.worth-consuming.workers.dev (the same Worker code under another name).
-`npm run deploy` updates both. Both use the same D1 database, so a restore code works on either site and
+`npm run deploy` updates both. Both use the same D1 database, so a family code works on either site and
 the stats page counts plays from both.
 
 Code names each character by its part (`hero`, `pest`, `shooter`, `pup-lead`…). Each edition has its
@@ -57,6 +57,16 @@ no other company's character names, art or recordings.
 At startup each child taps their picture (or **+** to make a new player and pick an avatar).
 Every player has their own lesson, spaced-repetition history, stars and stickers. Tap your avatar on
 the home screen to switch players. Grown-ups can name, re-picture or delete players.
+
+**Family sync.** Each family has a code (in the grown-up area). Every device linked with it has the
+same players and progress: link a device by scanning the QR code there, opening the link, or typing
+the code into the new device's grown-up area. Devices sync when the app opens, after each session,
+when it's put away and every few minutes, and play offline in between. When both have changed, they
+merge (`src/merge.ts`): stickers, games, books and map progress are combined, each word or sound keeps
+whichever device practiced it last, the lesson follows the latest lesson change, and stars add up the
+games from both. A player deleted on one device stays deleted. The server only accepts a merged copy
+made from its latest one, so two devices syncing at once can't undo each other. The family copy is
+also the backup. Recorded letter sounds and device settings stay on each device.
 
 ## The games
 
@@ -155,7 +165,7 @@ key — `hero.png`, `pup-lead.png`, `pest.png`, `bgLawn.jpg`, … (see `TEXTURES
 ## Grown-up area
 
 Press and hold the 🔒 in the bottom-right of the home screen for two seconds: players, progress and
-trickiest items, lesson, music/sound settings, session length, and letter-sound playback/recording.
+trickiest items, lesson, family sync, music/sound settings, session length, and letter-sound playback/recording.
 
 ## Adding a minigame
 

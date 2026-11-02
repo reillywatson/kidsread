@@ -3,7 +3,8 @@ import '@fontsource/andika/400.css';
 import '@fontsource/andika/700.css';
 import './style.css';
 import * as audio from './audio';
-import { startAutoBackup } from './sync';
+import { startAutoBackup, takeJoinLink } from './sync';
+import { confirmJoin } from './parent';
 import { GAMES } from './games';
 import { Boot } from './scenes/Boot';
 import { Home } from './scenes/Home';
@@ -35,7 +36,13 @@ async function start() {
   });
   turnWithStage(game);
   if (import.meta.env.DEV) Object.assign(window, { game });
-  else { keepOffline(); startAutoBackup(); }
+  else {
+    keepOffline();
+    // Opened with a link from another device's grown-up area: offer to join that family.
+    const join = takeJoinLink();
+    if (join) void confirmJoin(join).then(ok => (ok ? location.reload() : startAutoBackup()));
+    else startAutoBackup();
+  }
 }
 
 /**

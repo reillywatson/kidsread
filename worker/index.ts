@@ -1,14 +1,14 @@
 // Kids Read server: the static game (Workers static assets), plus a small API in front of a D1
 // database (schema in migrations/):
-//   GET/POST /api/backup/:code  a device's backup (players and progress), by its restore code
+//   GET/POST /api/backup/:code  a family's players and progress, by its family code (see src/sync.ts)
 //   GET /api/stats?key=…        pooled, anonymous play stats (game, time, score, lesson) and lesson changes
 //   GET /stats                  a page that shows them (needs the STATS_KEY secret)
 
 // Just the parts of the Workers types this uses.
-interface Stmt { bind(...v: unknown[]): Stmt; first<T>(): Promise<T | null>; all<T>(): Promise<{ results: T[] }>; run(): Promise<unknown> }
+interface Stmt { bind(...v: unknown[]): Stmt; first<T>(): Promise<T | null>; all<T>(): Promise<{ results: T[] }>; run(): Promise<{ meta: { changes: number } }> }
 interface Env {
   ASSETS: { fetch(r: Request): Promise<Response> };
-  DB: { prepare(sql: string): Stmt; batch(s: Stmt[]): Promise<unknown> };
+  DB: { prepare(sql: string): Stmt; batch(s: Stmt[]): Promise<{ meta: { changes: number } }[]> };
   STATS_KEY?: string;
 }
 
@@ -59,22 +59,31 @@ async function backup(req: Request, env: Env, code: string) {
   if (req.method !== 'POST') return json({ error: 'method' }, 405);
   const body = await req.text();
   if (body.length > MAX_BODY) return json({ error: 'too big' }, 413);
-  let parsed: { data?: unknown; plays?: unknown; moves?: unknown };
+  let parsed: { data?: unknown; base?: unknown; plays?: unknown; moves?: unknown };
   try { parsed = JSON.parse(body); } catch { return json({ error: 'bad json' }, 400); }
   if (!parsed.data || typeof parsed.data !== 'object') return json({ error: 'no data' }, 400);
   const now = Date.now();
   const fam = await hash(code);
   const plays = cleanPlays(parsed.plays);
   const moves = cleanMoves(parsed.moves);
-  await env.DB.batch([
-    env.DB.prepare('INSERT INTO backups (code, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(code) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at')
-      .bind(code, JSON.stringify(parsed.data), now),
+  // `base` is the family copy the device merged with (its time, or null when there was none). If
+  // another device saved since, nothing is written and the device merges again (409). Without
+  // `base` (an older version of the app), the copy is just replaced, as before.
+  const data = JSON.stringify(parsed.data);
+  const save = parsed.base === undefined
+    ? env.DB.prepare('INSERT INTO backups (code, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(code) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at').bind(code, data, now)
+    : typeof parsed.base === 'number'
+      ? env.DB.prepare('UPDATE backups SET data = ?, updated_at = ? WHERE code = ? AND updated_at = ?').bind(data, Math.max(now, parsed.base + 1), code, parsed.base)
+      : env.DB.prepare('INSERT INTO backups (code, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(code) DO NOTHING').bind(code, data, now);
+  const [saved] = await env.DB.batch([save]);
+  if (!saved.meta.changes) return json({ error: 'changed', at: now }, 409);
+  if (plays.length || moves.length) await env.DB.batch([
     ...plays.map(p => env.DB.prepare('INSERT OR IGNORE INTO plays (id, fam, game, at, ms, done, first_try, answers, stars, lesson) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
       .bind(`${fam}:${p.id}`, fam, p.game, p.at, p.ms, p.done ? 1 : 0, p.right, p.total, p.stars ?? null, p.lesson ?? null)),
     ...moves.map(m => env.DB.prepare('INSERT OR IGNORE INTO moves (id, fam, at, from_lesson, to_lesson, why) VALUES (?, ?, ?, ?, ?, ?)')
       .bind(`${fam}:${m.id}`, fam, m.at, m.from, m.to, m.why)),
   ]);
-  return json({ ok: true, at: now, plays: plays.length });
+  return json({ ok: true, plays: plays.length });
 }
 
 async function stats(req: Request, env: Env) {

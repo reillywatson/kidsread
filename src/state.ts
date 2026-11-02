@@ -3,12 +3,16 @@
 import { Learner, type Storage, type LearnerState, type Skill, type Tier } from './learner';
 import { renamed } from './edition';
 import { AVATARS } from './art';
+import { INDEX, PLAYER, DELETED } from './merge';
 
-export interface Profile { id: string; avatar: string; name: string; created: number; lastPlayed: number }
+export interface Profile {
+  id: string; avatar: string; name: string; created: number; lastPlayed: number;
+  /** When the name or picture last changed, so synced copies keep the latest (see merge.ts). */
+  updated?: number;
+}
 
-const INDEX = 'kidsread.profiles';
 const LEGACY = 'kidsread.v1';
-const key = (id: string) => `kidsread.p.${id}`;
+const key = (id: string) => PLAYER + id;
 
 function readJSON<T>(k: string): T | null {
   try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch { return null; }
@@ -53,13 +57,15 @@ export function createProfile(avatar: string): Profile {
 }
 
 export function updateProfile(id: string, patch: Partial<Pick<Profile, 'name' | 'avatar'>>) {
-  saveIndex(profiles().map(p => (p.id === id ? { ...p, ...patch } : p)));
+  saveIndex(profiles().map(p => (p.id === id ? { ...p, ...patch, updated: Date.now() } : p)));
   if (profile?.id === id) profile = { ...profile, ...patch };
 }
 
 export function deleteProfile(id: string) {
   saveIndex(profiles().filter(p => p.id !== id));
   try { localStorage.removeItem(key(id)); } catch { /* blocked */ }
+  // Remembered, so syncing doesn't bring the player back from another device.
+  writeJSON(DELETED, [...(readJSON<string[]>(DELETED) ?? []), id]);
   if (profile?.id === id) { profile = null; learner = new Learner(memoryStorage()); }
 }
 
@@ -82,6 +88,9 @@ export function sandbox(lesson: number, tier: Tier) {
   learner.skipAhead = false;
   for (const k of SKILLS) learner.s.tiers[k] = tier;
 }
+
+/** After a sync: the current player's progress may have changed underneath. */
+export function reloadLearner() { if (profile) learner.reload(); }
 
 export function selectProfile(id: string) {
   const p = profiles().find(x => x.id === id);

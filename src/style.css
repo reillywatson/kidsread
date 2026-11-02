@@ -93,6 +93,11 @@ html.turn #stage {
 #parent .note { background: #fff4e5; border-radius: 10px; padding: 8px 12px; }
 #parent code.restore { font: 700 20px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 1px; background: #f6f7fb;
   border: 1px solid #c9cfdb; border-radius: 8px; padding: 6px 10px; user-select: all; -webkit-user-select: all; }
+#parent .link-device { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+#parent .link-device .qr { width: 168px; flex: none; background: #fff; border: 1px solid #c9cfdb; border-radius: 10px; padding: 6px; }
+#parent .link-device .qr svg { display: block; width: 100%; height: auto; }
+#parent .link-device p { flex: 1; min-width: 240px; margin: 0; }
+#parent .link-device code { word-break: break-all; }
 #parent [data-restore-code] { font: 600 17px ui-monospace, Menlo, monospace; padding: 6px 10px; border-radius: 10px; border: 1px solid #c9cfdb; width: 12em; }
 #parent .seg { display: flex; gap: 6px; align-items: center; margin: 8px 0; }
 #parent .seg button.on { background: #1e4fd8; border-color: #1e4fd8; color: #fff; }
