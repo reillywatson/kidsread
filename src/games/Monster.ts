@@ -51,14 +51,14 @@ export class Monster extends BaseGame {
 
   protected async run() {
     const n = this.rounds(6);
-    const gs = this.learner.pick(['g'], n, { filter: g => canStartWord(g) && picsStartingWith(g).length > 0 });
+    const gs = this.learner.pick(['g'], n, { filter: g => canStartWord(g) && picsStartingWith(g, { clear: true }).length > 0 });
     const nChoices = [2, 3, 3][this.tier];
 
     for (let r = 0; r < gs.length && !this.timeUp(); r++) {
       const g = gs[r];
       this.belly.setText(GRAPHEMES[g].label);
       this.monster.setTexture('monster');
-      const answer = pickOne(picsStartingWith(g));
+      const answer = pickOne(picsStartingWith(g, { clear: true }));
       const opts = shuffle([answer, ...picsNotStartingWith(g, nChoices - 1, this.tier)]);
       const cards = opts.map((w, i) => {
         const c = picture(this, 380 + (i - (opts.length - 1) / 2) * 220, 520, w, { size: 90 });

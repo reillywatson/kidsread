@@ -28,6 +28,7 @@ const CATCHES = ['leafy', 'ember', 'splash'];
 export class PikaSpell extends BaseGame {
   private hero!: Phaser.GameObjects.Image;
   private team: Phaser.GameObjects.Image[] = [];
+  private sounding = false;
 
   constructor() { super(meta); }
 
@@ -71,6 +72,30 @@ export class PikaSpell extends BaseGame {
     await this.wait(1000);
   }
 
+  /**
+   * Help after a miss: the word, then its sounds box by box (each box lights up as its sound is
+   * said) up to the one being filled, which stays lit. So the child hears where they are in the word.
+   */
+  private async soundOut(w: string, boxes: { x: number; t: { g?: string | null } }[], upto: number) {
+    if (this.sounding) return;
+    this.sounding = true;
+    const glow = this.add.graphics().setDepth(5);
+    const light = (k: number) => glow.clear().lineStyle(10, 0xffc94d).strokeRoundedRect(boxes[k].x - 70, BOX_Y - 80, 140, 160, 22);
+    try {
+      await this.say(w);
+      for (let k = 0; k <= upto; k++) {
+        const g = boxes[k].t.g;
+        if (!g) continue;
+        light(k);
+        await this.letterSound(g);
+        await this.wait(200);
+      }
+      await this.wait(900);
+    } finally {
+      glow.destroy();
+      this.sounding = false;
+    }
+  }
   protected async run() {
     const n = this.rounds(4);
     const maxSounds = [3, 4, 6][this.tier];
@@ -137,7 +162,7 @@ export class PikaSpell extends BaseGame {
             void audio.sound((obj as Phaser.GameObjects.Container).getData('tok').g);
             obj.setAlpha(1); // tiles stay usable for later boxes
           },
-          onScaffold: () => { void this.letterSound(tok.g!).catch(() => {}); },
+          onScaffold: () => { void this.soundOut(w, boxes, i).catch(() => {}); },
         });
         free.forEach(c => c.setAlpha(1));
         const tile = res.obj as Phaser.GameObjects.Container;

@@ -45,6 +45,12 @@ export interface LearnerState {
   items: Record<string, ItemState>;
   recent: Partial<Record<Skill, boolean[]>>;
   tiers: Partial<Record<Skill, Tier>>;
+  /**
+   * Each game's own difficulty and recent answers. Games that share a skill can differ a lot (finding
+   * the letter for a sound in Garden Sort is far easier than spotting every picture that starts with
+   * it in I Spy), so each starts at its skill's tier and then follows how the child does in it.
+   */
+  gameTiers?: Record<string, { tier: Tier; recent: boolean[] }>;
   stars: number;
   stickers: string[];
   lastGames: string[];
@@ -159,7 +165,7 @@ export class Learner {
     return !it || (!it.skipped && it.right + it.wrong + it.help === 0);
   }
 
-  record(id: string, result: Result, skill?: Skill) {
+  record(id: string, result: Result, skill?: Skill, game?: string) {
     const t = this.now();
     const it = this.s.items[id] ||= { box: 0, due: t, right: 0, wrong: 0, help: 0, seen: 0, last: 0 };
     it.seen++;
@@ -183,6 +189,11 @@ export class Learner {
       it.due = t + INTERVALS[it.box];
     }
     if (skill && result !== 'seen') this.pushRecent(skill, result === 'correct');
+    if (game && skill && result !== 'seen') {
+      const gt = ((this.s.gameTiers ??= {})[game] ??= { tier: this.tier(skill), recent: [] });
+      gt.recent.push(result === 'correct');
+      if (gt.recent.length > RECENT) gt.recent.shift();
+    }
     if (result !== 'seen') this.noteProbe(id, result === 'correct');
     this.save();
   }
@@ -261,21 +272,30 @@ export class Learner {
   }
 
   tier(skill: Skill): Tier { return this.s.tiers[skill] ?? 0; }
+  /** How hard one game is for this child: its own tier once it has one, else its skill's. */
+  gameTier(game: string, skill: Skill): Tier { return this.s.gameTiers?.[game]?.tier ?? this.tier(skill); }
 
-  /** Called after each game. Moves the skill's difficulty tier up or down. */
-  adjustTier(skill: Skill): number {
+  /** Called after each game. Moves the skill's difficulty tier, and the game's own, up or down. */
+  adjustTier(skill: Skill, game?: string): number {
+    const step = (r: boolean[] | undefined, t: Tier) => {
+      if (!r || r.length < 6) return 0;
+      const acc = r.filter(Boolean).length / r.length;
+      return acc >= 0.85 && t < 2 ? 1 : acc < 0.6 && t > 0 ? -1 : 0;
+    };
+    const gt = game ? this.s.gameTiers?.[game] : undefined;
+    const gameChange = gt ? step(gt.recent, gt.tier) : 0;
+    if (gt && gameChange) {
+      gt.tier = (gt.tier + gameChange) as Tier;
+      gt.recent = gt.recent.slice(-3); // fresh evidence at the new tier
+    }
     const r = this.s.recent[skill];
-    if (!r || r.length < 6) return 0;
-    const acc = this.accuracy(skill)!;
     const t = this.tier(skill);
-    let change = 0;
-    if (acc >= 0.85 && t < 2) change = 1;
-    else if (acc < 0.6 && t > 0) change = -1;
+    const change = step(r, t);
     if (change) {
       this.s.tiers[skill] = (t + change) as Tier;
-      this.s.recent[skill] = r.slice(-3); // fresh evidence at the new tier
-      this.save();
+      this.s.recent[skill] = r!.slice(-3);
     }
+    if (change || gameChange) this.save();
     return change;
   }
 

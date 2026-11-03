@@ -122,8 +122,8 @@ export function roundButton(scene: Scene, x: number, y: number, r: number, color
  * plays its sound (sound-by-sound support, not the whole word).
  */
 export class WordView extends Phaser.GameObjects.Container {
-  /** Each written part, its grapheme (null = silent), and its resting color (silent letters are grey). */
-  parts: { text: Phaser.GameObjects.Text; g: string | null; base: string }[] = [];
+  /** Each written part, its grapheme (null = silent), its resting color (silent letters are grey) and its sound dot. */
+  parts: { text: Phaser.GameObjects.Text; g: string | null; base: string; dot?: Phaser.GameObjects.Arc }[] = [];
 
   constructor(scene: Scene, x: number, y: number, public word: string, { size = 90, dots = true, tapSounds = true, color = '#2b2b2b', cap = false } = {}) {
     super(scene, x, y);
@@ -139,14 +139,15 @@ export class WordView extends Phaser.GameObjects.Container {
         fontFamily: FONT, fontSize: `${size}px`, color: tok.g === null && !heart ? '#9a9a9a' : color, fontStyle: 'bold', padding: { x: 2, y: 10 },
       }).setOrigin(0, 0.5);
       this.add(tx);
-      if (dots && tok.g) this.add(scene.add.circle(cx + tx.width / 2, size * 0.62, size * 0.07, 0xe53935));
+      const dot = dots && tok.g ? scene.add.circle(cx + tx.width / 2, size * 0.62, size * 0.07, 0xe53935) : undefined;
+      if (dot) this.add(dot);
       if (tok.heart) this.add(emoji(scene, cx + tx.width / 2, -size * 0.7, '❤️', size * 0.3));
       if (tapSounds && tok.g) {
         tx.setInteractive({ useHandCursor: true });
         const g = tok.g;
         onTap(tx, () => { this.flash(this.parts.findIndex(p => p.text === tx)); void audio.sound(g); });
       }
-      this.parts.push({ text: tx, g: tok.g, base: tok.g === null && !heart ? '#9a9a9a' : color });
+      this.parts.push({ text: tx, g: tok.g, base: tok.g === null && !heart ? '#9a9a9a' : color, dot });
       cx += tx.width + gap;
     }
     // Center horizontally around x.

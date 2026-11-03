@@ -4,7 +4,7 @@
 // and at the end they all pop open at once.
 import Phaser from 'phaser';
 import { BaseGame, type GameMeta } from './BaseGame';
-import { GRAPHEMES, PIC, segment } from '../data/curriculum';
+import { GRAPHEMES, PIC } from '../data/curriculum';
 import { readableWords, wordDistractors, picsStartingWith, picsNotStartingWith, canStartWord } from '../choices';
 import { shuffle, pickOne } from '../learner';
 import { LINES } from '../lines';
@@ -100,7 +100,7 @@ export class PikaBlend extends BaseGame {
       let helped = false;
       const blendBtn = roundButton(this, 640, 330, 34, 0xffc94d, '➡️', () => {
         helped = true;
-        void this.blend(view, w).catch(() => {});
+        void this.blendWord(view, w).catch(() => {});
       });
       const opts = shuffle([w, ...wordDistractors(w, nChoices - 1, this.tier, this.lesson, { pic: true })]);
       const cards = opts.map((x, i) => picture(this, 640 + (i - (opts.length - 1) / 2) * 260, 540, x, { size: 100 }));
@@ -112,7 +112,7 @@ export class PikaBlend extends BaseGame {
       });
       const res = await this.choose(cards, opts.indexOf(w), {
         onWrong: () => { this.hero.setTexture('heroSurprised'); },
-        onScaffold: () => { helped = true; void this.blend(view, w).catch(() => {}); },
+        onScaffold: () => { helped = true; void this.blendWord(view, w).catch(() => {}); },
         scaffoldAfter: 1,
       });
       this.record('w:' + w, res.firstTry && !helped ? 'correct' : res.firstTry ? 'help' : 'wrong');
@@ -127,28 +127,14 @@ export class PikaBlend extends BaseGame {
     }
   }
 
-  /** Sound-by-sound model, then the whole word. */
-  private async blend(view: WordView, w: string) {
-    const toks = segment(w);
-    for (let i = 0; i < toks.length; i++) {
-      if (!toks[i].g) continue;
-      view.flash(i, true);
-      await this.letterSound(toks[i].g!);
-      view.resetColor(i);
-    }
-    view.setAllColor('#1e88e5');
-    await this.say(w);
-    view.resetColor();
-  }
-
   private async runLetters() {
     const n = this.rounds(5);
-    const gs = this.learner.pick(['g'], n, { filter: g => canStartWord(g) && picsStartingWith(g).length > 0 });
+    const gs = this.learner.pick(['g'], n, { filter: g => canStartWord(g) && picsStartingWith(g, { clear: true }).length > 0 });
     const nChoices = [2, 3, 3][this.tier];
 
     for (let r = 0; r < gs.length && !this.timeUp(); r++) {
       const g = gs[r];
-      const answer = pickOne(picsStartingWith(g));
+      const answer = pickOne(picsStartingWith(g, { clear: true }));
       const opts = shuffle([answer, ...picsNotStartingWith(g, nChoices - 1, this.tier)]);
       const letter = text(this, 640, 200, GRAPHEMES[g].label, 130);
       let helped = this.learner.isNew('g:' + g);

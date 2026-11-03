@@ -56,7 +56,7 @@ export class ISpy extends BaseGame {
 
   protected async run() {
     const n = this.rounds(3);
-    const gs = this.learner.pick(['g'], n, { filter: g => canStartWord(g) && picsStartingWith(g).length >= 3 });
+    const gs = this.learner.pick(['g'], n, { filter: g => canStartWord(g) && picsStartingWith(g, { clear: true }).length >= 3 });
     const nTargets = [2, 3, 3][this.tier];
 
     for (let r = 0; r < gs.length && !this.timeUp(); r++) {
@@ -64,7 +64,7 @@ export class ISpy extends BaseGame {
       this.badge.setText(GRAPHEMES[g].label);
       // Targets with distinct pictures, then others that don't share any of their pictures.
       const targets: string[] = [];
-      for (const w of shuffle(picsStartingWith(g))) if (targets.length < nTargets && targets.every(t => BANK[t] !== BANK[w])) targets.push(w);
+      for (const w of shuffle(picsStartingWith(g, { clear: true }))) if (targets.length < nTargets && targets.every(t => BANK[t] !== BANK[w])) targets.push(w);
       const others = picsNotStartingWith(g, ITEMS * 2, this.tier).filter(w => targets.every(t => BANK[t] !== BANK[w])).slice(0, ITEMS - targets.length);
       const items = this.scatter(shuffle([...targets, ...others]));
       const slots = targets.map((_, i) => emoji(this, 140 + (i - (targets.length - 1) / 2) * 48, 355, '🐾', 38).setAlpha(0.25));
@@ -112,7 +112,7 @@ export class ISpy extends BaseGame {
       stopIdle();
       if (this.signal.aborted) throw new Aborted();
 
-      this.record('g:' + g, misses === 0 ? 'correct' : 'wrong');
+      this.record('g:' + g, misses === 0 ? 'correct' : misses === 1 ? 'help' : 'wrong');
       this.score(misses === 0);
       await this.wait(600);
       this.sfx.bark();

@@ -93,9 +93,11 @@ export function preload(texts: string[]) {
 
 let current: AudioBufferSourceNode | null = null;
 let currentEl: HTMLAudioElement | null = null;
+let currentRun: GainNode | null = null;
 
 export function stop() {
   if (current) { try { current.stop(); } catch { /* already stopped */ } current = null; }
+  if (currentRun) { currentRun.disconnect(); currentRun = null; }
   if (currentEl) { currentEl.pause(); currentEl = null; }
 }
 
@@ -217,6 +219,49 @@ export async function sound(g: string): Promise<void> {
   const file = soundFile(g);
   if (file && await playBuffer(file)) return;
   missing(`the letter sound "${g}"`);
+}
+
+/** A letter sound as audio data: the grown-up's recording (decoded), else the generated clip. */
+async function soundBuffer(g: string): Promise<AudioBuffer | null> {
+  const rec = recordings.get('g:' + g);
+  if (rec) {
+    try { return await ac().decodeAudioData(await (await fetch(rec)).arrayBuffer()); } catch { return null; }
+  }
+  const file = soundFile(g);
+  return file ? load(file) : null;
+}
+
+/**
+ * Letter sounds run together, the way you blend a word: each starts before the last one has
+ * quite finished (by `overlap` of the shorter of the two, at most 150 ms), with a short fade so
+ * they smear into each other instead of clicking. overlap 0 plays them back to back.
+ */
+export async function soundRun(gs: string[], overlap = 0.35): Promise<void> {
+  const bufs = await Promise.all(gs.map(soundBuffer));
+  if (bufs.some(b => !b)) { missing(`a letter sound in "${gs.join('')}"`); return; }
+  stop();
+  const c = ac();
+  const out = c.createGain();
+  out.connect(busVoice);
+  currentRun = out;
+  duck(true);
+  const FADE = 0.03;
+  let t = c.currentTime + 0.05;
+  for (const [i, b] of (bufs as AudioBuffer[]).entries()) {
+    if (i > 0) t -= Math.min(0.15, overlap * Math.min(b.duration, bufs[i - 1]!.duration));
+    const src = c.createBufferSource(), env = c.createGain();
+    src.buffer = b;
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(1, t + FADE);
+    env.gain.setValueAtTime(1, Math.max(t + FADE, t + b.duration - FADE));
+    env.gain.linearRampToValueAtTime(0, t + b.duration);
+    src.connect(env).connect(out);
+    src.start(t);
+    t += b.duration;
+  }
+  await new Promise(r => setTimeout(r, (t - c.currentTime) * 1000 + 50));
+  duck(false);
+  if (currentRun === out) currentRun = null;
 }
 
 // ---------- Haptics ----------

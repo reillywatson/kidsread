@@ -342,7 +342,20 @@ export const BANK: Record<string, string> = {
   dolphin: '🐬', dragon: '🐉', taco: '🌮', turkey: '🦃', hippo: '🦛', helicopter: '🚁', honey: '🍯',
   balloon: '🎈', hug: '🤗', two: '2️⃣', unicorn: '🦄', truck: '🚚', lake: '🏞️', parrot: '🦜', pie: '🥧',
   tie: '👔', fly: '🪰', sand: '🏖️', leg: '🦵', plant: '🪴',
+  noodles: '🍜', ninja: '🥷', juggle: '🤹',
 };
+
+/**
+ * Bank pictures a child would likely call something else: 🐛 is a bug before it's an inchworm, 🐔 a
+ * chicken, 🥜 a peanut, 🎁 a present. Fine where the game says the name, but not in games where
+ * the child has to name the picture to themselves and hear its first sound (see choices.ts). Also
+ * the two that need emoji newer than Unicode 13 (nest, jar), which older tablets can't draw.
+ */
+export const HARD_TO_NAME = new Set([
+  'inchworm', 'insect', 'inch', 'ox', 'otter', 'olive', 'hen', 'rat', 'rose', 'nut', 'net', 'nest', 'jar', 'jeans', 'jet',
+  'mug', 'dish', 'wall', 'wig', 'yawn', 'think', 'envelope', 'log', 'coat', 'cone', 'sing', 'up', 'chain', 'gift', 'shirt',
+  'gorilla', 'alligator', 'lake', 'sand', 'plant', 'hug', 'fly',
+]);
 
 // Words whose first letter doesn't make its usual sound.
 const ODD_START: Record<string, string> = { one: 'w', unicorn: 'y' };

@@ -86,7 +86,7 @@ export abstract class BaseGame extends Phaser.Scene {
     this.streak = 0;
     this.meter = [];
     this.runner = this.trophy = null;
-    this.tier = this.learner.tier(this.meta.skill);
+    this.tier = this.learner.gameTier(this.meta.id, this.meta.skill);
     this.lesson = this.learner.lesson;
     playMusic(this.meta.theme);
     audio.preload([this.meta.intro, ...LINES.praise]);
@@ -349,6 +349,64 @@ export abstract class BaseGame extends Phaser.Scene {
   /** "like apple" — the keyword for a letter sound. */
   async keyword(g: string) { await this.say(LINES.like); await this.say(GRAPHEMES[g].key); }
   letterSound(g: string) { return this.guard(audio.sound(g)); }
+
+  /**
+   * Model blending a written word, the UFLI way: the letters spread apart and each sound is said
+   * on its own while a finger points to it; then the letters slide back together as the sounds
+   * are said again, run together ("mmmaaat"); then the whole word. Silent letters stay quiet.
+   */
+  async blendWord(view: WordView, w: string) {
+    const parts = view.parts, gs = parts.filter(p => p.g).map(p => p.g!);
+    if (view.getData('blending')) return; // already showing it
+    if (!gs.length) { await this.say(w); return; }
+    view.setData('blending', true);
+    const home = parts.map(p => ({ text: p.text.x, dot: p.dot?.x ?? 0 }));
+    const SPREAD = 46;
+    const slide = (k: number, duration: number) => this.tween({
+      targets: parts.flatMap(p => [p.text, p.dot].filter(Boolean)), duration, ease: 'Sine.InOut',
+      x: (o: object) => {
+        const i = parts.findIndex(p => p.text === o || p.dot === o);
+        return (o === parts[i].text ? home[i].text : home[i].dot) + (i - (parts.length - 1) / 2) * SPREAD * k;
+      },
+    });
+    // The finger sits under the word, in the word view's own space.
+    const at = (i: number) => view.x + parts[i].text.x + parts[i].text.width / 2;
+    const y = view.y + view.height / 2 + 6;
+    const finger = emoji(this, at(0), y, '👆', 48).setDepth(view.depth + 1).setAlpha(0);
+    try {
+      // 1. Each sound on its own.
+      await slide(1, 300);
+      await this.tween({ targets: finger, alpha: 1, duration: 150 });
+      for (const [i, p] of parts.entries()) {
+        if (!p.g) continue;
+        finger.x = at(i);
+        view.flash(i, true);
+        await this.letterSound(p.g);
+        view.resetColor(i);
+        await this.wait(250);
+      }
+      // 2. Faster: the letters come together as the sounds run into each other.
+      finger.x = at(0);
+      const sweep = Math.max(500, gs.length * 280);
+      view.setAllColor('#e53935');
+      await Promise.all([
+        this.guard(audio.soundRun(gs)),
+        slide(0, sweep),
+        this.tween({ targets: finger, x: view.x + home.at(-1)!.text + parts.at(-1)!.text.width / 2, duration: sweep }),
+      ]);
+      // 3. The word.
+      view.setAllColor('#1e88e5');
+      await this.say(w);
+    } finally {
+      finger.destroy();
+      if (view.active) {
+        this.tweens.killTweensOf(parts.flatMap(p => [p.text, p.dot].filter(Boolean)));
+        parts.forEach((p, i) => { p.text.x = home[i].text; if (p.dot) p.dot.x = home[i].dot; });
+        view.resetColor();
+        view.setData('blending', false);
+      }
+    }
+  }
   /** A letter's name ("bee"; "cue you" for qu). Z is "zee" or "zed" by the English setting. */
   async letterName(g: string) {
     for (const c of g) await this.say(c === 'z' && settings.english === 'uk' ? LINES.zed : LINES.letterName[c]);
@@ -420,7 +478,7 @@ export abstract class BaseGame extends Phaser.Scene {
     }));
   }
 
-  record(id: string, result: Result) { this.learner.record(id, result, this.meta.skill); }
+  record(id: string, result: Result) { this.learner.record(id, result, this.meta.skill, this.meta.id); }
 
   /** Which form of a letter to trace: small, or (at the medium and hard levels, sometimes) capital. */
   traceForm(g: string) {
@@ -485,7 +543,7 @@ export abstract class BaseGame extends Phaser.Scene {
     const acc = this.total ? this.right / this.total : 1;
     const stars = acc >= 0.9 ? 3 : acc >= 0.6 ? 2 : 1;
     this.logPlay(true, stars);
-    this.learner.adjustTier(this.meta.skill);
+    this.learner.adjustTier(this.meta.skill, this.meta.id);
     if (!this.learner.checkSkipAhead()) this.learner.checkLessonUp();
     this.session.gameDone(this, stars);
   }

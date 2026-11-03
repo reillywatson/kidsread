@@ -41,6 +41,19 @@ test('tiers rise with accuracy and fall with struggle', () => {
   expect(l.tier('word')).toBe(0);
 });
 
+test('each game has its own tier, starting at its skill’s', () => {
+  const { l } = make();
+  l.s.tiers.grapheme = 2;
+  // Easy in one game, hard in another: the skill stays up, the hard game comes down.
+  for (let i = 0; i < 6; i++) l.record('g:a', 'correct', 'grapheme', 'sort');
+  for (let i = 0; i < 6; i++) l.record('g:i', i < 2 ? 'correct' : 'wrong', 'grapheme', 'ispy');
+  expect(l.gameTier('ispy', 'grapheme')).toBe(2);
+  l.adjustTier('grapheme', 'ispy');
+  expect(l.gameTier('ispy', 'grapheme')).toBe(1);
+  expect(l.gameTier('sort', 'grapheme')).toBe(2);
+  expect(l.gameTier('monster', 'grapheme')).toBe(2); // not played yet: the skill's tier
+});
+
 test('lesson advances once its new grapheme is mastered', () => {
   const { l, tick } = make();
   expect(l.lesson).toBe(1);

@@ -1,7 +1,7 @@
 // Distractor selection. Difficulty tier controls how similar the wrong answers are:
 // tier 0 = clearly different, tier 2 = minimal pairs / confusable letters.
 import {
-  GRAPHEMES, PIC, BANK, RHYMES, WORD_LESSON, HEART, soundClass, confusable, picConflict, editDistance, initialSound, segment,
+  GRAPHEMES, PIC, BANK, HARD_TO_NAME, RHYMES, WORD_LESSON, HEART, soundClass, confusable, picConflict, editDistance, initialSound, segment,
   type Token,
 } from './data/curriculum';
 import { shuffle, type Tier } from './learner';
@@ -62,10 +62,14 @@ const NOT_INITIAL = new Set(['x', 'ck', 'ff', 'll', 'ss', 'zz', 'all', 'oll', 'u
 export const canStartWord = (g: string) => !NOT_INITIAL.has(g);
 
 /** Bank pictures starting with grapheme g's sound. */
-export function picsStartingWith(g: string): string[] {
+/**
+ * Bank pictures whose first sound is g's. With clear, only pictures a child would name the way
+ * we do (not HARD_TO_NAME): for games where they have to name it themselves to hear its sound.
+ */
+export function picsStartingWith(g: string, { clear = false } = {}): string[] {
   if (NOT_INITIAL.has(g)) return [];
   const cls = soundClass(g);
-  return Object.keys(BANK).filter(w => soundClass(initialSound(w)) === cls);
+  return Object.keys(BANK).filter(w => soundClass(initialSound(w)) === cls && !(clear && HARD_TO_NAME.has(w)));
 }
 
 /** Bank pictures whose first letter is grapheme g as written (cat for c, but not kite). */
@@ -73,7 +77,8 @@ export const picsStartingWithLetter = (g: string) => picsStartingWith(g).filter(
 
 export function picsNotStartingWith(g: string, n: number, tier: Tier): string[] {
   const cls = soundClass(g);
-  const other = Object.keys(BANK).filter(w => soundClass(initialSound(w)) !== cls);
+  // Never a picture the child might call something else: they could rightly pick it by its other name.
+  const other = Object.keys(BANK).filter(w => soundClass(initialSound(w)) !== cls && !HARD_TO_NAME.has(w));
   // At the top tier, include pictures whose first sound is easily confused with g's.
   const conf = other.filter(w => confusable(initialSound(w), g));
   const out = tier === 2 ? prefer(conf, other, n * 2) : pickN(other, n * 2);
